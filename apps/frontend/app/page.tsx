@@ -50,6 +50,8 @@ export default function Home() {
             Read our docs
           </a>
         </div>
+        <h1 className="text-center text-9xl">Testing & Fonts</h1>
+        <p className="text-center">Testing fonts и поддръжката на кирилица</p>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a

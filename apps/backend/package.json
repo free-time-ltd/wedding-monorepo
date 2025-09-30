@@ -8,10 +8,18 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.5",
-    "hono": "^4.9.9"
+    "@libsql/client": "^0.15.15",
+    "@repo/utils": "^1.0.0",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.44.5",
+    "hono": "^4.9.9",
+    "socket.io": "^4.8.1",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
+    "@types/socket.io": "^3.0.1",
+    "drizzle-kit": "^0.31.5",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3"
   }
