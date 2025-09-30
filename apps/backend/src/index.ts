@@ -1,5 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { Server } from "socket.io";
 
 const app = new Hono();
@@ -7,6 +8,13 @@ const app = new Hono();
 app.get("/", (c) => {
   return c.text("Hello Hono!");
 });
+
+app.use(
+  "*",
+  cors({
+    origin: "*",
+  })
+);
 
 const server = serve(
   {

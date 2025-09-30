@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MonteCarlo, RobotoSerif } from "@/lib/fonts";
 import "./globals.css";
+import { SocketProvider } from "@/context/SocketContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,7 +18,7 @@ export default function RootLayout({
       <body
         className={`${MonteCarlo.variable} ${RobotoSerif.variable} antialiased`}
       >
-        {children}
+        <SocketProvider url="ws://localhost:8080/ws">{children}</SocketProvider>
       </body>
     </html>
   );
