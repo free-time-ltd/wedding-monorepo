@@ -1,13 +1,11 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { getCookie } from "hono/cookie";
+import { verify } from "hono/jwt";
 import { cors } from "hono/cors";
 import { Server } from "socket.io";
 
 const app = new Hono();
-
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
 
 app.use(
   "*",
@@ -15,6 +13,39 @@ app.use(
     origin: "*",
   })
 );
+
+app.get("/", (c) => {
+  return c.text("Hello Hono!");
+});
+
+app.get("/api/me", async (c) => {
+  const cookie = getCookie(c, process.env?.SESSION_COOKIE_NAME!);
+  if (!cookie) {
+    return c.json({ success: false, error: "No session cookie" });
+  }
+
+  const data = await verify(cookie, process.env?.JWT_SECRET!);
+
+  console.log({ data });
+
+  return c.json({ success: true, data });
+});
+
+app.post("/api/user/set", async (c) => {
+  const body = await c.req.json();
+
+  // Step 1. Try to find the user in the sqlite table
+
+  // Step 2. Load table data, chat rooms, messages etc...
+
+  // Step 3. Generate JWT token containing all this
+
+  // Step 4. Generate a cookie
+
+  // Step 5. Respond
+
+  return c.json({ success: true, message: "User created", data: body }, 201);
+});
 
 const server = serve(
   {
