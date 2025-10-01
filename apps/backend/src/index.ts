@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
@@ -5,7 +6,7 @@ import { verify } from "hono/jwt";
 import { cors } from "hono/cors";
 import { Server } from "socket.io";
 import { db } from "@repo/db/client";
-import { usersTable } from "@repo/db/schema";
+import { tablesTable, usersTable } from "@repo/db/schema";
 import { eq } from "@repo/db";
 import { generateId } from "@repo/utils/generateId";
 
@@ -33,6 +34,18 @@ app.get("/api/me", async (c) => {
   console.log({ data });
 
   return c.json({ success: true, data });
+});
+
+app.get("/api/users", async (c) => {
+  const users = await db.select().from(usersTable);
+
+  return c.json({ users });
+});
+
+app.get("/api/tables", async (c) => {
+  const tables = await db.select().from(tablesTable);
+
+  return c.json({ tables });
 });
 
 app.post("/api/user/set", async (c) => {
@@ -69,7 +82,7 @@ app.post("/api/user/set", async (c) => {
 const server = serve(
   {
     fetch: app.fetch,
-    port: 8080,
+    port: Number(process.env?.BACKEND_PORT! ?? 8080),
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);

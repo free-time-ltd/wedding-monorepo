@@ -54,6 +54,7 @@ export const SocketProvider = ({
       newSocket.off("disconnect", onDisconnect);
       newSocket.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
   return (
