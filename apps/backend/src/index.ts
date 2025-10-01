@@ -4,9 +4,9 @@ import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import { cors } from "hono/cors";
 import { Server } from "socket.io";
-import { db } from "@/db/index.js";
-import { usersTable } from "@/db/schema.js";
-import { eq } from "drizzle-orm";
+import { db } from "@repo/db/client";
+import { usersTable } from "@repo/db/schema";
+import { eq } from "@repo/db";
 import { generateId } from "@repo/utils/generateId";
 
 const app = new Hono();
