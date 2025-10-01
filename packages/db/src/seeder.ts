@@ -1,5 +1,5 @@
-import { tablesTable, usersTable } from "@/db/schema";
-import { db } from "@/db";
+import { tablesTable, usersTable } from "./schema";
+import { db } from "./client";
 import { generateId } from "@repo/utils/generateId";
 
 const usernames = [
@@ -15,9 +15,7 @@ const usernames = [
 type UserInsertType = typeof usersTable.$inferInsert;
 type TableInsertType = typeof tablesTable.$inferInsert;
 
-console.log({ generateId });
-
-async function main() {
+export async function seed() {
   const tablesRaw = Array.from({ length: 15 }, (_, i) => i + 1);
   const tables: TableInsertType[] = tablesRaw.map((id) => ({
     name: `Маса #${id}`,
@@ -32,6 +30,6 @@ async function main() {
 
   await db.insert(tablesTable).values(tables);
   await db.insert(usersTable).values(users);
-}
 
-main();
+  console.log("✅ Seeder completed successfully.");
+}
