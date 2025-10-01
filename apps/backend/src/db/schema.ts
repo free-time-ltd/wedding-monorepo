@@ -4,6 +4,7 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 export const usersTable = sqliteTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
+  extras: integer("extra_people").default(0),
   tableId: integer("table_id").references(() => tablesTable.id, {
     onDelete: "set null",
   }),

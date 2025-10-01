@@ -54,7 +54,7 @@ export const SocketProvider = ({
       newSocket.off("disconnect", onDisconnect);
       newSocket.disconnect();
     };
-  }, [url, options]);
+  }, [url]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected, transport }}>

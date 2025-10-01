@@ -4,6 +4,10 @@ import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import { cors } from "hono/cors";
 import { Server } from "socket.io";
+import { db } from "@/db/index.js";
+import { usersTable } from "@/db/schema.js";
+import { eq } from "drizzle-orm";
+import { generateId } from "@repo/utils/generateId";
 
 const app = new Hono();
 
@@ -15,7 +19,7 @@ app.use(
 );
 
 app.get("/", (c) => {
-  return c.text("Hello Hono!");
+  return c.text(`Hello Hono! ${generateId()}`);
 });
 
 app.get("/api/me", async (c) => {
@@ -35,6 +39,21 @@ app.post("/api/user/set", async (c) => {
   const body = await c.req.json();
 
   // Step 1. Try to find the user in the sqlite table
+  const user = body.user;
+  if (!user) {
+    return c.json(
+      { success: false, error: "No user provided" },
+      { status: 400 }
+    );
+  }
+
+  const res = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, user))
+    .get();
+
+  console.log({ res });
 
   // Step 2. Load table data, chat rooms, messages etc...
 
@@ -68,5 +87,22 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", (reason) => {
     console.log(`socket disconnected: ${socket.id} for ${reason}`);
+  });
+});
+
+// graceful shutdown
+process.on("SIGINT", async () => {
+  server.close();
+  await io.close();
+  process.exit(0);
+});
+process.on("SIGTERM", async () => {
+  await io.close();
+  server.close((err) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    process.exit(0);
   });
 });
