@@ -18,7 +18,7 @@
     },
     "./drizzle.config": {
       "types": "./dist/drizzle.config.d.ts",
-      "import": "./src/drizzle.config.ts"
+      "default": "./src/drizzle.config.ts"
     }
   },
   "scripts": {

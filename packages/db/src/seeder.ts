@@ -19,6 +19,7 @@ export async function seed() {
   const tablesRaw = Array.from({ length: 15 }, (_, i) => i + 1);
   const tables: TableInsertType[] = tablesRaw.map((id) => ({
     name: `Маса #${id}`,
+    label: "Лъчо колеги",
   }));
 
   const users: UserInsertType[] = usernames.map((name) => ({

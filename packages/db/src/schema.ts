@@ -13,15 +13,8 @@ export const usersTable = sqliteTable("users", {
 export const tablesTable = sqliteTable("tables", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
+  label: text("label"),
 });
-
-export const userRelations = relations(usersTable, ({ one }) => ({
-  table: one(tablesTable),
-}));
-
-export const tableRelations = relations(tablesTable, ({ many }) => ({
-  users: many(usersTable),
-}));
 
 export const roomsTable = sqliteTable("rooms", {
   id: text("id").primaryKey(),
@@ -29,6 +22,16 @@ export const roomsTable = sqliteTable("rooms", {
   isPrivate: integer("is_private", { mode: "boolean" })
     .default(false)
     .notNull(),
+});
+
+export const userRooms = sqliteTable("user_rooms", {
+  userId: text("user_id").references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
+  roomId: text("room_id").references(() => roomsTable.id, {
+    onDelete: "cascade",
+  }),
+  joinedAt: integer("created_at", { mode: "timestamp_ms" }),
 });
 
 export const messagesTable = sqliteTable("messages", {
@@ -42,3 +45,30 @@ export const messagesTable = sqliteTable("messages", {
   content: text("content").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
+
+export const userRoomsRelations = relations(userRooms, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [userRooms.userId],
+    references: [usersTable.id],
+  }),
+  room: one(roomsTable, {
+    fields: [userRooms.roomId],
+    references: [roomsTable.id],
+  }),
+}));
+
+export const userRelations = relations(usersTable, ({ one, many }) => ({
+  table: one(tablesTable, {
+    fields: [usersTable.tableId],
+    references: [tablesTable.id],
+  }),
+  userRooms: many(userRooms),
+}));
+
+export const tableRelations = relations(tablesTable, ({ many }) => ({
+  guests: many(usersTable),
+}));
+
+export const roomRelations = relations(roomsTable, ({ many }) => ({
+  userRooms: many(userRooms),
+}));
