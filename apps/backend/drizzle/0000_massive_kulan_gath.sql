@@ -16,7 +16,8 @@ CREATE TABLE `rooms` (
 --> statement-breakpoint
 CREATE TABLE `tables` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`name` text NOT NULL
+	`name` text NOT NULL,
+	`label` text
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
