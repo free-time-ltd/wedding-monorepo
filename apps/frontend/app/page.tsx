@@ -1,3 +1,4 @@
+import { ConnectionInfo } from "@/components/connection-info";
 import Image from "next/image";
 
 export default function Home() {
@@ -52,6 +53,7 @@ export default function Home() {
         </div>
         <h1 className="text-center text-9xl">Testing & Fonts</h1>
         <p className="text-center">Testing fonts и поддръжката на кирилица</p>
+        <ConnectionInfo />
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a

@@ -3,71 +3,101 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
-  useEffect,
+  useRef,
   useState,
 } from "react";
-import io, { Socket } from "socket.io-client";
+import { io, Socket, SocketOptions } from "socket.io-client";
+import type { Transport } from "engine.io-client";
 
-type SocketType = typeof Socket;
-type SocketContextType = {
-  socket: SocketType | null;
+interface SocketContextValue {
+  socket: Socket | null;
   isConnected: boolean;
   transport: string;
-};
-
-const SocketContext = createContext<SocketContextType | null>(null);
-
-interface SocketProviderProps {
-  children: ReactNode;
-  url: string;
-  options?: Parameters<typeof io>[0];
+  connect: (props?: ConnectProps) => void;
+  disconnect: (removeListeners?: boolean) => void;
 }
 
-export const SocketProvider = ({
-  url,
-  children,
-  options = {},
-}: SocketProviderProps) => {
-  const [socket, setSocket] = useState<SocketType | null>(null);
+interface ConnectProps {
+  url?: string;
+  options?: Partial<SocketOptions>;
+}
+
+export const SocketContext = createContext<SocketContextValue | null>(null);
+
+export const SocketProvider = ({ children }: { children: ReactNode }) => {
+  const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
 
-  useEffect(() => {
-    const newSocket: SocketType = io(url, options);
+  const onConnect = useCallback(() => {
+    setIsConnected(true);
+    setTransport(socketRef.current?.io.engine.transport.name ?? "N/A");
 
-    const onConnect = () => {
-      setIsConnected(true);
-    };
+    socketRef.current?.io.engine.on("upgrade", onUpgrade);
+  }, []);
 
-    const onDisconnect = () => {
-      setTransport("N/A");
-    };
+  const onDisconnect = () => {
+    setIsConnected(false);
+    setTransport("N/A");
+  };
+  const onUpgrade = (transport: Transport) => {
+    setTransport(transport.name);
+  };
 
-    setSocket(newSocket);
+  const connect = useCallback(
+    (props?: ConnectProps) => {
+      if (socketRef.current?.connected) return;
 
-    newSocket.on("connect", onConnect);
-    newSocket.on("disconnect", onDisconnect);
+      console.log("on it");
 
-    return () => {
-      newSocket.off("connect", onConnect);
-      newSocket.off("disconnect", onDisconnect);
-      newSocket.disconnect();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url]);
+      const { url, options } = props ?? {};
+
+      socketRef.current = io(url ?? process.env.NEXT_PUBLIC_WS_SERVER_URL, {
+        path: process.env.NEXT_PUBLIC_WS_PATH,
+        autoConnect: false,
+        withCredentials: true,
+        ...options,
+      });
+
+      socketRef.current.on("connect", onConnect);
+      socketRef.current.on("disconnect", onDisconnect);
+      socketRef.current.on("connect_error", console.log);
+
+      socketRef.current.connect();
+    },
+    [onConnect]
+  );
+
+  const disconnect = useCallback((removeListeners?: boolean) => {
+    if (socketRef.current) {
+      if (removeListeners) {
+        socketRef.current.removeAllListeners();
+      }
+
+      socketRef.current.close();
+      socketRef.current = null;
+    }
+  }, []);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected, transport }}>
+    <SocketContext.Provider
+      value={{
+        connect,
+        disconnect,
+        socket: socketRef.current,
+        isConnected,
+        transport,
+      }}
+    >
       {children}
     </SocketContext.Provider>
   );
 };
 
-export const useSocket = (): SocketContextType => {
-  const context = useContext(SocketContext);
-  if (!context) {
-    throw new Error("useSocket must be used within a SocketProvider");
-  }
-  return context;
-};
+export function useSocket() {
+  const ctx = useContext(SocketContext);
+  if (!ctx) throw new Error("useSocket must be used within a SocketProvider");
+  return ctx;
+}

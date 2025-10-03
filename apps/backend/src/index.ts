@@ -8,13 +8,17 @@ import { Server } from "socket.io";
 import { db } from "@repo/db/client";
 import { tablesTable, usersTable } from "@repo/db/schema";
 import { generateId } from "@repo/utils/generateId";
+import { findUser, transformUser } from "./db-utils";
+import { authorizedSocket } from "./authorized-socket";
 
 const app = new Hono();
 
 app.use(
   "*",
   cors({
-    origin: "*",
+    // origin: process.env.FRONTEND_URL ?? "*",
+    origin: "http://localhost:3000",
+    credentials: true,
   })
 );
 
@@ -100,6 +104,8 @@ app.post("/api/user/set", async (c) => {
       );
     }
 
+    console.log({ user });
+
     const userModel = await findUser(user);
 
     if (!userModel) {
@@ -143,6 +149,65 @@ app.post("/api/user/set", async (c) => {
   }
 });
 
+app.get("/api/rooms/:id", async (c) => {
+  const { id } = c.req.param();
+
+  const roomRes = await db.query.roomsTable.findFirst({
+    where: (rooms, { eq }) => eq(rooms.id, id),
+    with: {
+      userRooms: {
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              extras: true,
+            },
+            with: {
+              table: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!roomRes) {
+    return c.json({ success: false, error: "room not found" }, { status: 404 });
+  }
+
+  if (roomRes.isPrivate) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+    const cookie = getCookie(c, process.env?.SESSION_COOKIE_NAME!);
+
+    if (!cookie) {
+      return c.json({ success: false, error: "No session cookie" });
+    }
+
+    const jwtData = await verify(cookie, process.env.JWT_SECRET);
+    const roomUsers = roomRes.userRooms.map((userRoom) => userRoom.userId);
+
+    if (!roomUsers.includes(jwtData.sub as string)) {
+      return c.json(
+        { status: false, error: "You don't have access to this room." },
+        { status: 403 }
+      );
+    }
+  }
+
+  const transformedRoom = {
+    id: roomRes.id,
+    name: roomRes.name,
+    isPrivate: roomRes.isPrivate,
+    users: roomRes.userRooms.map((userRoom) => ({
+      ...userRoom.user,
+      joinedAt: userRoom.joinedAt,
+    })),
+  };
+
+  return c.json({ succes: true, data: transformedRoom });
+});
+
 const server = serve(
   {
     fetch: app.fetch,
@@ -157,55 +222,20 @@ const server = serve(
 const io = new Server(server, {
   path: "/ws",
   serveClient: false,
-  cors: { origin: "*" },
+  cors: { origin: process.env.FRONTEND_URL, credentials: true },
 });
+
+io.use(authorizedSocket);
 
 io.on("connection", (socket) => {
   console.log("🔨 incoming connection from: ", socket.id);
+
+  socket.join("lobby");
 
   socket.on("disconnect", (reason) => {
     console.log(`socket disconnected: ${socket.id} for ${reason}`);
   });
 });
-
-const findUser = (userId: string) => {
-  return db.query.usersTable.findFirst({
-    where: (users, { eq }) => eq(users.id, userId),
-    with: {
-      table: {
-        with: {
-          guests: true,
-        },
-      },
-      userRooms: {
-        columns: {
-          roomId: true,
-          joinedAt: true,
-        },
-        with: {
-          room: true,
-        },
-      },
-    },
-  });
-};
-
-const transformUser = (
-  user: NonNullable<Awaited<ReturnType<typeof findUser>>>
-) => {
-  return {
-    id: user.id,
-    name: user.name,
-    extras: user.extras,
-    table: { ...user.table, label: user.table?.label ?? user.table?.name },
-    rooms: user.userRooms.map((userRoom) => ({
-      id: userRoom.roomId,
-      name: userRoom.room?.name,
-      isPrivate: userRoom.room?.isPrivate,
-      joinedAt: userRoom.joinedAt,
-    })),
-  };
-};
 
 // graceful shutdown
 process.on("SIGINT", async () => {
