@@ -50,8 +50,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     (props?: ConnectProps) => {
       if (socketRef.current?.connected) return;
 
-      console.log("on it");
-
       const { url, options } = props ?? {};
 
       socketRef.current = io(url ?? process.env.NEXT_PUBLIC_WS_SERVER_URL, {

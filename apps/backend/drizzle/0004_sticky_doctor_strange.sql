@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `unique_user_room` ON `user_rooms` (`user_id`,`room_id`);

@@ -1,23 +1,23 @@
 import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
+import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { verify, sign } from "hono/jwt";
 import { cors } from "hono/cors";
 import { Server } from "socket.io";
 import { db } from "@repo/db/client";
-import { tablesTable, usersTable } from "@repo/db/schema";
 import { generateId } from "@repo/utils/generateId";
 import { findUser, transformUser } from "./db-utils";
 import { authorizedSocket } from "./authorized-socket";
+import { messagesTable, roomsTable, userRooms } from "@repo/db/schema";
+import { InferInsertModel } from "@repo/db";
 
 const app = new Hono();
 
 app.use(
   "*",
   cors({
-    // origin: process.env.FRONTEND_URL ?? "*",
-    origin: "http://localhost:3000",
+    origin: process.env.FRONTEND_URL ?? "*",
     credentials: true,
   })
 );
@@ -76,16 +76,37 @@ app.get("/api/me", async (c) => {
 });
 
 app.get("/api/users", async (c) => {
-  const users = await db.select().from(usersTable);
+  const users = await db.query.usersTable.findMany({
+    with: {
+      table: true,
+    },
+  });
 
-  return c.json({ users });
+  return c.json({
+    success: true,
+    data: users.map((user) => ({
+      ...user,
+      table: { ...user.table, label: user.table?.label ?? user.table?.name },
+    })),
+  });
 });
 
 app.get("/api/tables", async (c) => {
-  const tables = await db.select().from(tablesTable);
+  const tables = await db.query.tablesTable.findMany({
+    with: {
+      guests: {
+        columns: {
+          id: true,
+          name: true,
+          extras: true,
+        },
+      },
+    },
+  });
 
   return c.json({
-    tables: tables.map((table) => ({
+    success: true,
+    data: tables.map((table) => ({
       ...table,
       label: table.label ?? table.name,
     })),
@@ -103,8 +124,6 @@ app.post("/api/user/set", async (c) => {
         { status: 400 }
       );
     }
-
-    console.log({ user });
 
     const userModel = await findUser(user);
 
@@ -147,6 +166,12 @@ app.post("/api/user/set", async (c) => {
 
     return c.json({ success: false, error: "Unknown error" }, { status: 500 });
   }
+});
+
+app.get("/api/logout", async (c) => {
+  deleteCookie(c, process.env.SESSION_COOKIE_NAME ?? "sess_cookie");
+
+  return c.json({ success: true, data: null, message: "ok" });
 });
 
 app.get("/api/rooms/:id", async (c) => {
@@ -230,10 +255,123 @@ io.use(authorizedSocket);
 io.on("connection", (socket) => {
   console.log("🔨 incoming connection from: ", socket.id);
 
+  if (!socket.data.user) {
+    socket.disconnect(true);
+  }
+
   socket.join("lobby");
+  socket.join(`user-${socket.data.user.id}`);
+
+  // Join the private rooms
+  socket.data.user.rooms.forEach((room: any) => {
+    socket.join(`room-${room.id}`);
+  });
 
   socket.on("disconnect", (reason) => {
     console.log(`socket disconnected: ${socket.id} for ${reason}`);
+  });
+
+  socket.on("create-room", async ({ roomName, invitedUserIds }) => {
+    const roomId = generateId();
+    const insertRows: InferInsertModel<typeof userRooms>[] = Array.from(
+      new Set([socket.data.user.id, invitedUserIds])
+    ).map((userId: string) => ({
+      roomId,
+      userId,
+      joinedAt: new Date(),
+    }));
+
+    const newRoom = await db
+      .insert(roomsTable)
+      .values({
+        id: roomId,
+        name: roomName,
+        createdBy: socket.id,
+        createdAt: new Date(),
+        isPrivate: true,
+      })
+      .returning();
+
+    await db.insert(userRooms).values(insertRows);
+
+    // We've prepared the database. Join the user into their new room
+    socket.join(`room-${roomId}`);
+
+    (invitedUserIds as any[]).forEach((uid) => {
+      io.to(`user-${uid}`).emit("new-room", {
+        room: newRoom.at(0),
+      });
+    });
+  });
+
+  socket.on("chat-message", async ({ roomId, message }) => {
+    // @todo Maybe add a check to see if the user can really add messages to this room?
+    const userId = socket.data.user.id as string;
+
+    await db.insert(messagesTable).values({
+      roomId,
+      userId,
+      content: message,
+      createdAt: new Date(),
+    });
+
+    io.to(`room-${roomId}`).emit("chat-message", {
+      roomId,
+      userId,
+      message,
+      createdAt: Date.now(),
+    });
+  });
+
+  socket.on("invite-to-room", async ({ roomId, userId }) => {
+    const room = await db.query.roomsTable.findFirst({
+      where: (rooms, { eq }) => eq(rooms.id, roomId),
+    });
+    if (!room || room.createdBy !== socket.data.user.id) {
+      return;
+    }
+
+    await db.insert(userRooms).values({
+      roomId,
+      userId,
+      joinedAt: new Date(),
+    });
+  });
+
+  socket.on("get-messages", async ({ roomId, lastMessageId }) => {
+    try {
+      // Fetch up to 100 messages newer than lastMessageId
+      let messages = await db.query.messagesTable.findMany({
+        where: (messages, { gt, eq, and }) =>
+          and(gt(messages.id, lastMessageId), eq(messages.roomId, roomId)),
+        orderBy: (messages, { asc }) => [asc(messages.id)],
+        limit: 100,
+      });
+
+      // If fewer than 100 messages were returned, load latest 100 to catch up
+      if (messages.length < 100) {
+        const hasNewerMessages = await db.query.messagesTable.findFirst({
+          where: (table, { gt, eq, and }) =>
+            and(eq(table.roomId, roomId), gt(table.id, lastMessageId)),
+          orderBy: (table, { desc }) => [desc(table.id)],
+        });
+
+        if (hasNewerMessages) {
+          messages = await db.query.messagesTable.findMany({
+            where: (table, { eq }) => eq(table.roomId, roomId),
+            orderBy: (table, { desc }) => [desc(table.id)],
+            limit: 100,
+          });
+
+          // Reverse so chronological order is preserved
+          messages.reverse();
+        }
+      }
+
+      socket.emit("messages", { roomId, messages });
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
   });
 });
 
