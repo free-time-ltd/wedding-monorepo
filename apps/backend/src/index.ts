@@ -8,9 +8,7 @@ import { Server } from "socket.io";
 import { db } from "@repo/db/client";
 import { generateId } from "@repo/utils/generateId";
 import { findUser, transformUser } from "./db-utils";
-import { authorizedSocket } from "./authorized-socket";
-import { messagesTable, roomsTable, userRooms } from "@repo/db/schema";
-import { InferInsertModel } from "@repo/db";
+import { defineSocketServer } from "./socket";
 
 const app = new Hono();
 
@@ -224,8 +222,12 @@ app.get("/api/rooms/:id", async (c) => {
     id: roomRes.id,
     name: roomRes.name,
     isPrivate: roomRes.isPrivate,
-    users: roomRes.userRooms.map((userRoom) => ({
+    guests: roomRes.userRooms.map((userRoom) => ({
       ...userRoom.user,
+      table: {
+        ...userRoom.user?.table,
+        label: userRoom.user?.table?.label ?? userRoom.user?.table?.name,
+      },
       joinedAt: userRoom.joinedAt,
     })),
   };
@@ -250,130 +252,7 @@ const io = new Server(server, {
   cors: { origin: process.env.FRONTEND_URL, credentials: true },
 });
 
-io.use(authorizedSocket);
-
-io.on("connection", (socket) => {
-  console.log("🔨 incoming connection from: ", socket.id);
-
-  if (!socket.data.user) {
-    socket.disconnect(true);
-  }
-
-  socket.join("lobby");
-  socket.join(`user-${socket.data.user.id}`);
-
-  // Join the private rooms
-  socket.data.user.rooms.forEach((room: any) => {
-    socket.join(`room-${room.id}`);
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.log(`socket disconnected: ${socket.id} for ${reason}`);
-  });
-
-  socket.on("create-room", async ({ roomName, invitedUserIds }) => {
-    const roomId = generateId();
-    const insertRows: InferInsertModel<typeof userRooms>[] = Array.from(
-      new Set([socket.data.user.id, invitedUserIds])
-    ).map((userId: string) => ({
-      roomId,
-      userId,
-      joinedAt: new Date(),
-    }));
-
-    const newRoom = await db
-      .insert(roomsTable)
-      .values({
-        id: roomId,
-        name: roomName,
-        createdBy: socket.id,
-        createdAt: new Date(),
-        isPrivate: true,
-      })
-      .returning();
-
-    await db.insert(userRooms).values(insertRows);
-
-    // We've prepared the database. Join the user into their new room
-    socket.join(`room-${roomId}`);
-
-    (invitedUserIds as any[]).forEach((uid) => {
-      io.to(`user-${uid}`).emit("new-room", {
-        room: newRoom.at(0),
-      });
-    });
-  });
-
-  socket.on("chat-message", async ({ roomId, message }) => {
-    // @todo Maybe add a check to see if the user can really add messages to this room?
-    const userId = socket.data.user.id as string;
-
-    await db.insert(messagesTable).values({
-      roomId,
-      userId,
-      content: message,
-      createdAt: new Date(),
-    });
-
-    io.to(`room-${roomId}`).emit("chat-message", {
-      roomId,
-      userId,
-      message,
-      createdAt: Date.now(),
-    });
-  });
-
-  socket.on("invite-to-room", async ({ roomId, userId }) => {
-    const room = await db.query.roomsTable.findFirst({
-      where: (rooms, { eq }) => eq(rooms.id, roomId),
-    });
-    if (!room || room.createdBy !== socket.data.user.id) {
-      return;
-    }
-
-    await db.insert(userRooms).values({
-      roomId,
-      userId,
-      joinedAt: new Date(),
-    });
-  });
-
-  socket.on("get-messages", async ({ roomId, lastMessageId }) => {
-    try {
-      // Fetch up to 100 messages newer than lastMessageId
-      let messages = await db.query.messagesTable.findMany({
-        where: (messages, { gt, eq, and }) =>
-          and(gt(messages.id, lastMessageId), eq(messages.roomId, roomId)),
-        orderBy: (messages, { asc }) => [asc(messages.id)],
-        limit: 100,
-      });
-
-      // If fewer than 100 messages were returned, load latest 100 to catch up
-      if (messages.length < 100) {
-        const hasNewerMessages = await db.query.messagesTable.findFirst({
-          where: (table, { gt, eq, and }) =>
-            and(eq(table.roomId, roomId), gt(table.id, lastMessageId)),
-          orderBy: (table, { desc }) => [desc(table.id)],
-        });
-
-        if (hasNewerMessages) {
-          messages = await db.query.messagesTable.findMany({
-            where: (table, { eq }) => eq(table.roomId, roomId),
-            orderBy: (table, { desc }) => [desc(table.id)],
-            limit: 100,
-          });
-
-          // Reverse so chronological order is preserved
-          messages.reverse();
-        }
-      }
-
-      socket.emit("messages", { roomId, messages });
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    }
-  });
-});
+defineSocketServer(io);
 
 // graceful shutdown
 process.on("SIGINT", async () => {

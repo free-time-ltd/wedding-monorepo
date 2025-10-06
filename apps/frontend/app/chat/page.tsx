@@ -1,3 +1,4 @@
+import { ChatComponent } from "@/components/chat/chat-page";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -13,6 +14,25 @@ const fetchUser = async () => {
     const url = new URL("/api/me", process.env.NEXT_PUBLIC_API_BASE_URL);
     const res = await fetch(url, {
       headers: { Cookie: (await cookies()).toString() },
+      cache: "no-cache",
+    });
+    const json = await res.json();
+    if (json.success && "data" in json) {
+      return json.data;
+    }
+    return null;
+  } catch (e) {
+    console.error(e);
+  }
+
+  return null;
+};
+
+const fetchGuests = async () => {
+  try {
+    const url = new URL("/api/users", process.env.NEXT_PUBLIC_API_BASE_URL);
+    const res = await fetch(url, {
+      cache: "force-cache",
     });
     const json = await res.json();
     if (json.success && "data" in json) {
@@ -32,5 +52,7 @@ export default async function ChatPage() {
     return redirect("/guest-select");
   }
 
-  return <p>Hello logged in customer.</p>;
+  const guests = await fetchGuests();
+
+  return <ChatComponent user={user} guests={guests} />;
 }
