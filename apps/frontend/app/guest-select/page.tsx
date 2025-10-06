@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const fetchUsers = async () => {
   const url = new URL("/api/users", process.env.NEXT_PUBLIC_API_BASE_URL);
-  const res = await fetch(url);
+  const res = await fetch(url, { cache: "force-cache" });
 
   const { data } = await res.json();
 
