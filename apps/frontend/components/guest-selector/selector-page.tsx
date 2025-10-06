@@ -135,7 +135,9 @@ export function SelectorPage({ guests }: Props) {
           disabled={!selectedGuest || isLoading}
           className="w-full"
         >
-          {selectedGuest && <>Продлъжете като "{userGuest?.name}" &raquo;</>}
+          {selectedGuest && (
+            <>Продлъжете като &quot;{userGuest?.name}&quot; &raquo;</>
+          )}
           {!selectedGuest && <>Продължете напред &raquo;</>}
         </button>
 

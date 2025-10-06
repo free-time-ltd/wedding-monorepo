@@ -122,7 +122,7 @@ export function ChatComponent({ user, guests }: Props) {
         {isConnected ? "connected" : "disconnected"}
       </p>
       <ul className="flex flex-col">
-        {Object.entries(chatrooms).map(([i, room]) => (
+        {Object.entries(chatrooms).map(([, room]) => (
           <li
             key={room.id}
             onClick={() => handleRoomSelect(room.id)}
@@ -139,6 +139,7 @@ export function ChatComponent({ user, guests }: Props) {
           <li key={guest.id}>{guest.name}</li>
         ))}
       </ul>
+      <p>Total guests on the wedding: {guests.length}</p>
     </>
   );
 }

@@ -1,9 +1,8 @@
-import type { Server } from "socket.io";
-import type { InferInsertModel } from "@repo/db";
 import { generateId } from "@repo/utils/generateId";
 import { messagesTable, roomsTable, userRooms } from "@repo/db/schema";
 import { db } from "@repo/db/client";
 import { authorizedSocket } from "./authorized-socket";
+import { Server } from "@repo/socket";
 
 export function defineSocketServer(io: Server) {
   io.use(authorizedSocket);
@@ -19,7 +18,7 @@ export function defineSocketServer(io: Server) {
     socket.join(`user-${socket.data.user.id}`);
 
     // Join the private rooms
-    socket.data.user.rooms.forEach((room: any) => {
+    socket.data.user.rooms.forEach((room) => {
       socket.join(`room-${room.id}`);
     });
 
@@ -28,35 +27,32 @@ export function defineSocketServer(io: Server) {
       console.log(`socket disconnected: ${socket.id} for ${reason}`);
     });
 
-    socket.on("create-room", async ({ roomName, invitedUserIds }) => {
+    socket.on("create-room", async ({ roomName, invitedUserIds = [] }) => {
       const roomId = generateId();
-      const insertRows: InferInsertModel<typeof userRooms>[] = Array.from(
-        new Set([socket.data.user.id, invitedUserIds])
-      ).map((userId: string) => ({
+      const insertRows: Array<typeof userRooms.$inferInsert> = Array.from(
+        new Set([socket.data.user.id, ...invitedUserIds])
+      ).map((userId) => ({
         roomId,
         userId,
         joinedAt: new Date(),
       }));
 
-      const newRoom = await db
-        .insert(roomsTable)
-        .values({
-          id: roomId,
-          name: roomName,
-          createdBy: socket.id,
-          createdAt: new Date(),
-          isPrivate: true,
-        })
-        .returning();
+      await db.insert(roomsTable).values({
+        id: roomId,
+        name: roomName,
+        createdBy: socket.id,
+        createdAt: new Date(),
+        isPrivate: true,
+      });
 
       await db.insert(userRooms).values(insertRows);
 
       // We've prepared the database. Join the user into their new room
       socket.join(`room-${roomId}`);
 
-      (invitedUserIds as any[]).forEach((uid) => {
+      invitedUserIds.forEach((uid) => {
         io.to(`user-${uid}`).emit("new-room", {
-          room: newRoom.at(0),
+          room: roomId,
         });
       });
     });
@@ -132,7 +128,7 @@ export function defineSocketServer(io: Server) {
       try {
         const fetched = await db.query.messagesTable.findMany({
           where: (table, { gt, eq, and }) =>
-            and(eq(table.roomId, roomId), gt(table.id, lastMessageId)),
+            and(eq(table.roomId, roomId), gt(table.id, Number(lastMessageId))),
           orderBy: (table, { asc }) => asc(table.id),
           limit: 101,
         });

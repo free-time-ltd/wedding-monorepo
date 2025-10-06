@@ -12,7 +12,7 @@ export interface Guest {
 }
 
 export interface Message {
-  id: string;
+  id: number;
   roomId: string;
   content: string;
   createdAt: number;
@@ -107,9 +107,19 @@ export const useChatStore = create<ChatStore>((set) => ({
     })),
   clearCurrentChatroom: () => set(() => ({ currentChatroom: null })),
   removeGuest: (chatroomId, guestId) =>
-    set((state) => ({
-      chatrooms: {
-        ...state.chatrooms,
-      },
-    })),
+    set((state) => {
+      const chatroom = state.chatrooms[chatroomId];
+      if (!chatroom) {
+        return state;
+      }
+      return {
+        chatrooms: {
+          ...state.chatrooms,
+          [chatroomId]: {
+            ...chatroom,
+            guests: chatroom.guests.filter((guest) => guest.id !== guestId),
+          },
+        },
+      };
+    }),
 }));

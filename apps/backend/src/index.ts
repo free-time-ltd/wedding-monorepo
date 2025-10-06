@@ -4,11 +4,11 @@ import { Hono } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { verify, sign } from "hono/jwt";
 import { cors } from "hono/cors";
-import { Server } from "socket.io";
 import { db } from "@repo/db/client";
 import { generateId } from "@repo/utils/generateId";
 import { findUser, transformUser } from "./db-utils";
 import { defineSocketServer } from "./socket";
+import { Server } from "@repo/socket";
 
 const app = new Hono();
 

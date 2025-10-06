@@ -1,12 +1,12 @@
-import { Chatroom, useChatStore } from "@/store/chatStore";
+import { useChatStore } from "@/store/chatStore";
 import { useCallback, useEffect } from "react";
-import type { Socket } from "socket.io-client";
+import type { TypedClientSocket, ServerToClientEvents } from "@repo/socket";
 
-export function useChatSocket(socket: Socket | undefined | null) {
+export function useChatSocket(socket: TypedClientSocket | undefined | null) {
   const addMessage = useChatStore((state) => state.addMessage);
 
   const sendGetMessages = useCallback(
-    (roomId: string, lastMessageId?: string) => {
+    (roomId: string, lastMessageId?: number) => {
       socket?.emit("get-messages", {
         roomId,
         lastMessageId,
@@ -18,17 +18,18 @@ export function useChatSocket(socket: Socket | undefined | null) {
   useEffect(() => {
     if (!socket || !socket.connected) return;
 
-    const handleIncomingMessages = ({
+    const handleIncomingMessages: ServerToClientEvents["messages"] = ({
       roomId,
       messages,
       hasMore,
-    }: {
-      roomId: string;
-      messages: Chatroom["messages"];
-      hasMore: boolean;
     }) => {
-      // @todo don't ignore the hasMore flag in the future
-      messages.forEach((message) => addMessage(roomId, message));
+      messages.forEach((message) =>
+        addMessage(roomId, {
+          ...message,
+          seen: false,
+          createdAt: new Date(message.createdAt).getTime(),
+        })
+      );
 
       if (hasMore) {
         sendGetMessages(roomId);
