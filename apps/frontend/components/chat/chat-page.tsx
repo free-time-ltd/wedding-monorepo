@@ -3,7 +3,8 @@
 import { useSocket } from "@/context/SocketContext";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { Chatroom, Guest, useChatStore } from "@/store/chatStore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { ChatUI } from "./chat-ui";
 
 type User = {
   id: string;
@@ -28,9 +29,10 @@ type User = {
   };
 };
 
-interface Props {
+export interface ChatProps {
   user: User;
   guests: Guest[];
+  initialChatroom?: string;
 }
 
 const fetchRoomById = async (
@@ -51,7 +53,7 @@ const fetchRoomById = async (
   return json.data satisfies Chatroom;
 };
 
-export function ChatComponent({ user, guests }: Props) {
+export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
   const { isConnected, connect, socket } = useSocket();
   const { sendGetMessages } = useChatSocket(socket);
   const chatrooms = useChatStore((state) => state.chatrooms);
@@ -86,34 +88,58 @@ export function ChatComponent({ user, guests }: Props) {
     );
   }, [addChatroom, user]);
 
-  const handleRoomSelect = async (roomId: string | null) => {
-    if (roomId === null) {
-      clearCurrentChatroom();
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      const roomData = await fetchRoomById(roomId);
-
-      if (!roomData) {
+  const handleRoomSelect = useCallback(
+    async (roomId: string | null) => {
+      if (roomId === null) {
+        clearCurrentChatroom();
         return;
       }
 
-      roomData.guests.forEach((guest) =>
-        addGuestToChatroom(roomData.id, guest)
-      );
+      try {
+        setIsLoading(true);
 
-      sendGetMessages(roomId, chatrooms[roomId]?.messages?.at(-1)?.id);
+        const roomData = await fetchRoomById(roomId);
 
-      setCurrentChatroom(roomId);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoading(false);
+        if (!roomData) {
+          return;
+        }
+
+        roomData.guests.forEach((guest) =>
+          addGuestToChatroom(roomData.id, guest)
+        );
+
+        sendGetMessages(roomId, chatrooms[roomId]?.messages?.at(-1)?.id);
+
+        setCurrentChatroom(roomId);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [
+      addGuestToChatroom,
+      chatrooms,
+      clearCurrentChatroom,
+      sendGetMessages,
+      setCurrentChatroom,
+    ]
+  );
+
+  // Auto-join room
+  useEffect(() => {
+    if (!initialChatroom || currentChatroom === initialChatroom) return;
+
+    if (initialChatroom in chatrooms && currentChatroom === null) {
+      handleRoomSelect(initialChatroom);
     }
-  };
+  }, [
+    initialChatroom,
+    chatrooms,
+    currentChatroom,
+    setCurrentChatroom,
+    handleRoomSelect,
+  ]);
 
   return (
     <>
@@ -140,6 +166,7 @@ export function ChatComponent({ user, guests }: Props) {
         ))}
       </ul>
       <p>Total guests on the wedding: {guests.length}</p>
+      <ChatUI user={user} guests={guests} />
     </>
   );
 }

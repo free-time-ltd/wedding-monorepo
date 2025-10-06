@@ -32,7 +32,11 @@ const fetchUser = async () => {
   return null;
 };
 
-export default async function ChatPage() {
+export default async function ChatPage({
+  params,
+}: {
+  params: Promise<{ slug: string[] }>;
+}) {
   const user = await fetchUser();
   if (user === null) {
     return redirect("/guest-select");
@@ -40,5 +44,11 @@ export default async function ChatPage() {
 
   const guests = await fetchGuests();
 
-  return <ChatComponent user={user} guests={guests} />;
+  const { slug } = await params;
+
+  const chatroom = slug?.at(0);
+
+  return (
+    <ChatComponent user={user} guests={guests} initialChatroom={chatroom} />
+  );
 }

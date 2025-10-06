@@ -16,6 +16,7 @@ export interface Message {
   roomId: string;
   content: string;
   createdAt: number;
+  userId: string;
   seen: boolean;
 }
 
@@ -31,16 +32,19 @@ export interface Chatroom {
 export interface ChatStore {
   chatrooms: Record<string, Chatroom>;
   currentChatroom: string | null;
+  guests: Guest[];
   addChatroom: (chatroom: Chatroom) => void;
   addMessage: (chatroomId: string, message: Message) => void;
   markMessagesSeen: (chatroomId: string) => void;
   addGuestToChatroom: (chatroomId: string, guest: Guest) => void;
-  setCurrentChatroom: (chatroomId: string) => void;
+  setCurrentChatroom: (chatroomId: string | null) => void;
   clearCurrentChatroom: () => void;
   removeGuest: (chatroomId: string, guestId: string) => void;
+  setGuests: (guestList: Guest[]) => void;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
+  guests: [],
   chatrooms: {},
   currentChatroom: null,
   addChatroom: (chatroom) =>
@@ -122,4 +126,8 @@ export const useChatStore = create<ChatStore>((set) => ({
         },
       };
     }),
+  setGuests: (guests) =>
+    set(() => ({
+      guests,
+    })),
 }));

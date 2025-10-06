@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SelectorPage } from "@/components/guest-selector/selector-page";
+import { fetchGuests } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "🎟️ Избери своето име – Сватбата на Кристина и Лъчезар",
@@ -7,17 +8,8 @@ export const metadata: Metadata = {
     "Открий себе си в списъка с гости и влез в сватбеното изживяване на Кристина и Лъчезар. Малка стъпка към голямото „Да!“ 💫",
 };
 
-const fetchUsers = async () => {
-  const url = new URL("/api/users", process.env.NEXT_PUBLIC_API_BASE_URL);
-  const res = await fetch(url, { cache: "force-cache" });
-
-  const { data } = await res.json();
-
-  return data;
-};
-
 export default async function GuestSelect() {
-  const users = await fetchUsers();
+  const users = await fetchGuests();
 
   return (
     <div className="min-h-screen pt-24 pb-12 px-4">
