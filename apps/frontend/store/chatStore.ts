@@ -17,7 +17,6 @@ export interface Message {
   content: string;
   createdAt: number;
   userId: string;
-  seen: boolean;
 }
 
 export interface Chatroom {
@@ -25,7 +24,6 @@ export interface Chatroom {
   name: string;
   guests: Guest[];
   isPrivate: boolean;
-  unseenCount: number;
   messages: Message[];
 }
 
@@ -35,7 +33,6 @@ export interface ChatStore {
   guests: Guest[];
   addChatroom: (chatroom: Chatroom) => void;
   addMessage: (chatroomId: string, message: Message) => void;
-  markMessagesSeen: (chatroomId: string) => void;
   addGuestToChatroom: (chatroomId: string, guest: Guest) => void;
   setCurrentChatroom: (chatroomId: string | null) => void;
   clearCurrentChatroom: () => void;
@@ -45,7 +42,15 @@ export interface ChatStore {
 
 export const useChatStore = create<ChatStore>((set) => ({
   guests: [],
-  chatrooms: {},
+  chatrooms: {
+    lobby: {
+      id: "lobby",
+      guests: [],
+      isPrivate: false,
+      messages: [],
+      name: "Lobby",
+    },
+  },
   currentChatroom: null,
   addChatroom: (chatroom) =>
     set((state) => ({
@@ -57,35 +62,23 @@ export const useChatStore = create<ChatStore>((set) => ({
       if (!chatroom) return state;
 
       const updatedMessages = [...chatroom.messages, message];
-      const unseenCount = message.seen
-        ? chatroom.unseenCount
-        : chatroom.unseenCount + 1;
+
+      if (message.createdAt < (updatedMessages.at(-1)?.createdAt ?? 0)) {
+        const index = updatedMessages.findIndex(
+          (m) => m.createdAt > message.createdAt
+        );
+        updatedMessages.splice(index, 0, message);
+      } else {
+        updatedMessages.push(message);
+      }
+
+      // We only need to store the last 100 messages
+      if (updatedMessages.length > 100) updatedMessages.shift();
 
       return {
         chatrooms: {
           ...state.chatrooms,
-          [chatroomId]: { ...chatroom, messages: updatedMessages, unseenCount },
-        },
-      };
-    }),
-  markMessagesSeen: (chatroomId) =>
-    set((state) => {
-      const chatroom = state.chatrooms[chatroomId];
-      if (!chatroom) return state;
-
-      const updatedMessages = chatroom.messages.map((msg) => ({
-        ...msg,
-        seen: true,
-      }));
-
-      return {
-        chatrooms: {
-          ...state.chatrooms,
-          [chatroomId]: {
-            ...chatroom,
-            messages: updatedMessages,
-            unseenCount: 0,
-          },
+          [chatroomId]: { ...chatroom, messages: updatedMessages },
         },
       };
     }),

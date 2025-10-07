@@ -26,7 +26,7 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
       messages.forEach((message) =>
         addMessage(roomId, {
           ...message,
-          seen: false,
+          userId: message.userId!,
           createdAt: new Date(message.createdAt).getTime(),
         })
       );

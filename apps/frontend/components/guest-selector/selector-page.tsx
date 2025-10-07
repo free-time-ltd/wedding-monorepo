@@ -3,6 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { getInitials } from "@/components/guest-selector/utils";
+import { Users } from "@repo/ui/icons";
+import { Label } from "@repo/ui/components/ui/label";
+import { Input } from "@repo/ui/components/ui/input";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,11 +62,11 @@ export function SelectorPage({ guests }: Props) {
       </div>
       <div className="card-body">
         <div className="space-y-6">
-          <div className="search-field flex flex-col">
-            <label htmlFor="guest-search" className="font-medium">
+          <div className="search-field flex flex-col gap-2">
+            <Label htmlFor="guest-search" className="font-medium">
               Търсене по име:
-            </label>
-            <input
+            </Label>
+            <Input
               type="search"
               id="guest-search"
               placeholder="Въведете вашето име"
@@ -75,12 +78,14 @@ export function SelectorPage({ guests }: Props) {
             <label>Изберете вашето име</label>
             <div className="border border-border rounded-lg max-h-96 overflow-y-auto">
               {filteredGuests.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">
-                  USR
-                  <p>
-                    Не бяха открити гости, които да отговарят на вашия критерий
-                    за търсене.
-                  </p>
+                <div className="p-8">
+                  <div className="flex items-center justify-center gap-2">
+                    <Users />
+                    <p className="text-muted-foreground">
+                      Не бяха открити гости, които да отговарят на вашия
+                      критерий за търсене.
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div className="divide-y divide-border">

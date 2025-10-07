@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SelectorPage } from "@/components/guest-selector/selector-page";
 import { fetchGuests } from "@/lib/data";
+import { Heart } from "@repo/ui/icons";
 
 export const metadata: Metadata = {
   title: "🎟️ Избери своето име – Сватбата на Кристина и Лъчезар",
@@ -17,8 +18,7 @@ export default async function GuestSelect() {
         <div className="text-center mb-12 space-y-4">
           <div className="flex justify-center mb-4">
             <div className="p-3 rounded-full bg-accent/10">
-              {/* <Heart className="h-8 w-8 text-accent fill-accent" /> */}{" "}
-              &lt;3
+              <Heart className="h-8 w-8 text-destructive fill-destructive" />
             </div>
           </div>
           <h1 className="font-serif text-4xl md:text-5xl text-balance text-foreground">

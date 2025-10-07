@@ -6,9 +6,10 @@ import { verify, sign } from "hono/jwt";
 import { cors } from "hono/cors";
 import { db } from "@repo/db/client";
 import { generateId } from "@repo/utils/generateId";
-import { findUser, transformUser } from "./db-utils";
+import { findUser, transformUser } from "@repo/db/utils";
 import { defineSocketServer } from "./socket";
 import { Server } from "@repo/socket";
+import { defineLobby } from "./lobby";
 
 const app = new Hono();
 
@@ -175,6 +176,11 @@ app.get("/api/logout", async (c) => {
 app.get("/api/rooms/:id", async (c) => {
   const { id } = c.req.param();
 
+  if (id === "lobby") {
+    const room = await defineLobby();
+    return c.json({ success: true, data: room });
+  }
+
   const roomRes = await db.query.roomsTable.findFirst({
     where: (rooms, { eq }) => eq(rooms.id, id),
     with: {
@@ -232,7 +238,7 @@ app.get("/api/rooms/:id", async (c) => {
     })),
   };
 
-  return c.json({ succes: true, data: transformedRoom });
+  return c.json({ success: true, data: transformedRoom });
 });
 
 const server = serve(

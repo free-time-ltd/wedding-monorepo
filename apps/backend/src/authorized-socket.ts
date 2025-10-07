@@ -1,7 +1,7 @@
 import type { ExtendedError, Socket } from "socket.io";
 import cookie from "cookie";
 import { verify } from "hono/jwt";
-import { findUser, transformUser } from "./db-utils";
+import { findUser, transformUser } from "@repo/db/utils";
 
 const sessionName = process.env?.SESSION_COOKIE_NAME ?? "sess";
 

@@ -16,6 +16,10 @@
       "types": "./dist/schema.d.ts",
       "import": "./src/schema.ts"
     },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./src/utils.ts"
+    },
     "./drizzle.config": {
       "types": "./dist/drizzle.config.d.ts",
       "default": "./src/drizzle.config.ts"

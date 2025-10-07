@@ -38,7 +38,7 @@ export default async function ChatPage({
   params: Promise<{ slug: string[] }>;
 }) {
   const user = await fetchUser();
-  if (user === null) {
+  if (!user) {
     return redirect("/guest-select");
   }
 

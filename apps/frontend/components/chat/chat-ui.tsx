@@ -14,15 +14,23 @@ import {
 import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { getInitials } from "../guest-selector/utils";
 import { Input } from "@repo/ui/components/ui/input";
-import { type Message, useChatStore } from "@/store/chatStore";
-import { ChatProps } from "./chat-page";
+import { Guest, type Message, useChatStore } from "@/store/chatStore";
 import { CreateRoomDialog } from "./create-room-dialog";
+import { UserApiType } from "@repo/db/utils";
+import { RoomButton } from "./room-button";
+import { ParticipantsDialog } from "./participants-dialog";
 
-export function ChatUI({ user, guests }: ChatProps) {
+interface Props {
+  user: UserApiType;
+  guests: Guest[];
+  onRoomChange?: (room: string | null) => void;
+}
+
+export function ChatUI({ user, guests, onRoomChange }: Props) {
   const chatrooms = useChatStore((state) => state.chatrooms);
   const currentChatroom = useChatStore((state) => state.currentChatroom);
-  const setCurrentChatroom = useChatStore((state) => state.setCurrentChatroom);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
+  const [showParticipants, setShowParticipants] = useState(false);
   const [messageInput, setMessageInput] = useState("");
 
   const currentGuest = { ...user };
@@ -41,7 +49,7 @@ export function ChatUI({ user, guests }: ChatProps) {
   };
 
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen pt-8">
       <div className="container mx-auto h-[calc(100vh-4rem)] max-w-7xl p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
           {/* Rooms Sidebar */}
@@ -70,7 +78,7 @@ export function ChatUI({ user, guests }: ChatProps) {
                     {currentGuest.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {currentGuest.table.label}
+                    {currentGuest?.table?.label}
                   </p>
                 </div>
               </div>
@@ -78,37 +86,12 @@ export function ChatUI({ user, guests }: ChatProps) {
 
             <div className="flex-1 overflow-y-auto">
               {filteredRooms.map((room) => (
-                <button
+                <RoomButton
+                  room={room}
+                  onClick={() => onRoomChange?.(room.id)}
+                  selected={selectedRoom?.id === room.id}
                   key={room.id}
-                  onClick={() => setCurrentChatroom(room.id)}
-                  className={`w-full p-4 flex items-start gap-3 hover:bg-accent/5 transition-colors border-b border-border ${
-                    selectedRoom?.id === room.id ? "bg-accent/10" : ""
-                  }`}
-                >
-                  <div className="p-2 rounded-lg bg-accent/10 mt-1">
-                    {room.isPrivate ? (
-                      <Lock className="h-4 w-4 text-accent" />
-                    ) : (
-                      <Users className="h-4 w-4 text-accent" />
-                    )}
-                  </div>
-                  <div className="flex-1 text-left min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="font-medium text-sm text-foreground truncate">
-                        {room.name}
-                      </p>
-                      {room.isPrivate && (
-                        <span className="text-xs text-muted-foreground">
-                          {room.guests.length}
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-muted-foreground truncate">
-                      last room message
-                    </p>
-                  </div>
-                </button>
+                />
               ))}
             </div>
           </Card>
@@ -123,7 +106,7 @@ export function ChatUI({ user, guests }: ChatProps) {
                       size="icon"
                       variant="ghost"
                       className="md:hidden"
-                      onClick={() => setCurrentChatroom(null)}
+                      onClick={() => onRoomChange?.(null)}
                     >
                       <ArrowLeft className="h-5 w-5" />
                     </Button>
@@ -138,9 +121,13 @@ export function ChatUI({ user, guests }: ChatProps) {
                       <h3 className="font-serif text-xl text-foreground">
                         {selectedRoom.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <button
+                        type="button"
+                        className="text-sm text-muted-foreground hover:underline cursor-pointer"
+                        onClick={() => setShowParticipants((prev) => !prev)}
+                      >
                         {selectedRoom.guests.length} participants
-                      </p>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -212,6 +199,8 @@ export function ChatUI({ user, guests }: ChatProps) {
                       placeholder="Type your message..."
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
+                      autoComplete="off"
+                      autoCorrect="false"
                       className="flex-1"
                     />
                     <Button size="icon">
@@ -241,6 +230,13 @@ export function ChatUI({ user, guests }: ChatProps) {
         onOpenChange={setShowCreateRoom}
         onCreateRoom={handleCreateRoom}
         currentGuestId={currentGuest.id}
+      />
+
+      <ParticipantsDialog
+        open={showParticipants}
+        name={selectedRoom?.name ?? ""}
+        onOpenChange={setShowParticipants}
+        guests={selectedRoom?.guests ?? []}
       />
     </div>
   );

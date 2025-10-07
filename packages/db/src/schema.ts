@@ -99,4 +99,5 @@ export const roomRelations = relations(roomsTable, ({ many, one }) => ({
     fields: [roomsTable.createdBy],
     references: [usersTable.id],
   }),
+  messages: many(messagesTable),
 }));
