@@ -40,7 +40,7 @@ export function defineSocketServer(io: Server) {
       await db.insert(roomsTable).values({
         id: roomId,
         name: roomName,
-        createdBy: socket.id,
+        createdBy: socket.data.user.id,
         createdAt: new Date(),
         isPrivate: true,
       });
@@ -140,6 +140,10 @@ export function defineSocketServer(io: Server) {
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
+    });
+
+    socket.on("ping", (callback) => {
+      callback?.();
     });
   });
 }

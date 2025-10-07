@@ -43,10 +43,11 @@ export interface ClientToServerEvents {
   "get-messages": (props: { roomId: string; lastMessageId?: number }) => void;
   "chat-message": (props: { roomId: string; message: string }) => void;
   "invite-room": (props: { roomId: string; userId: string }) => void;
+  ping: (callback?: () => void) => void;
 }
 
 export interface InterServerEvents {
-  ping: () => void;
+  ping: (cb?: () => void) => void;
 }
 
 interface SocketData {

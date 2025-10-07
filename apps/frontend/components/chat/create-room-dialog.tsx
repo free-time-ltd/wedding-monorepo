@@ -68,19 +68,20 @@ export function CreateRoomDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">
-            Create Chat Room
+            Създай Нова Чат Стая
           </DialogTitle>
           <DialogDescription>
-            Create a new room to chat with other guests
+            Създайте нова стая за чат с останалите гости. Поканете конкретна
+            група или просто комуникирайте със всички!
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="room-name">Room Name</Label>
+            <Label htmlFor="room-name">Име на стая</Label>
             <Input
               id="room-name"
-              placeholder="e.g., Table 5 Group"
+              placeholder="пример Чат на стая №5"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
             />
@@ -96,13 +97,13 @@ export function CreateRoomDialog({
               htmlFor="private"
               className="text-sm font-normal cursor-pointer"
             >
-              Make this a private room
+              Направи стаята частна (само с покана)
             </Label>
           </div>
 
           {isPrivate && (
             <div className="space-y-2">
-              <Label>Select Participants</Label>
+              <Label>Изберете гости</Label>
               <div className="border border-border rounded-lg max-h-64 overflow-y-auto">
                 {guests.map((guest) => (
                   <div
@@ -134,8 +135,7 @@ export function CreateRoomDialog({
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                {selectedParticipants.length} participant
-                {selectedParticipants.length !== 1 ? "s" : ""} selected
+                {selectedParticipants.length} гост(и) избрани
               </p>
             </div>
           )}
@@ -143,10 +143,10 @@ export function CreateRoomDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            Откажи
           </Button>
           <Button onClick={handleSubmit} disabled={!roomName.trim()}>
-            Create Room
+            Създай стая
           </Button>
         </DialogFooter>
       </DialogContent>

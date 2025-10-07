@@ -19,14 +19,27 @@ import { CreateRoomDialog } from "./create-room-dialog";
 import { UserApiType } from "@repo/db/utils";
 import { RoomButton } from "./room-button";
 import { ParticipantsDialog } from "./participants-dialog";
+import { NetworkIndicator } from "../network-indicator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/ui/tooltip";
+
+export interface RoomCreationType {
+  name: string;
+  invitedUserIds: string[];
+  isPrivate: boolean;
+}
 
 interface Props {
   user: UserApiType;
   guests: Guest[];
   onRoomChange?: (room: string | null) => void;
+  onRoomCreate?: (props: RoomCreationType) => void;
 }
 
-export function ChatUI({ user, guests, onRoomChange }: Props) {
+export function ChatUI({ user, guests, onRoomChange, onRoomCreate }: Props) {
   const chatrooms = useChatStore((state) => state.chatrooms);
   const currentChatroom = useChatStore((state) => state.currentChatroom);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
@@ -45,7 +58,8 @@ export function ChatUI({ user, guests, onRoomChange }: Props) {
     invitedUserIds: string[],
     isPrivate: boolean
   ) => {
-    console.log({ name, invitedUserIds, isPrivate });
+    onRoomCreate?.({ name, invitedUserIds, isPrivate });
+    setShowCreateRoom(false);
   };
 
   return (
@@ -56,16 +70,25 @@ export function ChatUI({ user, guests, onRoomChange }: Props) {
           <Card className="md:col-span-1 flex flex-col h-full">
             <div className="p-4 border-b border-border">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-serif text-2xl text-foreground">
-                  Chat Rooms
+                <h2 className="font-serif text-2xl text-foreground flex gap-2 items-center">
+                  Сватбен Чат
+                  <NetworkIndicator />
                 </h2>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => setShowCreateRoom(true)}
-                >
-                  <Plus className="h-5 w-5" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="cursor-pointer"
+                      onClick={() => setShowCreateRoom(true)}
+                    >
+                      <Plus className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Създай нова чат стая!</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <div className="flex items-center gap-3 p-3 bg-accent/5 rounded-lg">
                 <Avatar>
@@ -126,7 +149,7 @@ export function ChatUI({ user, guests, onRoomChange }: Props) {
                         className="text-sm text-muted-foreground hover:underline cursor-pointer"
                         onClick={() => setShowParticipants((prev) => !prev)}
                       >
-                        {selectedRoom.guests.length} participants
+                        {selectedRoom.guests.length} гости
                       </button>
                     </div>
                   </div>
@@ -136,9 +159,11 @@ export function ChatUI({ user, guests, onRoomChange }: Props) {
                   {roomMessages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
                       <MessageCircle className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                      <p className="text-muted-foreground">No messages yet</p>
+                      <p className="text-muted-foreground">
+                        Все още няма съобщения!
+                      </p>
                       <p className="text-sm text-muted-foreground">
-                        Be the first to say hello!
+                        Бъди пръв и кажи Здравей!
                       </p>
                     </div>
                   ) : (
@@ -213,10 +238,10 @@ export function ChatUI({ user, guests, onRoomChange }: Props) {
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
                 <MessageCircle className="h-16 w-16 text-muted-foreground/50 mb-4" />
                 <h3 className="font-serif text-2xl text-foreground mb-2">
-                  Select a chat room
+                  Изберете чат стая
                 </h3>
                 <p className="text-muted-foreground">
-                  Choose a room from the sidebar to start chatting
+                  Изберете чат стая от менюто вляво за да започнете чат
                 </p>
               </div>
             )}

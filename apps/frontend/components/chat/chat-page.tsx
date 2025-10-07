@@ -3,10 +3,12 @@
 import { useSocket } from "@/context/SocketContext";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { Chatroom, Guest, useChatStore } from "@/store/chatStore";
-import { useCallback, useEffect, useState } from "react";
-import { ChatUI } from "./chat-ui";
+import { useCallback, useEffect } from "react";
+import { ChatUI, RoomCreationType } from "./chat-ui";
 import type { UserApiType } from "@repo/db/utils";
 import { useRouter } from "next/navigation";
+import { Toaster } from "@repo/ui/components/ui/sonner";
+import { OfflineIndicator } from "../offline-indicator";
 
 export interface ChatProps {
   user: UserApiType;
@@ -35,12 +37,13 @@ const fetchRoomById = async (
 export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
   const router = useRouter();
   const { isConnected, connect, socket } = useSocket();
-  const { sendGetMessages } = useChatSocket(socket);
+  const { sendGetMessages, createRoom } = useChatSocket(socket);
   const chatrooms = useChatStore((state) => state.chatrooms);
   const currentChatroom = useChatStore((state) => state.currentChatroom);
   const addChatroom = useChatStore((state) => state.addChatroom);
   const addGuestToChatroom = useChatStore((state) => state.addGuestToChatroom);
   const setCurrentChatroom = useChatStore((state) => state.setCurrentChatroom);
+  const setGuests = useChatStore((state) => state.setGuests);
   const clearCurrentChatroom = useChatStore(
     (state) => state.clearCurrentChatroom
   );
@@ -51,6 +54,12 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
       connect();
     }
   }, [connect, isConnected]);
+
+  // Set the guest list in the store
+  useEffect(() => {
+    setGuests(guests);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [guests]);
 
   useEffect(() => {
     user.rooms.forEach((room) => {
@@ -123,9 +132,23 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
     handleRoomSelect,
   ]);
 
+  const handleRoomCreation = ({ name, invitedUserIds }: RoomCreationType) => {
+    createRoom({
+      roomName: name,
+      invitedUserIds,
+    });
+  };
+
   return (
     <>
-      <ChatUI user={user} guests={guests} onRoomChange={handleRoomSelect} />
+      <ChatUI
+        user={user}
+        guests={guests}
+        onRoomChange={handleRoomSelect}
+        onRoomCreate={handleRoomCreation}
+      />
+      <Toaster />
+      <OfflineIndicator />
     </>
   );
 }
