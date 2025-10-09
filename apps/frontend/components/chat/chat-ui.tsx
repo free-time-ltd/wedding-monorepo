@@ -237,9 +237,7 @@ export function ChatUI({
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>
-                                    {new Date(msg.createdAt).toLocaleString({
-                                      language: "bg_BG",
-                                    })}
+                                    {new Date(msg.createdAt).toLocaleString()}
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
