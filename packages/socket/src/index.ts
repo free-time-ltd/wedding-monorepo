@@ -1,6 +1,8 @@
 import { roomsTable, messagesTable, tablesTable } from "@repo/db/schema";
 import { Server as IOServer, type Socket } from "socket.io";
 import type { Socket as ClientSocket } from "socket.io-client";
+export type { SocketOptions } from "socket.io-client";
+export { io } from "socket.io-client";
 
 type RoomModel = typeof roomsTable.$inferSelect;
 type MessageModel = typeof messagesTable.$inferSelect;

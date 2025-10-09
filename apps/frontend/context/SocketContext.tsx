@@ -8,7 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { io, Socket, SocketOptions } from "socket.io-client";
+import type { SocketOptions, TypedClientSocket as Socket } from "@repo/socket";
+import { io } from "@repo/socket";
 import type { Transport } from "engine.io-client";
 
 interface SocketContextValue {

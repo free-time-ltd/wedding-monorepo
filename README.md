@@ -5,7 +5,6 @@ This is a project for my wedding and website
 ## ToDos
 
 - Once connected to server - Sonner notifications when new messages arrive and you are not on the chat page
-- Clear raw socket.io from backend and from frontend (npm rm)
 - Gotta add the event handler for when user gets invites to a new room
 
 ## Fixing turborepo
