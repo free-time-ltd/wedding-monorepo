@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.5",
-    "@repo/db": "*",
-    "@repo/socket": "^1.0.0",
-    "@repo/utils": "*",
+    "@repo/db": "1.0.0",
+    "@repo/socket": "1.0.0",
+    "@repo/utils": "1.0.0",
     "cookie": "^1.0.2",
     "dotenv": "^17.2.3",
     "hono": "^4.9.9",
