@@ -1,6 +1,7 @@
 import { useChatStore } from "@/store/chatStore";
 import { useCallback, useEffect } from "react";
-import type { TypedClientSocket, ServerToClientEvents } from "@repo/socket";
+import type { ServerToClientEvents } from "@repo/socket";
+import type { TypedClientSocket } from "@repo/socket/client";
 import { useRouter } from "next/navigation";
 import { toast } from "@repo/ui";
 
