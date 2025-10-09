@@ -2,19 +2,11 @@
 
 import { Card } from "@repo/ui/components/ui/card";
 import { Button } from "@repo/ui/components/ui/button";
-import { useState } from "react";
-import {
-  Plus,
-  Users,
-  Lock,
-  ArrowLeft,
-  MessageCircle,
-  Send,
-} from "@repo/ui/icons";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Plus, Users, Lock, ArrowLeft, MessageCircle } from "@repo/ui/icons";
 import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { getInitials } from "../guest-selector/utils";
-import { Input } from "@repo/ui/components/ui/input";
-import { Guest, type Message, useChatStore } from "@/store/chatStore";
+import { Guest, useChatStore } from "@/store/chatStore";
 import { CreateRoomDialog } from "./create-room-dialog";
 import { UserApiType } from "@repo/db/utils";
 import { RoomButton } from "./room-button";
@@ -25,6 +17,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@repo/ui/components/ui/tooltip";
+import { useSocket } from "@/context/SocketContext";
+import ChatControls from "./chat-controls";
 
 export interface RoomCreationType {
   name: string;
@@ -35,23 +29,35 @@ export interface RoomCreationType {
 interface Props {
   user: UserApiType;
   guests: Guest[];
+  onMessageSend?: (message: string) => void;
   onRoomChange?: (room: string | null) => void;
   onRoomCreate?: (props: RoomCreationType) => void;
 }
 
-export function ChatUI({ user, guests, onRoomChange, onRoomCreate }: Props) {
+export function ChatUI({
+  user,
+  guests,
+  onRoomChange,
+  onRoomCreate,
+  onMessageSend,
+}: Props) {
+  const { isConnected } = useSocket();
   const chatrooms = useChatStore((state) => state.chatrooms);
   const currentChatroom = useChatStore((state) => state.currentChatroom);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
-  const [messageInput, setMessageInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
 
   const currentGuest = { ...user };
   const selectedRoom = currentChatroom ? chatrooms[currentChatroom] : null;
 
   const filteredRooms = Object.values(chatrooms);
 
-  const roomMessages = [] as Message[];
+  const roomMessages = useMemo(
+    () => Array.from(selectedRoom?.messages ?? []),
+    [selectedRoom]
+  );
 
   const handleCreateRoom = (
     name: string,
@@ -62,12 +68,31 @@ export function ChatUI({ user, guests, onRoomChange, onRoomCreate }: Props) {
     setShowCreateRoom(false);
   };
 
+  const handleRoomChange = (room: string | null) => {
+    onRoomChange?.(room);
+    if (room !== null && inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  const handleChatSubmit = (message: string) => {
+    onMessageSend?.(message);
+  };
+
+  // Automatic scroll to bottom
+  useEffect(() => {
+    const el = messagesRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [roomMessages]);
+
   return (
     <div className="min-h-screen pt-8">
       <div className="container mx-auto h-[calc(100vh-4rem)] max-w-7xl p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
           {/* Rooms Sidebar */}
-          <Card className="md:col-span-1 flex flex-col h-full">
+          <Card className="md:col-span-1 flex flex-col h-full min-h-0">
             <div className="p-4 border-b border-border">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-serif text-2xl text-foreground flex gap-2 items-center">
@@ -92,7 +117,7 @@ export function ChatUI({ user, guests, onRoomChange, onRoomCreate }: Props) {
               </div>
               <div className="flex items-center gap-3 p-3 bg-accent/5 rounded-lg">
                 <Avatar>
-                  <AvatarFallback className="bg-accent/20 text-accent">
+                  <AvatarFallback className="bg-accent/20">
                     {getInitials(currentGuest.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -111,7 +136,7 @@ export function ChatUI({ user, guests, onRoomChange, onRoomCreate }: Props) {
               {filteredRooms.map((room) => (
                 <RoomButton
                   room={room}
-                  onClick={() => onRoomChange?.(room.id)}
+                  onClick={() => handleRoomChange(room.id)}
                   selected={selectedRoom?.id === room.id}
                   key={room.id}
                 />
@@ -120,7 +145,7 @@ export function ChatUI({ user, guests, onRoomChange, onRoomCreate }: Props) {
           </Card>
 
           {/* Chat Area */}
-          <Card className="md:col-span-2 flex flex-col h-full">
+          <Card className="md:col-span-2 flex flex-col h-full min-h-0">
             {selectedRoom ? (
               <>
                 <div className="p-4 border-b border-border">
@@ -155,7 +180,10 @@ export function ChatUI({ user, guests, onRoomChange, onRoomCreate }: Props) {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div
+                  className="flex-1 p-4 space-y-4 overflow-y-auto"
+                  ref={messagesRef}
+                >
                   {roomMessages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
                       <MessageCircle className="h-12 w-12 text-muted-foreground/50 mb-3" />
@@ -174,31 +202,47 @@ export function ChatUI({ user, guests, onRoomChange, onRoomCreate }: Props) {
                       );
 
                       return (
-                        <div
-                          key={msg.id}
-                          className={`flex gap-3 ${isCurrentUser ? "flex-row-reverse" : ""}`}
-                        >
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-accent/20 text-accent text-xs">
-                              {getInitials(sender?.name ?? "")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div
-                            className={`flex-1 ${isCurrentUser ? "text-right" : ""}`}
-                          >
+                        <div key={msg.id} className={`flex gap-3`}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Avatar className="size-8 border">
+                                <AvatarFallback className="bg-accent/20 text-xs select-none">
+                                  {getInitials(sender?.name ?? "")}
+                                </AvatarFallback>
+                              </Avatar>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {sender?.name} ({sender?.table?.label})
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <div className={`flex-1`}>
                             <div className="flex items-center gap-2 mb-1">
                               <p className="text-sm font-medium text-foreground">
                                 {sender?.name}
                               </p>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(msg.createdAt).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  }
-                                )}
-                              </p>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <p className="text-xs text-muted-foreground">
+                                    {new Date(msg.createdAt).toLocaleTimeString(
+                                      [],
+                                      {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: false,
+                                      }
+                                    )}
+                                  </p>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {new Date(msg.createdAt).toLocaleString({
+                                      language: "bg_BG",
+                                    })}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
                             </div>
                             <div
                               className={`inline-block p-3 rounded-lg ${
@@ -219,19 +263,11 @@ export function ChatUI({ user, guests, onRoomChange, onRoomCreate }: Props) {
                 </div>
 
                 <div className="p-4 border-t border-border">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Type your message..."
-                      value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      autoComplete="off"
-                      autoCorrect="false"
-                      className="flex-1"
-                    />
-                    <Button size="icon">
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <ChatControls
+                    disabled={!isConnected}
+                    onSubmit={handleChatSubmit}
+                    ref={inputRef}
+                  />
                 </div>
               </>
             ) : (

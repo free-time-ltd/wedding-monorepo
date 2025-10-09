@@ -7,7 +7,7 @@ import { toast } from "@repo/ui";
 export function useChatSocket(socket: TypedClientSocket | undefined | null) {
   const router = useRouter();
   const addMessage = useChatStore((state) => state.addMessage);
-  const addChatroom = useChatStore((state) => state.addChatroom);
+  // const addChatroom = useChatStore((state) => state.addChatroom);
 
   const sendGetMessages = useCallback(
     (roomId: string, lastMessageId?: number) => {
@@ -28,6 +28,16 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
       invitedUserIds: string[];
     }) => {
       socket?.emit("create-room", { roomName, invitedUserIds });
+    },
+    [socket]
+  );
+
+  const sendChatMessage = useCallback(
+    ({ roomId, message }: { roomId: string; message: string }) => {
+      socket?.emit("chat-message", {
+        message,
+        roomId,
+      });
     },
     [socket]
   );
@@ -58,14 +68,25 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
       toast.success("Стаята бе създадена успешно!");
     };
 
+    const handleNewChatMessage: ServerToClientEvents["chat-message"] = (
+      message
+    ) => {
+      addMessage(message.roomId, {
+        ...message,
+        content: message.message,
+      });
+    };
+
     socket.on("messages", handleIncomingMessages);
     socket.on("new-room", handleNewRoom);
+    socket.on("chat-message", handleNewChatMessage);
 
     return () => {
       socket.off("messages", handleIncomingMessages);
       socket.off("new-room", handleNewRoom);
+      socket.off("chat-message", handleNewChatMessage);
     };
   }, [socket, addMessage, sendGetMessages, router]);
 
-  return { sendGetMessages, createRoom };
+  return { sendGetMessages, createRoom, sendChatMessage };
 }

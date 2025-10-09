@@ -37,7 +37,7 @@ export function RoomButton({ room, onClick, selected, disabled }: Props) {
         </div>
 
         <p className="text-xs text-muted-foreground truncate">
-          {room.messages.at(-1)?.content}
+          {room.lastMessage?.content}
         </p>
       </div>
     </button>

@@ -63,14 +63,18 @@ export function defineSocketServer(io: Server) {
 
       if (message.trim().length === 0) return;
 
-      await db.insert(messagesTable).values({
-        roomId,
-        userId,
-        content: message,
-        createdAt: new Date(),
-      });
+      const [newMessage] = await db
+        .insert(messagesTable)
+        .values({
+          roomId,
+          userId,
+          content: message,
+          createdAt: new Date(),
+        } as typeof messagesTable.$inferInsert)
+        .returning({ id: messagesTable.id });
 
       io.to(`room-${roomId}`).emit("chat-message", {
+        id: newMessage.id,
         roomId,
         userId,
         message,

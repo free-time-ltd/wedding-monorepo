@@ -24,7 +24,8 @@ export interface Chatroom {
   name: string;
   guests: Guest[];
   isPrivate: boolean;
-  messages: Message[];
+  messages: Set<Message>;
+  lastMessage: Message | null;
 }
 
 export interface ChatStore {
@@ -47,8 +48,9 @@ export const useChatStore = create<ChatStore>((set) => ({
       id: "lobby",
       guests: [],
       isPrivate: false,
-      messages: [],
+      messages: new Set(),
       name: "Lobby",
+      lastMessage: null,
     },
   },
   currentChatroom: null,
@@ -61,7 +63,7 @@ export const useChatStore = create<ChatStore>((set) => ({
       const chatroom = state.chatrooms[chatroomId];
       if (!chatroom) return state;
 
-      const updatedMessages = [...chatroom.messages, message];
+      const updatedMessages = [...Array.from(chatroom.messages), message];
 
       if (message.createdAt < (updatedMessages.at(-1)?.createdAt ?? 0)) {
         const index = updatedMessages.findIndex(
@@ -78,7 +80,11 @@ export const useChatStore = create<ChatStore>((set) => ({
       return {
         chatrooms: {
           ...state.chatrooms,
-          [chatroomId]: { ...chatroom, messages: updatedMessages },
+          [chatroomId]: {
+            ...chatroom,
+            messages: new Set(updatedMessages),
+            lastMessage: message,
+          },
         },
       };
     }),

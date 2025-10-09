@@ -21,6 +21,7 @@ export type UserModel = {
 export interface ServerToClientEvents {
   "new-room": (props: { room: string }) => void;
   "chat-message": (props: {
+    id: number;
     roomId: string;
     userId: string;
     message: string;

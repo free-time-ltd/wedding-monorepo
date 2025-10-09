@@ -37,7 +37,8 @@ const fetchRoomById = async (
 export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
   const router = useRouter();
   const { isConnected, connect, socket } = useSocket();
-  const { sendGetMessages, createRoom } = useChatSocket(socket);
+  const { sendGetMessages, createRoom, sendChatMessage } =
+    useChatSocket(socket);
   const chatrooms = useChatStore((state) => state.chatrooms);
   const currentChatroom = useChatStore((state) => state.currentChatroom);
   const addChatroom = useChatStore((state) => state.addChatroom);
@@ -68,7 +69,8 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
         addChatroom({
           ...room,
           guests: [],
-          messages: [],
+          messages: new Set(),
+          lastMessage: null,
         } satisfies Chatroom);
       }
     });
@@ -98,7 +100,7 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
           addGuestToChatroom(roomData.id, guest)
         );
 
-        sendGetMessages(roomId, chatrooms[roomId]?.messages?.at(-1)?.id);
+        sendGetMessages(roomId, chatrooms[roomId]?.lastMessage?.id);
 
         setCurrentChatroom(roomId);
         router.push(`/chat/${roomId}`);
@@ -116,6 +118,13 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
       addGuestToChatroom,
     ]
   );
+
+  const handleMessageSend = (message: string) => {
+    sendChatMessage({
+      roomId: currentChatroom ?? "lobby",
+      message,
+    });
+  };
 
   // Auto-join room
   useEffect(() => {
@@ -146,6 +155,7 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
         guests={guests}
         onRoomChange={handleRoomSelect}
         onRoomCreate={handleRoomCreation}
+        onMessageSend={handleMessageSend}
       />
       <Toaster />
       <OfflineIndicator />

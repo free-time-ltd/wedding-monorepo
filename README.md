@@ -8,3 +8,5 @@ This is a project for my wedding and website
 - Make sure /chat handles itself and /chat/\* so that users may share chat URLs
 - Clear raw socket.io from backend and from frontend (npm rm)
 - Listen for navigator.onLine changes and show proper notifications if the network goes away
+- Build is failing - fix it
+- Gotta add the event handler for when user gets invites to a new room
