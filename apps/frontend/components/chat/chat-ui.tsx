@@ -2,8 +2,15 @@
 
 import { Card } from "@repo/ui/components/ui/card";
 import { Button } from "@repo/ui/components/ui/button";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Users, Lock, ArrowLeft, MessageCircle } from "@repo/ui/icons";
+import { useRef, useState } from "react";
+import {
+  Plus,
+  Users,
+  Lock,
+  ArrowLeft,
+  MessageCircle,
+  ChevronDown,
+} from "@repo/ui/icons";
 import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { getInitials } from "../guest-selector/utils";
 import { Guest, useChatStore } from "@/store/chatStore";
@@ -19,6 +26,7 @@ import {
 } from "@repo/ui/components/ui/tooltip";
 import { useSocket } from "@/context/SocketContext";
 import ChatControls from "./chat-controls";
+import ChatArea, { ChatAreaHandle } from "./chat-area";
 
 export interface RoomCreationType {
   name: string;
@@ -46,18 +54,14 @@ export function ChatUI({
   const currentChatroom = useChatStore((state) => state.currentChatroom);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
+  const [isChatAtBottom, setIsChatAtBottom] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
-  const messagesRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<ChatAreaHandle>(null);
 
   const currentGuest = { ...user };
   const selectedRoom = currentChatroom ? chatrooms[currentChatroom] : null;
 
   const filteredRooms = Object.values(chatrooms);
-
-  const roomMessages = useMemo(
-    () => Array.from(selectedRoom?.messages ?? []),
-    [selectedRoom]
-  );
 
   const handleCreateRoom = (
     name: string,
@@ -79,13 +83,9 @@ export function ChatUI({
     onMessageSend?.(message);
   };
 
-  // Automatic scroll to bottom
-  useEffect(() => {
-    const el = messagesRef.current;
-    if (el) {
-      el.scrollTop = el.scrollHeight;
-    }
-  }, [roomMessages]);
+  const handleChatScroll = (isAtBottom: boolean) => {
+    setIsChatAtBottom(isAtBottom);
+  };
 
   return (
     <div className="min-h-screen pt-8">
@@ -145,7 +145,7 @@ export function ChatUI({
           </Card>
 
           {/* Chat Area */}
-          <Card className="md:col-span-2 flex flex-col h-full min-h-0">
+          <Card className="md:col-span-2 flex flex-col h-full min-h-0 relative">
             {selectedRoom ? (
               <>
                 <div className="p-4 border-b border-border">
@@ -180,85 +180,32 @@ export function ChatUI({
                   </div>
                 </div>
 
-                <div
-                  className="flex-1 p-4 space-y-4 overflow-y-auto"
+                <ChatArea
+                  messages={selectedRoom.messages}
+                  guests={guests}
+                  user={currentGuest}
+                  onScroll={handleChatScroll}
                   ref={messagesRef}
-                >
-                  {roomMessages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                      <MessageCircle className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                      <p className="text-muted-foreground">
-                        Все още няма съобщения!
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Бъди пръв и кажи Здравей!
-                      </p>
-                    </div>
-                  ) : (
-                    roomMessages.map((msg) => {
-                      const isCurrentUser = msg.userId === currentGuest.id;
-                      const sender = guests.find(
-                        (guest) => guest.id === msg.userId
-                      );
-
-                      return (
-                        <div key={msg.id} className={`flex gap-3`}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Avatar className="size-8 border">
-                                <AvatarFallback className="bg-accent/20 text-xs select-none">
-                                  {getInitials(sender?.name ?? "")}
-                                </AvatarFallback>
-                              </Avatar>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {sender?.name} ({sender?.table?.label})
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <div className={`flex-1`}>
-                            <div className="flex items-center gap-2 mb-1">
-                              <p className="text-sm font-medium text-foreground">
-                                {sender?.name}
-                              </p>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <p className="text-xs text-muted-foreground">
-                                    {new Date(msg.createdAt).toLocaleTimeString(
-                                      [],
-                                      {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        hour12: false,
-                                      }
-                                    )}
-                                  </p>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>
-                                    {new Date(msg.createdAt).toLocaleString()}
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <div
-                              className={`inline-block p-3 rounded-lg ${
-                                isCurrentUser
-                                  ? "bg-accent text-accent-foreground"
-                                  : "bg-muted text-foreground"
-                              }`}
-                            >
-                              <p className="text-sm leading-relaxed">
-                                {msg.content}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+                />
+                {!isChatAtBottom && (
+                  <div className="absolute left-0 right-0 bottom-28 flex items-center justify-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => messagesRef.current?.scrollToBottom()}
+                        >
+                          <ChevronDown />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Виж последните съобщения</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                )}
 
                 <div className="p-4 border-t border-border">
                   <ChatControls

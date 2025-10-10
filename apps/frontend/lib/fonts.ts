@@ -11,7 +11,7 @@ export const MonteCarlo = MonteCarloFont({
 });
 
 export const RobotoSerif = RegularFont({
-  weight: ["400", "700"],
+  weight: ["400", "500", "700"],
   variable: "--font-notosans",
   subsets: ["latin", "cyrillic"],
   style: ["normal", "italic"],
