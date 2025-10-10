@@ -1,0 +1,96 @@
+import {
+  createContext,
+  useContext,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from "react";
+import { toast } from "@repo/ui";
+import { useSocket } from "./SocketContext";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "@repo/ui/components/ui/button";
+import { ServerToClientEvents } from "@repo/socket";
+
+const MessageNotificationContext = createContext(null);
+
+export const useMessageNotification = () =>
+  useContext(MessageNotificationContext);
+
+interface Props {
+  children: ReactNode;
+}
+
+export const MessageNotificationProvider = ({ children }: Props) => {
+  const { socket } = useSocket();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const goToChat = useCallback(
+    (roomId: string | null) => {
+      router.push(`/chat/${roomId}`);
+    },
+    [router]
+  );
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const originalTitle = document.title;
+
+    const blinkTitle = (newTitle: string, times = 7, interval = 500) => {
+      if (!document.hidden) return;
+
+      let count = 0;
+
+      const blinkInterval = setInterval(() => {
+        document.title =
+          document.title === originalTitle ? newTitle : originalTitle;
+        count++;
+        if (count >= times * 2) {
+          clearInterval(blinkInterval);
+          document.title = originalTitle;
+        }
+      }, interval);
+    };
+
+    const handleChatMessage: ServerToClientEvents["chat-message"] = ({
+      roomId,
+    }) => {
+      if (!pathname.startsWith("/chat")) {
+        const toastId = toast.info("Ново съобщение в чата!", {
+          action: (
+            <Button
+              type="button"
+              onClick={() => {
+                goToChat(roomId);
+                toast.dismiss(toastId);
+              }}
+            >
+              Виж
+            </Button>
+          ),
+        });
+      }
+      blinkTitle("💬 Ново съобщение!");
+    };
+
+    const handleFocus = () => {
+      document.title = originalTitle;
+    };
+
+    socket.on("chat-message", handleChatMessage);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      socket.off("chat-message", handleChatMessage);
+      window.removeEventListener("focus", handleFocus);
+      document.title = originalTitle;
+    };
+  }, [socket, pathname, router, goToChat]);
+
+  return (
+    <MessageNotificationContext.Provider value={null}>
+      {children}
+    </MessageNotificationContext.Provider>
+  );
+};

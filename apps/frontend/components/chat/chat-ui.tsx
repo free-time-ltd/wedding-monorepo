@@ -4,21 +4,16 @@ import { Card } from "@repo/ui/components/ui/card";
 import { Button } from "@repo/ui/components/ui/button";
 import { useRef, useState } from "react";
 import {
-  Plus,
   Users,
   Lock,
   ArrowLeft,
   MessageCircle,
   ChevronDown,
 } from "@repo/ui/icons";
-import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
-import { getInitials } from "../guest-selector/utils";
 import { Guest, useChatStore } from "@/store/chatStore";
 import { CreateRoomDialog } from "./create-room-dialog";
 import { UserApiType } from "@repo/db/utils";
-import { RoomButton } from "./room-button";
 import { ParticipantsDialog } from "./participants-dialog";
-import { NetworkIndicator } from "../network-indicator";
 import {
   Tooltip,
   TooltipContent,
@@ -27,6 +22,7 @@ import {
 import { useSocket } from "@/context/SocketContext";
 import ChatControls from "./chat-controls";
 import ChatArea, { ChatAreaHandle } from "./chat-area";
+import { ChatSidebar } from "./chat-sidebar";
 
 export interface RoomCreationType {
   name: string;
@@ -37,6 +33,7 @@ export interface RoomCreationType {
 interface Props {
   user: UserApiType;
   guests: Guest[];
+  currentChatroom: string | null;
   onMessageSend?: (message: string) => void;
   onRoomChange?: (room: string | null) => void;
   onRoomCreate?: (props: RoomCreationType) => void;
@@ -45,20 +42,19 @@ interface Props {
 export function ChatUI({
   user,
   guests,
+  currentChatroom,
   onRoomChange,
   onRoomCreate,
   onMessageSend,
 }: Props) {
   const { isConnected } = useSocket();
   const chatrooms = useChatStore((state) => state.chatrooms);
-  const currentChatroom = useChatStore((state) => state.currentChatroom);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
   const [isChatAtBottom, setIsChatAtBottom] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<ChatAreaHandle>(null);
 
-  const currentGuest = { ...user };
   const selectedRoom = currentChatroom ? chatrooms[currentChatroom] : null;
 
   const filteredRooms = Object.values(chatrooms);
@@ -92,57 +88,14 @@ export function ChatUI({
       <div className="container mx-auto h-[calc(100vh-4rem)] max-w-7xl p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
           {/* Rooms Sidebar */}
-          <Card className="md:col-span-1 flex flex-col h-full min-h-0">
-            <div className="p-4 border-b border-border">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-serif text-2xl text-foreground flex gap-2 items-center">
-                  Сватбен Чат
-                  <NetworkIndicator />
-                </h2>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="cursor-pointer"
-                      onClick={() => setShowCreateRoom(true)}
-                    >
-                      <Plus className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Създай нова чат стая!</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-accent/5 rounded-lg">
-                <Avatar>
-                  <AvatarFallback className="bg-accent/20">
-                    {getInitials(currentGuest.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-foreground truncate">
-                    {currentGuest.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {currentGuest?.table?.label}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              {filteredRooms.map((room) => (
-                <RoomButton
-                  room={room}
-                  onClick={() => handleRoomChange(room.id)}
-                  selected={selectedRoom?.id === room.id}
-                  key={room.id}
-                />
-              ))}
-            </div>
-          </Card>
+          <ChatSidebar
+            guests={guests}
+            roomList={filteredRooms}
+            user={user}
+            selectedRoom={selectedRoom}
+            onRoomChange={handleRoomChange}
+            onRoomCreate={handleCreateRoom}
+          />
 
           {/* Chat Area */}
           <Card className="md:col-span-2 flex flex-col h-full min-h-0 relative">
@@ -183,7 +136,7 @@ export function ChatUI({
                 <ChatArea
                   messages={selectedRoom.messages}
                   guests={guests}
-                  user={currentGuest}
+                  user={user}
                   onScroll={handleChatScroll}
                   ref={messagesRef}
                 />
@@ -235,7 +188,7 @@ export function ChatUI({
         guests={guests}
         onOpenChange={setShowCreateRoom}
         onCreateRoom={handleCreateRoom}
-        currentGuestId={currentGuest.id}
+        currentGuestId={user.id}
       />
 
       <ParticipantsDialog

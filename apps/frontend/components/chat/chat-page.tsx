@@ -7,8 +7,8 @@ import { useCallback, useEffect } from "react";
 import { ChatUI, RoomCreationType } from "./chat-ui";
 import type { UserApiType } from "@repo/db/utils";
 import { useRouter } from "next/navigation";
-import { Toaster } from "@repo/ui/components/ui/sonner";
 import { OfflineIndicator } from "../offline-indicator";
+import Link from "next/link";
 
 export interface ChatProps {
   user: UserApiType;
@@ -150,14 +150,15 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
 
   return (
     <>
+      <Link href="/">Go home</Link>
       <ChatUI
         user={user}
         guests={guests}
+        currentChatroom={currentChatroom}
         onRoomChange={handleRoomSelect}
         onRoomCreate={handleRoomCreation}
         onMessageSend={handleMessageSend}
       />
-      <Toaster />
       <OfflineIndicator />
     </>
   );

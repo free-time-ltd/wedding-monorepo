@@ -1,0 +1,36 @@
+# Node / Bun modules
+node_modules
+**/node_modules
+**/dist
+**/.turbo
+**/.next
+**/.cache
+
+# Build artifacts
+*.log
+out
+*.tsbuildinfo
+
+# OS / IDE files
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Docker files
+.dockerignore
+Dockerfile*
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Temporary / local dev files
+tmp
+temp
+*.swp
