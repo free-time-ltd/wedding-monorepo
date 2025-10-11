@@ -4,6 +4,7 @@ import {
   useEffect,
   ReactNode,
   useCallback,
+  useRef,
 } from "react";
 import { toast } from "@repo/ui";
 import { useSocket } from "./SocketContext";
@@ -24,6 +25,7 @@ export const MessageNotificationProvider = ({ children }: Props) => {
   const { socket } = useSocket();
   const pathname = usePathname();
   const router = useRouter();
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const goToChat = useCallback(
     (roomId: string | null) => {
@@ -31,6 +33,12 @@ export const MessageNotificationProvider = ({ children }: Props) => {
     },
     [router]
   );
+
+  useEffect(() => {
+    audioRef.current = new Audio("/beep.mp3");
+    audioRef.current.preload = "auto";
+    audioRef.current.volume = 0.5;
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -53,6 +61,12 @@ export const MessageNotificationProvider = ({ children }: Props) => {
       }, interval);
     };
 
+    const playBeep = () => {
+      if (!audioRef.current || !document.hidden) return;
+      const clone = audioRef.current.cloneNode() as HTMLAudioElement;
+      clone.play().catch(console.error);
+    };
+
     const handleChatMessage: ServerToClientEvents["chat-message"] = ({
       roomId,
     }) => {
@@ -72,6 +86,7 @@ export const MessageNotificationProvider = ({ children }: Props) => {
         });
       }
       blinkTitle("💬 Ново съобщение!");
+      playBeep();
     };
 
     const handleFocus = () => {
