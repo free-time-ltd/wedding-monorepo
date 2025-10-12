@@ -3,7 +3,7 @@
 import { useSocket } from "@/context/SocketContext";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { Chatroom, Guest, useChatStore } from "@/store/chatStore";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChatUI, RoomCreationType } from "./chat-ui";
 import type { UserApiType } from "@repo/db/utils";
 import { useRouter } from "next/navigation";
@@ -34,20 +34,20 @@ const fetchRoomById = async (
   return json.data satisfies Chatroom;
 };
 
-export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
+export function ChatPage({ user, guests, initialChatroom }: ChatProps) {
   const router = useRouter();
   const { isConnected, connect, socket } = useSocket();
   const { sendGetMessages, createRoom, sendChatMessage } =
     useChatSocket(socket);
   const chatrooms = useChatStore((state) => state.chatrooms);
-  const currentChatroom = useChatStore((state) => state.currentChatroom);
   const addChatroom = useChatStore((state) => state.addChatroom);
   const addGuestToChatroom = useChatStore((state) => state.addGuestToChatroom);
-  const setCurrentChatroom = useChatStore((state) => state.setCurrentChatroom);
   const setGuests = useChatStore((state) => state.setGuests);
-  const clearCurrentChatroom = useChatStore(
-    (state) => state.clearCurrentChatroom
-  );
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+
+  const selectedRoom = useMemo(() => {
+    return selectedRoomId ? (chatrooms[selectedRoomId] ?? null) : null;
+  }, [chatrooms, selectedRoomId]);
 
   // Initialize the websocket
   useEffect(() => {
@@ -77,21 +77,12 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const handleRoomSelect = useCallback(
+  const loadRoomData = useCallback(
     async (roomId: string | null) => {
-      if (roomId === null) {
-        clearCurrentChatroom();
-        router.push("/chat");
-        return;
-      }
-
-      if (roomId === currentChatroom) {
-        return;
-      }
+      if (!roomId) return;
 
       try {
         const roomData = await fetchRoomById(roomId);
-
         if (!roomData) {
           return;
         }
@@ -101,45 +92,39 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
         );
 
         sendGetMessages(roomId, chatrooms[roomId]?.lastMessage?.id);
-
-        setCurrentChatroom(roomId);
-        router.push(`/chat/${roomId}`);
       } catch (e) {
         console.error(e);
       }
     },
-    [
-      currentChatroom,
-      clearCurrentChatroom,
-      router,
-      sendGetMessages,
-      chatrooms,
-      setCurrentChatroom,
-      addGuestToChatroom,
-    ]
+    [addGuestToChatroom, chatrooms, sendGetMessages]
+  );
+
+  const handleRoomSelect = useCallback(
+    async (roomId: string | null) => {
+      if (roomId === null) {
+        setSelectedRoomId(null);
+        router.push("/chat");
+        return;
+      }
+
+      const chatroom = chatrooms[roomId];
+
+      // Skip if already active or room doesn’t exist
+      if (!chatroom || roomId === selectedRoomId) return;
+
+      await loadRoomData(roomId);
+
+      router.replace(`/chat/${roomId}`);
+    },
+    [chatrooms, selectedRoomId, loadRoomData, router]
   );
 
   const handleMessageSend = (message: string) => {
     sendChatMessage({
-      roomId: currentChatroom ?? "lobby",
+      roomId: selectedRoomId ?? "lobby",
       message,
     });
   };
-
-  // Auto-join room
-  useEffect(() => {
-    if (!initialChatroom || currentChatroom === initialChatroom) return;
-
-    if (initialChatroom in chatrooms && currentChatroom === null) {
-      handleRoomSelect(initialChatroom);
-    }
-  }, [
-    initialChatroom,
-    chatrooms,
-    currentChatroom,
-    setCurrentChatroom,
-    handleRoomSelect,
-  ]);
 
   const handleRoomCreation = ({ name, invitedUserIds }: RoomCreationType) => {
     createRoom({
@@ -148,13 +133,23 @@ export function ChatComponent({ user, guests, initialChatroom }: ChatProps) {
     });
   };
 
+  // Autojoin on initial load
+  useEffect(() => {
+    if (initialChatroom && isConnected) {
+      loadRoomData(initialChatroom).then(() => {
+        setSelectedRoomId(initialChatroom);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialChatroom, isConnected]);
+
   return (
     <>
       <Link href="/">Go home</Link>
       <ChatUI
         user={user}
         guests={guests}
-        currentChatroom={currentChatroom}
+        selectedRoom={selectedRoom}
         onRoomChange={handleRoomSelect}
         onRoomCreate={handleRoomCreation}
         onMessageSend={handleMessageSend}

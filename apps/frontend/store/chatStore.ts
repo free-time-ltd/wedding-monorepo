@@ -30,13 +30,10 @@ export interface Chatroom {
 
 export interface ChatStore {
   chatrooms: Record<string, Chatroom>;
-  currentChatroom: string | null;
   guests: Guest[];
   addChatroom: (chatroom: Chatroom) => void;
   addMessage: (chatroomId: string, message: Message) => void;
   addGuestToChatroom: (chatroomId: string, guest: Guest) => void;
-  setCurrentChatroom: (chatroomId: string | null) => void;
-  clearCurrentChatroom: () => void;
   removeGuest: (chatroomId: string, guestId: string) => void;
   setGuests: (guestList: Guest[]) => void;
 }
@@ -53,7 +50,6 @@ export const useChatStore = create<ChatStore>((set) => ({
       lastMessage: null,
     },
   },
-  currentChatroom: null,
   addChatroom: (chatroom) =>
     set((state) => ({
       chatrooms: { ...state.chatrooms, [chatroom.id]: chatroom },
@@ -104,11 +100,6 @@ export const useChatStore = create<ChatStore>((set) => ({
         },
       };
     }),
-  setCurrentChatroom: (chatroomId) =>
-    set(() => ({
-      currentChatroom: chatroomId,
-    })),
-  clearCurrentChatroom: () => set(() => ({ currentChatroom: null })),
   removeGuest: (chatroomId, guestId) =>
     set((state) => {
       const chatroom = state.chatrooms[chatroomId];

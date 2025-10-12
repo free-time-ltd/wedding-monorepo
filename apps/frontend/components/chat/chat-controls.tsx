@@ -1,5 +1,10 @@
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/ui/tooltip";
 import { Send } from "@repo/ui/icons";
 import { ChangeEvent, forwardRef, KeyboardEvent, Ref, useState } from "react";
 
@@ -48,13 +53,20 @@ const ChatControls = forwardRef<HTMLInputElement, Props>(
           disabled={disabled}
           ref={ref}
         />
-        <Button
-          size="icon"
-          onClick={handleSubmit}
-          disabled={disabled || submitDisabled}
-        >
-          <Send className="h-4 w-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              onClick={handleSubmit}
+              disabled={disabled || submitDisabled}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Изпрати съобщение</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     );
   }

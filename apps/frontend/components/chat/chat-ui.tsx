@@ -10,7 +10,7 @@ import {
   MessageCircle,
   ChevronDown,
 } from "@repo/ui/icons";
-import { Guest, useChatStore } from "@/store/chatStore";
+import { Chatroom, Guest, useChatStore } from "@/store/chatStore";
 import { CreateRoomDialog } from "./create-room-dialog";
 import { UserApiType } from "@repo/db/utils";
 import { ParticipantsDialog } from "./participants-dialog";
@@ -33,7 +33,7 @@ export interface RoomCreationType {
 interface Props {
   user: UserApiType;
   guests: Guest[];
-  currentChatroom: string | null;
+  selectedRoom: Chatroom | null;
   onMessageSend?: (message: string) => void;
   onRoomChange?: (room: string | null) => void;
   onRoomCreate?: (props: RoomCreationType) => void;
@@ -42,7 +42,7 @@ interface Props {
 export function ChatUI({
   user,
   guests,
-  currentChatroom,
+  selectedRoom,
   onRoomChange,
   onRoomCreate,
   onMessageSend,
@@ -54,8 +54,6 @@ export function ChatUI({
   const [isChatAtBottom, setIsChatAtBottom] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<ChatAreaHandle>(null);
-
-  const selectedRoom = currentChatroom ? chatrooms[currentChatroom] : null;
 
   const filteredRooms = Object.values(chatrooms);
 

@@ -16,7 +16,12 @@ interface Props {
 
 export function ChatMessage({ sender, message, isCurrentUser }: Props) {
   return (
-    <div className={`flex gap-3`} id={`chat-message-${message.id}`}>
+    <div
+      className={`flex gap-3 items-start ${
+        isCurrentUser ? "flex-row-reverse text-right" : ""
+      }`}
+      id={`chat-message-${message.id}`}
+    >
       <Tooltip>
         <TooltipTrigger asChild>
           <Avatar className="size-8 border">
@@ -31,8 +36,14 @@ export function ChatMessage({ sender, message, isCurrentUser }: Props) {
           </p>
         </TooltipContent>
       </Tooltip>
-      <div className={`flex-1`}>
-        <div className="flex items-center gap-2 mb-1">
+      <div
+        className={`flex-1 ${isCurrentUser ? "flex flex-col items-end" : ""}`}
+      >
+        <div
+          className={`flex items-center gap-2 mb-1 ${
+            isCurrentUser ? "flex-row-reverse" : ""
+          }`}
+        >
           <p className="text-sm font-medium text-foreground">{sender?.name}</p>
           <Tooltip>
             <TooltipTrigger asChild>

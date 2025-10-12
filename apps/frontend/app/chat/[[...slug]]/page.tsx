@@ -1,4 +1,4 @@
-import { ChatComponent } from "@/components/chat/chat-page";
+import { ChatPage } from "@/components/chat/chat-page";
 import { fetchGuests } from "@/lib/data";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -32,7 +32,7 @@ const fetchUser = async () => {
   return null;
 };
 
-export default async function ChatPage({
+export default async function ChatPageServer({
   params,
 }: {
   params: Promise<{ slug: string[] }>;
@@ -48,7 +48,5 @@ export default async function ChatPage({
 
   const chatroom = slug?.at(0);
 
-  return (
-    <ChatComponent user={user} guests={guests} initialChatroom={chatroom} />
-  );
+  return <ChatPage user={user} guests={guests} initialChatroom={chatroom} />;
 }

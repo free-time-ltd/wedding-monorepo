@@ -26,6 +26,7 @@ export const MessageNotificationProvider = ({ children }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const audioRef = useRef<HTMLAudioElement>(null);
+  const blinkIntervalRef = useRef<number>(null);
 
   const goToChat = useCallback(
     (roomId: string | null) => {
@@ -50,12 +51,15 @@ export const MessageNotificationProvider = ({ children }: Props) => {
 
       let count = 0;
 
-      const blinkInterval = setInterval(() => {
+      blinkIntervalRef.current = window.setInterval(() => {
         document.title =
           document.title === originalTitle ? newTitle : originalTitle;
         count++;
         if (count >= times * 2) {
-          clearInterval(blinkInterval);
+          if (blinkIntervalRef.current) {
+            clearInterval(blinkIntervalRef.current);
+          }
+
           document.title = originalTitle;
         }
       }, interval);
@@ -90,6 +94,10 @@ export const MessageNotificationProvider = ({ children }: Props) => {
     };
 
     const handleFocus = () => {
+      if (blinkIntervalRef.current) {
+        clearInterval(blinkIntervalRef.current);
+      }
+
       document.title = originalTitle;
     };
 
