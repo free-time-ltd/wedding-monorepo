@@ -1,8 +1,9 @@
 import { ChatPage } from "@/components/chat/chat-page";
 import { fetchGuests } from "@/lib/data";
+import { UserApiType } from "@repo/db/utils";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "💬 Сватбен чат – Сподели радостта с Кристина и Лъчезар",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-const fetchUser = async () => {
+const fetchUser = async (): Promise<UserApiType | null> => {
   try {
     const cookieStore = await cookies();
     const url = new URL("/api/me", process.env.NEXT_PUBLIC_API_BASE_URL);
@@ -22,7 +23,7 @@ const fetchUser = async () => {
     });
     const json = await res.json();
     if (json.success && "data" in json) {
-      return json.data;
+      return json.data as UserApiType;
     }
     return null;
   } catch (e) {
@@ -42,11 +43,17 @@ export default async function ChatPageServer({
     return redirect("/guest-select");
   }
 
-  const guests = await fetchGuests();
-
   const { slug } = await params;
 
+  const guests = (await fetchGuests()) ?? [];
+
   const chatroom = slug?.at(0);
+
+  const roomExists = user.rooms.findIndex((room) => room.id === chatroom) > -1;
+
+  if (slug && !roomExists) {
+    notFound();
+  }
 
   return <ChatPage user={user} guests={guests} initialChatroom={chatroom} />;
 }
