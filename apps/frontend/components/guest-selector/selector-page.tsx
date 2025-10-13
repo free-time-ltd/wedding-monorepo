@@ -6,6 +6,7 @@ import { getInitials } from "@/components/guest-selector/utils";
 import { Users } from "@repo/ui/icons";
 import { Label } from "@repo/ui/components/ui/label";
 import { Input } from "@repo/ui/components/ui/input";
+import { Button } from "@repo/ui/components/ui/button";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,7 +61,7 @@ export function SelectorPage({ guests }: Props) {
         <h1 className="text-2xl font-bold">Достъп до сайта</h1>
         <p>Моля изберете вашето име от списъка по-долу.</p>
       </div>
-      <div className="card-body">
+      <div className="card-body space-y-4">
         <div className="space-y-6">
           <div className="search-field flex flex-col gap-2">
             <Label htmlFor="guest-search" className="font-medium">
@@ -135,17 +136,16 @@ export function SelectorPage({ guests }: Props) {
             </div>
           </div>
         </div>
-        <button
+        <Button
+          type="button"
           onClick={selectGuest}
           disabled={!selectedGuest || isLoading}
-          className="w-full"
+          className="w-full cursor-pointer"
+          size="lg"
         >
-          {selectedGuest && (
-            <>Продлъжете като &quot;{userGuest?.name}&quot; &raquo;</>
-          )}
-          {!selectedGuest && <>Продължете напред &raquo;</>}
-        </button>
-
+          {selectedGuest && <>Продлъжете като &quot;{userGuest?.name}&quot;</>}
+          {!selectedGuest && <>Продължете напред</>}
+        </Button>
         <p className="text-sm text-muted-foreground text-center text-pretty">
           Не откривате името си? Моля свържете се с младоженците за подкрепа.
         </p>

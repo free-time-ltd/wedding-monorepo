@@ -4,6 +4,7 @@ import { UserApiType } from "@repo/db/utils";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { use } from "react";
 
 export const metadata: Metadata = {
   title: "💬 Сватбен чат – Сподели радостта с Кристина и Лъчезар",
@@ -33,19 +34,18 @@ const fetchUser = async (): Promise<UserApiType | null> => {
   return null;
 };
 
-export default async function ChatPageServer({
+export default function ChatPageServer({
   params,
 }: {
   params: Promise<{ slug: string[] }>;
 }) {
-  const user = await fetchUser();
+  const { slug } = use(params);
+  const user = use(fetchUser());
+  const guests = use(fetchGuests()) || [];
+
   if (!user) {
     return redirect("/guest-select");
   }
-
-  const { slug } = await params;
-
-  const guests = (await fetchGuests()) ?? [];
 
   const chatroom = slug?.at(0);
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SelectorPage } from "@/components/guest-selector/selector-page";
 import { fetchGuests } from "@/lib/data";
 import { Heart } from "@repo/ui/icons";
+import { use } from "react";
 
 export const metadata: Metadata = {
   title: "🎟️ Избери своето име – Сватбата на Кристина и Лъчезар",
@@ -9,13 +10,13 @@ export const metadata: Metadata = {
     "Открий себе си в списъка с гости и влез в сватбеното изживяване на Кристина и Лъчезар. Малка стъпка към голямото „Да!“ 💫",
 };
 
-export default async function GuestSelect() {
-  const users = await fetchGuests();
+export default function GuestSelect() {
+  const users = use(fetchGuests()) ?? [];
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4">
+    <div className="min-h-screen pt-8">
       <div className="container mx-auto max-w-3xl">
-        <div className="text-center mb-12 space-y-4">
+        <div className="text-center mb-4 space-y-4">
           <div className="flex justify-center mb-4">
             <div className="p-3 rounded-full bg-accent/10">
               <Heart className="h-8 w-8 text-destructive fill-destructive" />
