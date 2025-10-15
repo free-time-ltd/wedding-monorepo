@@ -74,4 +74,12 @@ export function ChatMessage({ sender, message, isCurrentUser }: Props) {
   );
 }
 
+export function SystemMessage({ message }: { message: string }) {
+  return (
+    <p className="text-center text-muted-foreground text-shadow-2xs italic text-sm py-4">
+      {message}
+    </p>
+  );
+}
+
 export default memo(ChatMessage);

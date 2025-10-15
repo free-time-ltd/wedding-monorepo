@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import ChatMessage from "./chat-message";
+import ChatMessage, { SystemMessage } from "./chat-message";
 import { UserApiType } from "@repo/db/utils";
 
 interface Props {
@@ -110,6 +110,15 @@ const ChatArea = forwardRef<ChatAreaHandle, Props>(
           </div>
         ) : (
           roomMessages.map((msg) => {
+            if (!msg.userId) {
+              return (
+                <SystemMessage
+                  message={msg.content}
+                  key={`system-message-${msg.id}`}
+                />
+              );
+            }
+
             const sender = guests.find((guest) => guest.id === msg.userId);
 
             return (

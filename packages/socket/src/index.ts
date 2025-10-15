@@ -1,7 +1,7 @@
-import { roomsTable, messagesTable, tablesTable } from "@repo/db/schema";
+import { messagesTable, tablesTable } from "@repo/db/schema";
+import type { RoomApiType } from "@repo/db/utils";
 import { Server as IOServer, type Socket } from "socket.io";
 
-type RoomModel = typeof roomsTable.$inferSelect;
 type MessageModel = typeof messagesTable.$inferSelect;
 
 export type UserModel = {
@@ -26,7 +26,7 @@ export interface ServerToClientEvents {
     message: string;
     createdAt: number;
   }) => void;
-  "joined-room": (props: { room: RoomModel }) => void;
+  "joined-room": (props: { room: RoomApiType }) => void;
   messages: (props: {
     roomId: string;
     messages: MessageModel[];

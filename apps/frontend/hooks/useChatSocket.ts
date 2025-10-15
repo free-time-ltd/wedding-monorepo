@@ -1,4 +1,4 @@
-import { useChatStore } from "@/store/chatStore";
+import { Chatroom, useChatStore } from "@/store/chatStore";
 import { useCallback, useEffect } from "react";
 import type { ServerToClientEvents } from "@repo/socket";
 import type { TypedClientSocket } from "@repo/socket/client";
@@ -8,7 +8,7 @@ import { toast } from "@repo/ui";
 export function useChatSocket(socket: TypedClientSocket | undefined | null) {
   const router = useRouter();
   const addMessage = useChatStore((state) => state.addMessage);
-  // const addChatroom = useChatStore((state) => state.addChatroom);
+  const addChatroom = useChatStore((state) => state.addChatroom);
 
   const sendGetMessages = useCallback(
     (roomId: string, lastMessageId?: number) => {
@@ -78,16 +78,24 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
       });
     };
 
+    const handleRoomJoin: ServerToClientEvents["joined-room"] = ({ room }) => {
+      addChatroom(room as Chatroom);
+    };
+
     socket.on("messages", handleIncomingMessages);
     socket.on("new-room", handleNewRoom);
     socket.on("chat-message", handleNewChatMessage);
+    socket.on("joined-room", handleRoomJoin);
+    // socket.on("new-room", notDoneYet);
 
     return () => {
       socket.off("messages", handleIncomingMessages);
       socket.off("new-room", handleNewRoom);
       socket.off("chat-message", handleNewChatMessage);
+      socket.off("joined-room", handleRoomJoin);
+      // socket.off("new-room", notDoneYet);
     };
-  }, [socket, addMessage, sendGetMessages, router]);
+  }, [socket, addMessage, sendGetMessages, router, addChatroom]);
 
   return { sendGetMessages, createRoom, sendChatMessage };
 }

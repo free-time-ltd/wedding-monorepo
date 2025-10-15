@@ -3,6 +3,7 @@ import { messagesTable, roomsTable, userRooms } from "@repo/db/schema";
 import { db } from "@repo/db/client";
 import { authorizedSocket } from "./authorized-socket";
 import { Server } from "@repo/socket";
+import { findRoom, transformRoom } from "@repo/db/utils";
 
 export function defineSocketServer(io: Server) {
   io.use(authorizedSocket);
@@ -104,28 +105,25 @@ export function defineSocketServer(io: Server) {
 
     socket.on("join-room", async ({ roomId }) => {
       const uid = socket.data.user.id;
-      const room = await db.query.roomsTable.findFirst({
-        where: (table, { eq }) => eq(table.id, roomId),
-      });
+      const room = await findRoom(roomId);
+
       if (!room) return;
 
       if (!room.isPrivate) {
         socket.join(`room-${roomId}`);
-        io.to(`user-${uid}`).emit("joined-room", { room });
+        io.to(`user-${uid}`).emit("joined-room", { room: transformRoom(room) });
         return;
       }
 
-      const userAllowed = await db.query.userRooms.findFirst({
-        where: (table, { and, eq }) =>
-          and(eq(table.roomId, roomId), eq(table.userId, uid)),
-      });
+      const userAllowed =
+        room.userRooms.findIndex((userRoom) => userRoom.userId === uid) > -1;
 
       if (!userAllowed) {
         return;
       }
 
       socket.join(`room-${roomId}`);
-      io.to(`user-${uid}`).emit("joined-room", { room });
+      io.to(`user-${uid}`).emit("joined-room", { room: transformRoom(room) });
     });
 
     socket.on("get-messages", async ({ roomId, lastMessageId = 0 }) => {

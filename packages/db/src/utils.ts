@@ -47,3 +47,57 @@ export const transformUser = (user: UserBaseType) => {
 };
 
 export type UserApiType = NonNullable<ReturnType<typeof transformUser>>;
+
+export const findRoom = (roomId: string) =>
+  db.query.roomsTable.findFirst({
+    where: (table, { eq }) => eq(table.id, roomId),
+    with: {
+      userRooms: {
+        with: {
+          user: {
+            with: {
+              table: true,
+            },
+          },
+        },
+      },
+      messages: {
+        limit: 10,
+        orderBy: (table, { desc }) => desc(table.id),
+      },
+    },
+  });
+
+export type RoomBaseType = NonNullable<Awaited<ReturnType<typeof findRoom>>>;
+
+export const transformRoom = ({
+  id,
+  name,
+  isPrivate,
+  ...room
+}: RoomBaseType) => {
+  return {
+    id,
+    name,
+    isPrivate,
+    guests: room.userRooms.map(({ user }) => ({
+      id: user?.id,
+      name: user?.name,
+      tableId: user?.tableId,
+      table: {
+        id: user?.tableId,
+        name: user?.table?.name,
+        label: user?.table?.label,
+      },
+    })),
+    messages: new Set(
+      room.messages.map((msg) => ({
+        ...msg,
+        createdAt: room.createdAt.getTime(),
+      }))
+    ),
+    lastMessage: room.messages.at(0) ?? null,
+  };
+};
+
+export type RoomApiType = ReturnType<typeof transformRoom>;

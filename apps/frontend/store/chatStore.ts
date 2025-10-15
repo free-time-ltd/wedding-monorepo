@@ -16,7 +16,7 @@ export interface Message {
   roomId: string;
   content: string;
   createdAt: number;
-  userId: string;
+  userId: string | null;
 }
 
 export interface Chatroom {
