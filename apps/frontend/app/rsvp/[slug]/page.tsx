@@ -72,8 +72,8 @@ export default function RSVPPage() {
               Guest Not Found
             </CardTitle>
             <CardDescription>
-              We couldn't find your invitation. Please check your invitation
-              link.
+              We couldn&apos;t find your invitation. Please check your
+              invitation link.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -177,7 +177,7 @@ export default function RSVPPage() {
                       htmlFor="attending-yes"
                       className="font-normal cursor-pointer"
                     >
-                      Yes, I'll be there!
+                      Yes, I&apos;ll be there!
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -186,7 +186,7 @@ export default function RSVPPage() {
                       htmlFor="attending-no"
                       className="font-normal cursor-pointer"
                     >
-                      Unfortunately, I can't make it
+                      Unfortunately, I can&apos;t make it
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -220,7 +220,7 @@ export default function RSVPPage() {
                         htmlFor="guest-yes"
                         className="font-normal cursor-pointer"
                       >
-                        Yes, I'll bring a plus one
+                        Yes, I&apos;ll bring a plus one
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -254,7 +254,7 @@ export default function RSVPPage() {
                       htmlFor="transport-parking"
                       className="font-normal cursor-pointer"
                     >
-                      I'll need parking
+                      I&apos;ll need parking
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -263,7 +263,7 @@ export default function RSVPPage() {
                       htmlFor="transport-shuttle"
                       className="font-normal cursor-pointer"
                     >
-                      I'd like shuttle service
+                      I&apos;d like shuttle service
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -329,8 +329,8 @@ export default function RSVPPage() {
                   className="min-h-[100px] resize-none"
                 />
                 <p className="text-sm text-sage-600">
-                  We'll do our best to accommodate your dietary needs. Leave
-                  blank if you have no restrictions.
+                  We&apos;ll do our best to accommodate your dietary needs.
+                  Leave blank if you have no restrictions.
                 </p>
               </div>
 
