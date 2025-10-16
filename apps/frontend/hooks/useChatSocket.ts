@@ -86,14 +86,12 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
     socket.on("new-room", handleNewRoom);
     socket.on("chat-message", handleNewChatMessage);
     socket.on("joined-room", handleRoomJoin);
-    // socket.on("new-room", notDoneYet);
 
     return () => {
       socket.off("messages", handleIncomingMessages);
       socket.off("new-room", handleNewRoom);
       socket.off("chat-message", handleNewChatMessage);
       socket.off("joined-room", handleRoomJoin);
-      // socket.off("new-room", notDoneYet);
     };
   }, [socket, addMessage, sendGetMessages, router, addChatroom]);
 

@@ -70,6 +70,20 @@ export const messagesTable = sqliteTable(
   })
 );
 
+export const menuTypes = ["vegan", "regular"] as const;
+export const invitationTable = sqliteTable("invitations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  attending: integer("attending", { mode: "boolean" }),
+  plusOne: integer("plus_one", { mode: "boolean" }),
+  menuChoice: text("menu_choice", { enum: menuTypes }),
+  notes: text("notes"),
+  views: integer("views").default(0),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
 export const userRoomsRelations = relations(userRooms, ({ one }) => ({
   user: one(usersTable, {
     fields: [userRooms.userId],
@@ -87,6 +101,10 @@ export const userRelations = relations(usersTable, ({ one, many }) => ({
     references: [tablesTable.id],
   }),
   userRooms: many(userRooms),
+  invitation: one(invitationTable, {
+    fields: [usersTable.id],
+    references: [invitationTable.userId],
+  }),
 }));
 
 export const tableRelations = relations(tablesTable, ({ many }) => ({
@@ -100,4 +118,11 @@ export const roomRelations = relations(roomsTable, ({ many, one }) => ({
     references: [usersTable.id],
   }),
   messages: many(messagesTable),
+}));
+
+export const invitationRelations = relations(invitationTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [invitationTable.userId],
+    references: [usersTable.id],
+  }),
 }));

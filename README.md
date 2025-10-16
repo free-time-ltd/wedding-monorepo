@@ -8,7 +8,7 @@ This is a project for my wedding and website
 - At some point maybe migrate to better-sqlite3?
 - Should I add web notifications support?
 - Търсачка във CreateRoomDialog че при 88 човека - проблем
-- Да направя listener за всички serverToClient event-и
+- RSVP страница със формуляр - измисли по-добър вариант от това което имаме в момента. Не би трябвало invitations таблицата да е главната
 
 ## Fixing turborepo
 

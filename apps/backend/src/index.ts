@@ -5,11 +5,14 @@ import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { verify, sign } from "hono/jwt";
 import { cors } from "hono/cors";
 import { db } from "@repo/db/client";
+import { eq, sql } from "@repo/db";
 import { generateId } from "@repo/utils/generateId";
 import { findUser, transformUser } from "@repo/db/utils";
 import { defineSocketServer } from "./socket";
 import { Server } from "@repo/socket";
 import { defineLobby } from "./lobby";
+import { invitationTable } from "@repo/db/schema";
+import z from "zod";
 
 const app = new Hono();
 
@@ -171,6 +174,69 @@ app.get("/api/logout", async (c) => {
   deleteCookie(c, process.env.SESSION_COOKIE_NAME ?? "sess_cookie");
 
   return c.json({ success: true, data: null, message: "ok" });
+});
+
+app.get("/api/rsvps/:id", async (c) => {
+  const { id } = c.req.param();
+
+  const guest = await db.query.usersTable.findFirst({
+    where: (colums, { eq }) => eq(colums.id, id),
+    with: {
+      table: true,
+      invitation: true,
+    },
+  });
+
+  if (!guest) {
+    return c.json({ success: false, error: "404 Not Found" }, { status: 404 });
+  }
+
+  if (guest.invitation) {
+    await db
+      .update(invitationTable)
+      .set({
+        views: sql`${invitationTable.views} + 1`,
+      })
+      .where(eq(invitationTable.id, guest.invitation.id));
+  }
+
+  return c.json({ success: true, data: guest });
+});
+
+const rsvpSchema = z.object({
+  meal: z.enum(["vegan", "regular"]),
+  attending: z.boolean(),
+  plusOne: z.boolean(),
+  notes: z.string().optional(),
+});
+
+type RsvpInput = z.infer<typeof rsvpSchema>;
+
+app.post("/api/rsvps/:id", async (c) => {
+  const { id } = c.req.param();
+
+  // Parse the body
+  const body = (await c.req.parseBody({
+    all: true,
+    dot: true,
+  })) as unknown as RsvpInput;
+
+  const parsed = rsvpSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json(
+      { success: false, error: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const { attending, plusOne, meal, notes } = parsed.data;
+
+  await db
+    .update(invitationTable)
+    .set({ attending, plusOne, menuChoice: meal, notes: notes ?? null })
+    .where(eq(invitationTable.id, Number(id)));
+
+  return c.json({ success: true, message: "ok" });
 });
 
 app.get("/api/rooms/:id", async (c) => {

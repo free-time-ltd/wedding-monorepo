@@ -43,6 +43,20 @@
       "when": 1759681892960,
       "tag": "0005_volatile_roughhouse",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1760612632490,
+      "tag": "0006_ordinary_bill_hollister",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1760618068722,
+      "tag": "0007_hesitant_roland_deschain",
+      "breakpoints": true
     }
   ]
 }

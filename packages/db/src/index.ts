@@ -5,6 +5,7 @@ export {
   and,
   or,
   gt,
+  sql,
   type InferSelectModel,
   type InferInsertModel,
 } from "drizzle-orm";
