@@ -8,7 +8,6 @@ import { ChatUI, RoomCreationType } from "./chat-ui";
 import type { UserApiType } from "@repo/db/utils";
 import { useRouter } from "next/navigation";
 import { OfflineIndicator } from "../offline-indicator";
-import Link from "next/link";
 
 export interface ChatProps {
   user: UserApiType;
@@ -145,7 +144,6 @@ export function ChatPage({ user, guests, initialChatroom }: ChatProps) {
 
   return (
     <>
-      <Link href="/">Go home</Link>
       <ChatUI
         user={user}
         guests={guests}
