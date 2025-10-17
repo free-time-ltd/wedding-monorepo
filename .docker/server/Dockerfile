@@ -30,9 +30,9 @@ FROM node:22.20-alpine AS runner
 
 WORKDIR /app
 
-COPY .docker/server/entrypoint.sh /entrypoint.sh
+RUN npm install -g pm2
 
 COPY --from=installer /app/node_modules ./node_modules
 COPY --from=installer /app/apps/backend/dist/index.js index.js
 
-CMD ["node", "index.js"]
+CMD ["pm2-runtime", "index.js"]

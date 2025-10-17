@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import { db } from "./client";
 
-export const findUser = (userId: string) => {
-  return db.query.usersTable.findFirst({
+export const findUser = async (userId: string) => {
+  const user = await db.query.usersTable.findFirst({
     where: (users, { eq }) => eq(users.id, userId),
     with: {
       table: {
@@ -27,6 +26,22 @@ export const findUser = (userId: string) => {
       },
     },
   });
+
+  if (!user) return null;
+
+  const publicRooms = await db.query.roomsTable.findMany({
+    where: (columns, { eq }) => eq(columns.isPrivate, false),
+  });
+
+  const rooms = [
+    ...publicRooms,
+    ...(user.userRooms.map((ur) => ur.room) || []),
+  ];
+
+  return {
+    ...user,
+    rooms,
+  };
 };
 
 export type UserBaseType = NonNullable<Awaited<ReturnType<typeof findUser>>>;
@@ -37,12 +52,7 @@ export const transformUser = (user: UserBaseType) => {
     name: user.name,
     extras: user.extras,
     table: { ...user.table, label: user.table?.label ?? user.table?.name },
-    rooms: user.userRooms.map((userRoom) => ({
-      id: userRoom.roomId!,
-      name: userRoom.room?.name!,
-      isPrivate: userRoom.room?.isPrivate!,
-      joinedAt: userRoom.joinedAt!,
-    })),
+    rooms: user.rooms,
   };
 };
 

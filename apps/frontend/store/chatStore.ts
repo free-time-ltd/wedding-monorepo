@@ -40,16 +40,7 @@ export interface ChatStore {
 
 export const useChatStore = create<ChatStore>((set) => ({
   guests: [],
-  chatrooms: {
-    lobby: {
-      id: "lobby",
-      guests: [],
-      isPrivate: false,
-      messages: new Set(),
-      name: "Lobby",
-      lastMessage: null,
-    },
-  },
+  chatrooms: {},
   addChatroom: (chatroom) =>
     set((state) => ({
       chatrooms: { ...state.chatrooms, [chatroom.id]: chatroom },

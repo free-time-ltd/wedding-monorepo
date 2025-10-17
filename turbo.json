@@ -18,6 +18,10 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "db:seed": {
+      "dependsOn": ["^build"],
+      "outputs": []
     }
   }
 }

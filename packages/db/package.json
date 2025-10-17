@@ -20,6 +20,10 @@
       "types": "./dist/utils.d.ts",
       "import": "./src/utils.ts"
     },
+    "./seeder": {
+      "types": "./dist/seeder.d.ts",
+      "import": "./src/seeder.ts"
+    },
     "./drizzle.config": {
       "types": "./dist/drizzle.config.d.ts",
       "default": "./src/drizzle.config.ts"

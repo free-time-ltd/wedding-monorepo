@@ -13,9 +13,8 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
-import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { Guest } from "@/store/chatStore";
-import { getInitials } from "../guest-selector/utils";
+import { GuestList } from "../guest-list";
 
 interface CreateRoomDialogProps {
   open: boolean;
@@ -54,14 +53,8 @@ export function CreateRoomDialog({
     setSelectedParticipants([currentGuestId]);
   };
 
-  const toggleParticipant = (guestId: string) => {
-    if (guestId === currentGuestId) return; // Cannot remove yourself
-    setSelectedParticipants((prev) =>
-      prev.includes(guestId)
-        ? prev.filter((id) => id !== guestId)
-        : [...prev, guestId]
-    );
-  };
+  const handleGuestSelect = (guests: string[]) =>
+    setSelectedParticipants(guests);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,40 +96,14 @@ export function CreateRoomDialog({
 
           {isPrivate && (
             <div className="space-y-2">
-              <Label>Изберете гости</Label>
-              <div className="border border-border rounded-lg max-h-64 overflow-y-auto">
-                {guests.map((guest) => (
-                  <div
-                    key={guest.id}
-                    onClick={() => toggleParticipant(guest.id)}
-                    className={`w-full p-3 flex items-center gap-3 hover:bg-accent/5 transition-colors border-b border-border last:border-0 ${
-                      guest.id === currentGuestId
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                  >
-                    <Checkbox
-                      checked={selectedParticipants.includes(guest.id)}
-                    />
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-accent/20 text-accent text-xs">
-                        {getInitials(guest.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 text-left">
-                      <p className="text-sm font-medium text-foreground">
-                        {guest.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {guest.table.label}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {selectedParticipants.length} гост(и) избрани
-              </p>
+              <GuestList
+                guests={guests}
+                striped
+                selectable
+                searchable
+                onSelect={handleGuestSelect}
+                defaultSelected={selectedParticipants}
+              />
             </div>
           )}
         </div>

@@ -51,7 +51,7 @@ export default function ChatPageServer({
 
   const roomExists = user.rooms.findIndex((room) => room.id === chatroom) > -1;
 
-  if (slug && !roomExists) {
+  if (slug && chatroom !== "lobby" && !roomExists) {
     notFound();
   }
 

@@ -9,7 +9,8 @@ This is a project for my wedding and website
 - Търсачка във CreateRoomDialog че при 88 човека - проблем
 - RSVP страница със формуляр - измисли по-добър вариант от това което имаме в момента. Не би трябвало invitations таблицата да е главната
 - Fuzzy search при guest portal-a ?
-- Create a script that ssets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
+- Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
+- Make a helper function for system messages
 
 ## Fixing turborepo
 
@@ -28,6 +29,12 @@ For now the project requires both:
 ```bash
 npm run install
 npm run dev
+```
+
+## Seeding the database
+
+```bash
+npx turbo run db:seed --filter=backend
 ```
 
 ## Adding ShadCN components

@@ -15,7 +15,6 @@ export function defineSocketServer(io: Server) {
       socket.disconnect(true);
     }
 
-    socket.join("lobby");
     socket.join(`user-${socket.data.user.id}`);
 
     // Join the private rooms

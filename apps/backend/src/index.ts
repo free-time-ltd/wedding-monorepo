@@ -10,7 +10,6 @@ import { generateId } from "@repo/utils/generateId";
 import { findUser, transformUser } from "@repo/db/utils";
 import { defineSocketServer } from "./socket";
 import { Server } from "@repo/socket";
-import { defineLobby } from "./lobby";
 import { invitationTable } from "@repo/db/schema";
 import z from "zod";
 
@@ -242,11 +241,6 @@ app.post("/api/rsvps/:id", async (c) => {
 app.get("/api/rooms/:id", async (c) => {
   const { id } = c.req.param();
 
-  if (id === "lobby") {
-    const room = await defineLobby();
-    return c.json({ success: true, data: room });
-  }
-
   const roomRes = await db.query.roomsTable.findFirst({
     where: (rooms, { eq }) => eq(rooms.id, id),
     with: {
@@ -290,18 +284,30 @@ app.get("/api/rooms/:id", async (c) => {
     }
   }
 
+  const guests = roomRes.isPrivate
+    ? roomRes.userRooms.map((userRoom) => ({
+        ...userRoom.user,
+        table: {
+          ...userRoom.user?.table,
+          label: userRoom.user?.table?.label ?? userRoom.user?.table?.name,
+        },
+      }))
+    : (await db.query.usersTable.findMany({ with: { table: true } })).map(
+        (user) => ({
+          ...user,
+          table: {
+            ...user.table,
+            label: user.table?.label ?? user.table?.name,
+          },
+          joinedAt: new Date(),
+        })
+      );
+
   const transformedRoom = {
     id: roomRes.id,
     name: roomRes.name,
     isPrivate: roomRes.isPrivate,
-    guests: roomRes.userRooms.map((userRoom) => ({
-      ...userRoom.user,
-      table: {
-        ...userRoom.user?.table,
-        label: userRoom.user?.table?.label ?? userRoom.user?.table?.name,
-      },
-      joinedAt: userRoom.joinedAt,
-    })),
+    guests,
   };
 
   return c.json({ success: true, data: transformedRoom });
