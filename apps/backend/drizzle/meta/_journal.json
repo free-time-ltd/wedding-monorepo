@@ -78,6 +78,20 @@
       "when": 1760781993424,
       "tag": "0010_dizzy_bloodscream",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1760804958363,
+      "tag": "0011_minor_warpath",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1760805021879,
+      "tag": "0012_even_archangel",
+      "breakpoints": true
     }
   ]
 }

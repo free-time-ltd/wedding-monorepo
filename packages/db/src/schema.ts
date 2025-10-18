@@ -1,3 +1,4 @@
+import { generateId } from "@repo/utils/generateId";
 import { relations } from "drizzle-orm";
 import {
   sqliteTable,
@@ -88,6 +89,42 @@ export const invitationTable = sqliteTable("invitations", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
+export const officialPhotosTable = sqliteTable("official_photos", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
+  key: text("s3_key").notNull(),
+  url: text("url"), // CloudFront CDN URL if any
+  title: text("title").notNull(),
+  description: text("description"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }),
+  width: integer("width"),
+  height: integer("height"),
+  sizeBytes: integer("size_bytes"),
+  mimeType: text("mime_type"),
+});
+
+export const guestUploadStatus = ["pending", "approved", "rejected"] as const;
+export type GuestUploadStatus = (typeof guestUploadStatus)[number];
+export const guestUploadsTable = sqliteTable("guest_uploads", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
+  s3Key: text("s3_key").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  url: text("url"), // CloudFront CDN URL if any
+  message: text("message"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }),
+  status: text("status", { enum: guestUploadStatus }).default("pending"),
+  width: integer("width"),
+  height: integer("height"),
+  sizeBytes: integer("size_bytes"),
+  mimeType: text("mime_type"),
+  approvedAt: integer("created_at", { mode: "timestamp_ms" }),
+});
+
 export const userRoomsRelations = relations(userRooms, ({ one }) => ({
   user: one(usersTable, {
     fields: [userRooms.userId],
@@ -109,6 +146,7 @@ export const userRelations = relations(usersTable, ({ one, many }) => ({
     fields: [usersTable.id],
     references: [invitationTable.userId],
   }),
+  uploads: many(guestUploadsTable),
 }));
 
 export const tableRelations = relations(tablesTable, ({ many }) => ({
@@ -127,6 +165,13 @@ export const roomRelations = relations(roomsTable, ({ many, one }) => ({
 export const invitationRelations = relations(invitationTable, ({ one }) => ({
   user: one(usersTable, {
     fields: [invitationTable.userId],
+    references: [usersTable.id],
+  }),
+}));
+
+export const guestUploadRelations = relations(guestUploadsTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [guestUploadsTable.userId],
     references: [usersTable.id],
   }),
 }));

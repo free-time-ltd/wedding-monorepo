@@ -1,0 +1,1 @@
+DROP INDEX `guest_uploads_user_id_unique`;
