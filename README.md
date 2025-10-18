@@ -10,6 +10,21 @@ This is a project for my wedding and website
 - Make a helper function for system chat messages
 - For some reason chat duplicates messages at least according to NextJS.
 - Make a better tailwind theme
+- Integrate Resent to receive an email on RSVP change
+- Tests for the backend?
+- Daily or weekly SQLite backup to S3
+- Decide on how you want gallery uploads
+  - The whole infrastructure should be tagged as "wedding" so we can easily delete resources later
+  - AWS cognito for Krisi and I
+  - S3 bucket for image uploads
+  - Github action to deploy backend to the VPS using deploy key
+  - Figure out Vercel deployment (ezpz)
+  - Lambda for image processing???
+    - Resize
+    - Convert to webp from any format
+    - Lower quality
+    - Generate thumbnails?
+    - FFMPEG for video? Or smartphones already encode well? Investigate
 
 ## Fixing turborepo
 
