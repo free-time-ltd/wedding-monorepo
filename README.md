@@ -9,6 +9,7 @@ This is a project for my wedding and website
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
 - Make a helper function for system chat messages
 - For some reason chat duplicates messages at least according to NextJS.
+- Make a better tailwind theme
 
 ## Fixing turborepo
 
