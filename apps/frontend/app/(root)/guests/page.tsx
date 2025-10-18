@@ -7,8 +7,6 @@ import { GuestInfo } from "@/components/guest-info";
 export default function GuestsPage() {
   const guests = use(fetchGuests()) ?? [];
 
-  console.log({ guests });
-
   const totalGuests = guests.length;
   const totalWithPlusOnes = guests.filter((g) => g.extras).length;
   const totalTables = new Set(guests.map((g) => g.table)).size;
