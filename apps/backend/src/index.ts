@@ -10,7 +10,7 @@ import { generateId } from "@repo/utils/generateId";
 import { findUser, transformUser } from "@repo/db/utils";
 import { defineSocketServer } from "./socket";
 import { Server } from "@repo/socket";
-import { invitationTable } from "@repo/db/schema";
+import { invitationTable, menuTypes, transportTypes } from "@repo/db/schema";
 import z from "zod";
 
 const app = new Hono();
@@ -203,9 +203,11 @@ app.get("/api/rsvps/:id", async (c) => {
 });
 
 const rsvpSchema = z.object({
-  meal: z.enum(["vegan", "regular"]),
+  menuChoice: z.enum(menuTypes),
   attending: z.boolean(),
   plusOne: z.boolean(),
+  accommodation: z.boolean(),
+  transportation: z.enum(transportTypes),
   notes: z.string().optional(),
 });
 
@@ -215,10 +217,9 @@ app.post("/api/rsvps/:id", async (c) => {
   const { id } = c.req.param();
 
   // Parse the body
-  const body = (await c.req.parseBody({
-    all: true,
-    dot: true,
-  })) as unknown as RsvpInput;
+  const body = (c.req.header("Content-Type") === "application/json"
+    ? await c.req.json()
+    : await c.req.parseBody({ all: true, dot: true })) as unknown as RsvpInput;
 
   const parsed = rsvpSchema.safeParse(body);
   if (!parsed.success) {
@@ -228,12 +229,39 @@ app.post("/api/rsvps/:id", async (c) => {
     );
   }
 
-  const { attending, plusOne, meal, notes } = parsed.data;
+  const {
+    attending,
+    plusOne,
+    menuChoice,
+    transportation,
+    accommodation,
+    notes,
+  } = parsed.data;
 
   await db
-    .update(invitationTable)
-    .set({ attending, plusOne, menuChoice: meal, notes: notes ?? null })
-    .where(eq(invitationTable.id, Number(id)));
+    .insert(invitationTable)
+    .values({
+      userId: id,
+      attending,
+      plusOne,
+      menuChoice,
+      transportation,
+      accommodation,
+      notes: notes ?? null,
+      createdAt: new Date(),
+      views: 0,
+    })
+    .onConflictDoUpdate({
+      target: [invitationTable.userId],
+      set: {
+        attending,
+        plusOne,
+        menuChoice,
+        transportation,
+        accommodation,
+        notes: notes ?? null,
+      },
+    });
 
   return c.json({ success: true, message: "ok" });
 });

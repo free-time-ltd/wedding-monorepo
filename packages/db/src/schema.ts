@@ -70,15 +70,19 @@ export const messagesTable = sqliteTable(
   })
 );
 
-export const menuTypes = ["vegan", "regular"] as const;
+export const menuTypes = ["vegan", "regular", "fish"] as const;
+export const transportTypes = ["parking", "shuttle", "no"] as const;
 export const invitationTable = sqliteTable("invitations", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: text("user_id")
     .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
+    .references(() => usersTable.id, { onDelete: "cascade" })
+    .unique(),
   attending: integer("attending", { mode: "boolean" }),
   plusOne: integer("plus_one", { mode: "boolean" }),
   menuChoice: text("menu_choice", { enum: menuTypes }),
+  transportation: text("transportation", { enum: transportTypes }),
+  accommodation: integer("accommodation", { mode: "boolean" }),
   notes: text("notes"),
   views: integer("views").default(0),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),

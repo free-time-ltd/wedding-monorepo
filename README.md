@@ -6,11 +6,9 @@ This is a project for my wedding and website
 
 - Gotta add the event handler for when user gets invites to a new room
 - At some point maybe migrate to better-sqlite3?
-- Търсачка във CreateRoomDialog че при 88 човека - проблем
-- RSVP страница със формуляр - измисли по-добър вариант от това което имаме в момента. Не би трябвало invitations таблицата да е главната
-- Fuzzy search при guest portal-a ?
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
-- Make a helper function for system messages
+- Make a helper function for system chat messages
+- For some reason chat duplicates messages at least according to NextJS.
 
 ## Fixing turborepo
 

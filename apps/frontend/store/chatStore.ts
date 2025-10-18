@@ -38,6 +38,19 @@ export interface ChatStore {
   setGuests: (guestList: Guest[]) => void;
 }
 
+export interface RsvpResponse extends Guest {
+  invitation: {
+    id: number;
+    attending: boolean;
+    plusOne: boolean;
+    createdAt: Date;
+    menuChoice: "vegan" | "regular" | "fish";
+    notes: string | null;
+    userId: string;
+    views: number;
+  } | null;
+}
+
 export const useChatStore = create<ChatStore>((set) => ({
   guests: [],
   chatrooms: {},

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `invitations_user_id_unique` ON `invitations` (`user_id`);

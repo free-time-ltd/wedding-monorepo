@@ -1,33 +1,4 @@
-// const fetchRsvp = async (rsvpId: string) => {
-//   const url = new URL(
-//     `/api/rsvps/${rsvpId}`,
-//     process.env.NEXT_PUBLIC_API_BASE_URL
-//   );
-
-//   const res = await fetch(url, { cache: "force-cache" });
-//   const json = await res.json();
-
-//   return json?.data;
-// };
-
-// export default async function RsvpPage({
-//   params,
-// }: {
-//   params: Promise<{ slug: string }>;
-// }) {
-//   const { slug } = await params;
-//   const rsvp = await fetchRsvp(slug);
-
-//   return (
-//     <div>
-//       <p>Well?</p>
-//       <p>{JSON.stringify(rsvp)}</p>
-//     </div>
-//   );
-// }
 "use client";
-
-import type React from "react";
 
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@repo/ui/components/ui/button";
@@ -38,28 +9,39 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/ui/card";
-import { Label } from "@repo/ui/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@repo/ui/components/ui/radio-group";
-import { Textarea } from "@repo/ui/components/ui/textarea";
 import { ArrowLeft, Heart } from "@repo/ui/icons";
-import { useState } from "react";
+import { use, useState } from "react";
+import { RsvpResponse } from "@/store/chatStore";
+import { FormValues, RsvpForm } from "@/components/rsvp/form";
+import { serializeFormValues } from "@/components/rsvp/utils";
+
+const rsvpPromiseCache = new Map<string, Promise<RsvpResponse>>();
+
+const fetchRsvp = async (rsvpId: string) => {
+  const url = new URL(
+    `/api/rsvps/${rsvpId}`,
+    process.env.NEXT_PUBLIC_API_BASE_URL
+  );
+
+  const res = await fetch(url, { cache: "force-cache" });
+  const json = await res.json();
+
+  return json?.data;
+};
+
+const fetchRsvpCached = (rsvpId: string) => {
+  if (!rsvpPromiseCache.has(rsvpId)) {
+    rsvpPromiseCache.set(rsvpId, fetchRsvp(rsvpId));
+  }
+
+  return rsvpPromiseCache.get(rsvpId)!;
+};
 
 export default function RSVPPage() {
   const params = useParams();
   const router = useRouter();
-  const guestId = params.guestId as string;
-  const guest = {
-    name: "Lachezar Tsochev",
-    plusOne: true,
-  };
-
-  const [formData, setFormData] = useState({
-    attending: "",
-    bringingGuest: "",
-    transportation: "",
-    accommodation: "",
-    dietary: "",
-  });
+  const guestId = params.slug as string;
+  const guest = use(fetchRsvpCached(guestId));
 
   const [submitted, setSubmitted] = useState(false);
 
@@ -69,11 +51,12 @@ export default function RSVPPage() {
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle className="text-rose-gold-600">
-              Guest Not Found
+              Не успях да открия гост :(
             </CardTitle>
             <CardDescription>
-              We couldn&apos;t find your invitation. Please check your
-              invitation link.
+              Не успяхме да открием Вашата покана. Моля проверете линка с
+              поканата! Ако мислите, че това е грешка се свържете с младоженците
+              за помощ!
             </CardDescription>
           </CardHeader>
         </Card>
@@ -81,11 +64,25 @@ export default function RSVPPage() {
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In production, this would save to a database
-    console.log("[v0] RSVP submitted:", { guestId, ...formData });
-    setSubmitted(true);
+  const handleSubmit = (data: FormData) => {
+    const url = new URL(
+      `/api/rsvps/${guestId}`,
+      process.env.NEXT_PUBLIC_API_BASE_URL
+    );
+
+    const payload = Object.fromEntries(data.entries());
+
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify(
+        serializeFormValues(payload as Record<string, string>)
+      ),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).finally(() => {
+      setSubmitted(true);
+    });
   };
 
   if (submitted) {
@@ -158,197 +155,11 @@ export default function RSVPPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Question 1: Attending */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium text-sage-800">
-                  Will you be attending?
-                </Label>
-                <RadioGroup
-                  value={formData.attending}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, attending: value })
-                  }
-                  required
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id="attending-yes" />
-                    <Label
-                      htmlFor="attending-yes"
-                      className="font-normal cursor-pointer"
-                    >
-                      Yes, I&apos;ll be there!
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="attending-no" />
-                    <Label
-                      htmlFor="attending-no"
-                      className="font-normal cursor-pointer"
-                    >
-                      Unfortunately, I can&apos;t make it
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="maybe" id="attending-maybe" />
-                    <Label
-                      htmlFor="attending-maybe"
-                      className="font-normal cursor-pointer"
-                    >
-                      Not sure yet
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {/* Question 2: Bringing Guest */}
-              {guest.plusOne && (
-                <div className="space-y-3">
-                  <Label className="text-base font-medium text-sage-800">
-                    Will you be bringing a guest?
-                  </Label>
-                  <RadioGroup
-                    value={formData.bringingGuest}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, bringingGuest: value })
-                    }
-                    required
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="yes" id="guest-yes" />
-                      <Label
-                        htmlFor="guest-yes"
-                        className="font-normal cursor-pointer"
-                      >
-                        Yes, I&apos;ll bring a plus one
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="no" id="guest-no" />
-                      <Label
-                        htmlFor="guest-no"
-                        className="font-normal cursor-pointer"
-                      >
-                        No, just me
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              )}
-
-              {/* Question 3: Transportation */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium text-sage-800">
-                  Will you need transportation or parking?
-                </Label>
-                <RadioGroup
-                  value={formData.transportation}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, transportation: value })
-                  }
-                  required
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="parking" id="transport-parking" />
-                    <Label
-                      htmlFor="transport-parking"
-                      className="font-normal cursor-pointer"
-                    >
-                      I&apos;ll need parking
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="shuttle" id="transport-shuttle" />
-                    <Label
-                      htmlFor="transport-shuttle"
-                      className="font-normal cursor-pointer"
-                    >
-                      I&apos;d like shuttle service
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="none" id="transport-none" />
-                    <Label
-                      htmlFor="transport-none"
-                      className="font-normal cursor-pointer"
-                    >
-                      No transportation needed
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {/* Question 4: Accommodation */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium text-sage-800">
-                  Would you like help finding a nearby hotel or guesthouse?
-                </Label>
-                <RadioGroup
-                  value={formData.accommodation}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, accommodation: value })
-                  }
-                  required
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id="accommodation-yes" />
-                    <Label
-                      htmlFor="accommodation-yes"
-                      className="font-normal cursor-pointer"
-                    >
-                      Yes, please send recommendations
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="accommodation-no" />
-                    <Label
-                      htmlFor="accommodation-no"
-                      className="font-normal cursor-pointer"
-                    >
-                      No, I have accommodations arranged
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {/* Question 5: Dietary Restrictions */}
-              <div className="space-y-3">
-                <Label
-                  htmlFor="dietary"
-                  className="text-base font-medium text-sage-800"
-                >
-                  Do you have any allergies or dietary restrictions?
-                </Label>
-                <Textarea
-                  id="dietary"
-                  placeholder="Please let us know about any dietary needs, allergies, or food preferences..."
-                  value={formData.dietary}
-                  onChange={(e) =>
-                    setFormData({ ...formData, dietary: e.target.value })
-                  }
-                  className="min-h-[100px] resize-none"
-                />
-                <p className="text-sm text-sage-600">
-                  We&apos;ll do our best to accommodate your dietary needs.
-                  Leave blank if you have no restrictions.
-                </p>
-              </div>
-
-              {/* Submit Button */}
-              <div className="pt-4">
-                <Button
-                  type="submit"
-                  className="w-full bg-rose-gold-500 hover:bg-rose-gold-600 text-secondary text-lg py-6"
-                  disabled={
-                    !formData.attending ||
-                    !formData.transportation ||
-                    !formData.accommodation
-                  }
-                >
-                  Submit RSVP
-                </Button>
-              </div>
-            </form>
+            <RsvpForm
+              name="rsvp-form"
+              defaultValues={guest.invitation as unknown as FormValues}
+              onSubmit={handleSubmit}
+            />
           </CardContent>
         </Card>
 

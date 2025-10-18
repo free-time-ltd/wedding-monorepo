@@ -57,6 +57,27 @@
       "when": 1760618068722,
       "tag": "0007_hesitant_roland_deschain",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1760779797415,
+      "tag": "0008_many_callisto",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1760779961539,
+      "tag": "0009_powerful_firebrand",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1760781993424,
+      "tag": "0010_dizzy_bloodscream",
+      "breakpoints": true
     }
   ]
 }
