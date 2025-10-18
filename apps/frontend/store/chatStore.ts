@@ -3,6 +3,7 @@ import { create } from "zustand";
 export interface Guest {
   id: string;
   name: string;
+  extras?: number;
   tableId: number;
   table: {
     id: number;
