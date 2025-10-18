@@ -63,6 +63,7 @@ export function ChatPage({ user, guests, initialChatroom }: ChatProps) {
 
   useEffect(() => {
     user.rooms.forEach((room) => {
+      if (!room) return;
       const currentRoom = chatrooms[room.id] ?? null;
       if (!currentRoom) {
         addChatroom({
