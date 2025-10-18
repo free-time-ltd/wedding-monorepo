@@ -52,7 +52,7 @@ npm run ui [rest of shadcn command - e.g. install Skeleton]
 ## Pushing & Generating schema updates
 
 ```bash
-ch apps/backend
+cd apps/backend
 npx drizzle-kit push
 npx drizzle-kit generate
 ```
