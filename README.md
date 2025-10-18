@@ -25,11 +25,16 @@ For now the project requires both:
 ## Installation
 
 ```bash
+cp apps/frontend/.env.example apps/frontend/.env.local
+cp apps/backend/.env.example apps/backend/.env
 npm run install
-npm run dev
+cd apps/backend
+npx drizzle-kit migrate
 ```
 
 ## Seeding the database
+
+From the project root execute the following command:
 
 ```bash
 npx turbo run db:seed --filter=backend
@@ -37,12 +42,14 @@ npx turbo run db:seed --filter=backend
 
 ## Adding ShadCN components
 
+Since the project is using ShadCN UI Canary, we cannot copy & paste fom the official docs directly
+
 ```bash
 cd packages/ui
 npm run ui [rest of shadcn command - e.g. install Skeleton]
 ```
 
-## Uploading schema updates
+## Pushing & Generating schema updates
 
 ```bash
 ch apps/backend
