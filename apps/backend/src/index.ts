@@ -30,7 +30,7 @@ app.get("/", (c) => {
       eTag: generateId(),
       version: "1.0",
       eventName: "Lacho & Krisi's Wedding",
-      date: "2026-07-27",
+      date: "2026-06-27",
       time: "19:00",
       tz: "Europe/Sofia",
       location: {
