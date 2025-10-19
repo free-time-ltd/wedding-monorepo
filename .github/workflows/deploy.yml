@@ -59,7 +59,7 @@ jobs:
               uses: appleboy/ssh-action@v1.1.0
               with:
                   host: ${{ secrets.VPS_HOST }}
-                  username: ${{ secrets.VPS_USER }}
+                  username: root
                   key: ${{ secrets.VPS_SSH_KEY }}
                   script: |
                       docker pull ${{ env.REGISTRY }}/${{ env.REPO }}/${{ env.IMAGE_NAME }}:latest

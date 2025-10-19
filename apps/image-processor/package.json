@@ -1,0 +1,23 @@
+{
+  "name": "image-processor",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && npm run bundle",
+    "bundle": "cd dist && zip -r ../lambda.zip .",
+    "dev": "tsx watch src/index.ts",
+    "clean": "rm -rf dist lambda.zip",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.913.0",
+    "sharp": "^0.34.4"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.156",
+    "@types/node": "^24.8.1",
+    "eslint": "^9.38.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.3"
+  }
+}

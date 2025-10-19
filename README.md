@@ -15,7 +15,7 @@ This is a project for my wedding and website
 - Daily or weekly SQLite backup to S3
 - Decide on how you want gallery uploads
   - The whole infrastructure should be tagged as "wedding" so we can easily delete resources later
-  - AWS cognito for Krisi and I
+  - AWS cognito for Krisi and I - Should I though?
   - S3 bucket for image uploads
   - Github action to deploy backend to the VPS using deploy key
   - Figure out Vercel deployment (ezpz)
@@ -72,3 +72,15 @@ cd apps/backend
 npx drizzle-kit push
 npx drizzle-kit generate
 ```
+
+### Image processing flow
+
+- User sends request to get presigned upload url
+- User uploads to said presigned upload url
+- S3 upload event triggers image-processing lambda
+- Lambda processes image, minifies it and adds thumbnails
+- Upon success, lambda sends a webhook request.
+
+...
+
+Should I be putting a metadata in the S3 object for the webhook url? Or should i just use env variables?

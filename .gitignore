@@ -38,3 +38,17 @@ yarn-error.log*
 *.pem
 
 *.sqlite
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraformrc
+terraform.rc
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfplan
+*.tfvars
+.DS_Store
