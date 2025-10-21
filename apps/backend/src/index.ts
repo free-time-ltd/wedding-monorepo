@@ -11,7 +11,10 @@ import { findUser, transformUser } from "@repo/db/utils";
 import { defineSocketServer } from "./socket";
 import { Server } from "@repo/socket";
 import { invitationTable, menuTypes, transportTypes } from "@repo/db/schema";
+import Cache from "@repo/db/cache";
+import eventData from "@repo/utils/eventData";
 import z from "zod";
+import { fetchOpenMeteoWeather } from "./weather";
 
 const app = new Hono();
 
@@ -29,27 +32,7 @@ app.get("/", (c) => {
     data: {
       eTag: generateId(),
       version: "1.0",
-      eventName: "Lacho & Krisi's Wedding",
-      date: "2026-07-27",
-      time: "19:00",
-      tz: "Europe/Sofia",
-      location: {
-        city: "Plovdiv, Bulgaria",
-        venue: "Collibri Pool and Garden Plovdiv",
-        address: "86, 4015 Plovdiv",
-        gps: [42.1142642, 24.6800456],
-        plus: "4M7J+P2 Plovdiv",
-      },
-      contactEmails: ["ltsochev@live.com", "krisi.v.kostova@gmail.com"],
-      contactPhone: "+359897498226",
-      website: "https://svatba2026.com",
-      dressCode: "Formal",
-      parking: "Available at venue",
-      notes: "Please arrive 15 minutes early",
-      links: {
-        guests: "/api/users",
-        tables: "/api/tables",
-      },
+      ...eventData,
     },
   });
 });
@@ -339,6 +322,44 @@ app.get("/api/rooms/:id", async (c) => {
   };
 
   return c.json({ success: true, data: transformedRoom });
+});
+
+app.get("/api/weather", async (c) => {
+  const cache = new Cache(db, 1000);
+  const now = new Date();
+  const date = now.toISOString().split("T")[0];
+  const weddingDate = new Date("2026-06-27");
+  const daysUntilWedding = Math.floor(
+    (weddingDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const baseDate = daysUntilWedding > 14 ? new Date("2025-06-27") : weddingDate;
+  const startDate = new Date(baseDate);
+  startDate.setDate(baseDate.getDate() - 4);
+
+  const isHistorical = daysUntilWedding > 14;
+
+  const weatherReport = await cache.remember(
+    `weather-${date}`,
+    60 * 60 * 24 * 1000,
+    async () => {
+      const report = await fetchOpenMeteoWeather(
+        startDate.toISOString().split("T")[0],
+        baseDate.toISOString().split("T")[0],
+        [...eventData.location.gps],
+        isHistorical
+      );
+
+      return report;
+    }
+  );
+
+  return c.json({
+    status: true,
+    data: weatherReport,
+    daysUntilWedding,
+    isHistorical,
+    year: baseDate.getFullYear(),
+  });
 });
 
 const server = serve(

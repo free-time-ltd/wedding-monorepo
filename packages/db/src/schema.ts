@@ -12,6 +12,8 @@ export const usersTable = sqliteTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   extras: integer("extra_people").default(0),
+  email: text("email"),
+  phone: text("phone"),
   tableId: integer("table_id").references(() => tablesTable.id, {
     onDelete: "set null",
   }),
@@ -124,6 +126,19 @@ export const guestUploadsTable = sqliteTable("guest_uploads", {
   mimeType: text("mime_type"),
   approvedAt: integer("created_at", { mode: "timestamp_ms" }),
 });
+
+export const cacheTable = sqliteTable(
+  "cache",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    cacheKey: text("cache_key").unique(),
+    cacheValue: text("cache_value", { mode: "json" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+  },
+  (table) => [index("expireIndex").on(table.expiresAt)]
+);
 
 export const userRoomsRelations = relations(userRooms, ({ one }) => ({
   user: one(usersTable, {

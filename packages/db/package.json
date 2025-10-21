@@ -24,6 +24,10 @@
       "types": "./dist/seeder.d.ts",
       "import": "./src/seeder.ts"
     },
+    "./cache": {
+      "types": "./dist/cache.d.ts",
+      "import": "./src/cache.ts"
+    },
     "./drizzle.config": {
       "types": "./dist/drizzle.config.d.ts",
       "default": "./src/drizzle.config.ts"

@@ -25,6 +25,10 @@ This is a project for my wedding and website
     - Lower quality
     - Generate thumbnails?
     - FFMPEG for video? Or smartphones already encode well? Investigate
+- Fetch weather on the frontend and backend. Figure out API.
+- Finish image processing lambda
+- How to use the google maps plus code
+- How to generate navigation link
 
 ## Fixing turborepo
 

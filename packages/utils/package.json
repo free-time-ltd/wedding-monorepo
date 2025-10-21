@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./generateId": "./src/generateId.ts"
+    "./generateId": "./src/generateId.ts",
+    "./eventData": "./src/eventData.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
