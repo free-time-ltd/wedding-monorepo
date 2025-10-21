@@ -71,7 +71,7 @@ export function GuestInfo({ guests }: Props) {
                   </div>
                   {tableName}
                   <Badge variant="secondary" className="ml-auto">
-                    {guestsByTable[tableName]?.length ?? 0} guests
+                    {guestsByTable[tableName]?.length ?? 0} гости
                   </Badge>
                 </CardTitle>
               </CardHeader>
@@ -91,7 +91,7 @@ export function GuestInfo({ guests }: Props) {
                         <p className="font-medium text-foreground truncate">
                           {guest.name}
                         </p>
-                        {guest.extras && (
+                        {!!guest.extras && (
                           <div className="flex items-center gap-1 mt-1">
                             <UserPlus className="h-3 w-3 text-muted-foreground" />
                             <p className="text-xs text-muted-foreground">

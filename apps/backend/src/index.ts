@@ -15,6 +15,7 @@ import Cache from "@repo/db/cache";
 import eventData from "@repo/utils/eventData";
 import z from "zod";
 import { fetchOpenMeteoWeather } from "./weather";
+import { Resend } from "resend";
 
 const app = new Hono();
 
@@ -245,6 +246,25 @@ app.post("/api/rsvps/:id", async (c) => {
         notes: notes ?? null,
       },
     });
+
+  const user = await db.query.usersTable.findFirst({
+    where: (columns, { eq }) => eq(columns.id, id),
+  });
+
+  if (user) {
+    const resend = new Resend(process.env.RESEND_KEY);
+
+    const { error } = await resend.emails.send({
+      from: `Wedding <${process.env.MAIL_ADDRESS_FROM}>`,
+      to: ["ltsochev@live.com", "krisi.v.kostova@gmail.com"],
+      subject: `RSVP Change for: ${user.name}`,
+      html: `${user.name} changed their RSVP status. Details below:`,
+    });
+
+    if (error) {
+      console.error(error);
+    }
+  }
 
   return c.json({ success: true, message: "ok" });
 });

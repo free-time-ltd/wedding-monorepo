@@ -25,6 +25,7 @@ export default function VenuePage() {
       "Очарователен градински комплекс, разположен в полите на Родопите, съчетаващ изискан ресторант, просторна градина и прекрасна гледка към планините. Идеалното място за незабравима сватба под открито небе.",
     parking: "Безплатен паркинг за всички гости на събитието",
     dresscode: "Бихме се радвали, ако изберете официално облекло",
+    directionUrl: eventData.location.directionUrl,
     mapsUrl: eventData.location.mapsUrl,
     iframeUrl: eventData.location.iframeUrl,
   };
@@ -71,7 +72,7 @@ export default function VenuePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Map Card */}
-          <MapCard {...venue} />
+          <MapCard {...venue} mapsUrl={venue.directionUrl} />
 
           {/* Venue Info Card */}
           <Card>
