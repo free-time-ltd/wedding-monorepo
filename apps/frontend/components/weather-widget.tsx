@@ -11,7 +11,7 @@ const cachedPromise = fetchWeather();
 export function WeatherWidget() {
   const {
     daysUntilWedding,
-    data: forecast,
+    data: forecast = [],
     isHistorical,
     year,
   } = use(cachedPromise);

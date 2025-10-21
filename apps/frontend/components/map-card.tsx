@@ -39,7 +39,7 @@ export function MapCard({ name, address, iframeUrl, mapsUrl }: Props) {
             </p>
           </div>
           <Button type="button" className="shrink-0" asChild>
-            <Link href={mapsUrl} target="_blank" rel="nofollow">
+            <Link href={mapsUrl} target="_blank" rel="noopener noreferrer">
               <Navigation className="h-4 w-4 mr-2" />
               Навигация
             </Link>
