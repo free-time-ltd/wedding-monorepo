@@ -1,0 +1,1 @@
+ALTER TABLE `guest_uploads` ADD `approved_at` integer;

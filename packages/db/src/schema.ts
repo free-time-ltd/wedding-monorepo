@@ -108,24 +108,28 @@ export const officialPhotosTable = sqliteTable("official_photos", {
 
 export const guestUploadStatus = ["pending", "approved", "rejected"] as const;
 export type GuestUploadStatus = (typeof guestUploadStatus)[number];
-export const guestUploadsTable = sqliteTable("guest_uploads", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => generateId()),
-  s3Key: text("s3_key").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  url: text("url"), // CloudFront CDN URL if any
-  message: text("message"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }),
-  status: text("status", { enum: guestUploadStatus }).default("pending"),
-  width: integer("width"),
-  height: integer("height"),
-  sizeBytes: integer("size_bytes"),
-  mimeType: text("mime_type"),
-  approvedAt: integer("created_at", { mode: "timestamp_ms" }),
-});
+export const guestUploadsTable = sqliteTable(
+  "guest_uploads",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    s3Key: text("s3_key").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    url: text("url"), // CloudFront CDN URL if any
+    message: text("message"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }),
+    status: text("status", { enum: guestUploadStatus }).default("pending"),
+    width: integer("width"),
+    height: integer("height"),
+    sizeBytes: integer("size_bytes"),
+    mimeType: text("mime_type"),
+    approvedAt: integer("approved_at", { mode: "timestamp_ms" }),
+  },
+  (table) => [index("lookupIndex").on(table.s3Key)]
+);
 
 export const cacheTable = sqliteTable(
   "cache",

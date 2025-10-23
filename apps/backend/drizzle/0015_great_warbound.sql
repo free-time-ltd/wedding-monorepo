@@ -1,0 +1,1 @@
+CREATE INDEX `lookupIndex` ON `guest_uploads` (`s3_key`);

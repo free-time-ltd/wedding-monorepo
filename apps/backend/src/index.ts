@@ -10,7 +10,12 @@ import { generateId } from "@repo/utils/generateId";
 import { findUser, transformUser } from "@repo/db/utils";
 import { defineSocketServer } from "./socket";
 import { Server } from "@repo/socket";
-import { invitationTable, menuTypes, transportTypes } from "@repo/db/schema";
+import {
+  guestUploadsTable,
+  invitationTable,
+  menuTypes,
+  transportTypes,
+} from "@repo/db/schema";
 import Cache from "@repo/db/cache";
 import eventData from "@repo/utils/eventData";
 import z from "zod";
@@ -383,6 +388,38 @@ app.get("/api/weather", async (c) => {
 });
 
 app.post("/api/images/process", async (c) => {
+  // @todo validate body with zod
+  const authHeader = c.req.header("Authorization");
+  const expectedSecret = `Bearer ${process.env.WEBHOOK_SECRET}`;
+
+  if (!authHeader || authHeader !== expectedSecret) {
+    return c.json({ status: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { originalKey } = await c.req.json();
+
+  if (!originalKey) {
+    return c.json({ status: false, error: "Not found" }, { status: 404 });
+  }
+
+  const res = await db.query.guestUploadsTable.findFirst({
+    where: (columns, { eq }) => eq(columns.s3Key, originalKey),
+  });
+
+  if (!res) {
+    return c.json(
+      { status: false, error: "Not found by S3 Key" },
+      { status: 404 }
+    );
+  }
+
+  await db
+    .update(guestUploadsTable)
+    .set({
+      approvedAt: new Date(),
+    })
+    .where(eq(guestUploadsTable.id, res.id));
+
   return c.json(
     {
       status: false,
