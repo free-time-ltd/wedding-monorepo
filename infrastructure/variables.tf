@@ -56,3 +56,14 @@ variable "facebook_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "webhook_url" {
+  description = "Webhook URL for the lambda to POST once its done processing images."
+  type        = string
+}
+
+variable "webhook_secret" {
+  description = "The secret for the webhook. It will be attached as a Authorization: Bearer token by the lambda."
+  type        = string
+  sensitive   = true
+}

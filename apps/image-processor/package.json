@@ -19,5 +19,8 @@
     "eslint": "^9.38.0",
     "tsx": "^4.20.6",
     "typescript": "^5.8.3"
+  },
+  "turbo": {
+    "env": ["WEBHOOK_URL", "WEBHOOK_SECRET", "BUCKET_NAME", "AWS_REGION"]
   }
 }
