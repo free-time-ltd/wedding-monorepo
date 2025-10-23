@@ -382,6 +382,16 @@ app.get("/api/weather", async (c) => {
   });
 });
 
+app.post("/api/images/process", async (c) => {
+  return c.json(
+    {
+      status: false,
+      error: "Not implemented yet",
+    },
+    { status: 501 }
+  );
+});
+
 const server = serve(
   {
     fetch: app.fetch,
