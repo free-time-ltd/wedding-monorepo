@@ -12,3 +12,18 @@ output "cognito_oauth2_redirect_uri" {
   value       = "https://${aws_cognito_user_pool_domain.main.domain}.auth.${var.region}.amazoncognito.com/oauth2/idpresponse"
   description = "Full Cognito hosted login URL"
 }
+
+output "s3_bucket_name" {
+  description = "Name of the S3 bucket for uploads"
+  value       = aws_s3_bucket.uploads.bucket
+}
+
+output "s3_bucket_region" {
+  description = "Region where the S3 bucket resides"
+  value       = aws_s3_bucket.uploads.region
+}
+
+output "lambda_s3_policy_name" {
+  description = "Name of the IAM policy allowing S3 access for Lambda"
+  value       = aws_iam_role_policy.lambda_s3_policy.name
+}
