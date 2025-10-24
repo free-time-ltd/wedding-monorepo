@@ -14,6 +14,7 @@ import rsvpRouter from "./routes/rsvp";
 import authRouter from "./routes/auth";
 import restRouter from "./routes/restful";
 import handler from "./handler";
+import galleryRouter from "./routes/gallery";
 
 const app = new Hono();
 
@@ -43,6 +44,7 @@ app.route("/api/rsvps", rsvpRouter);
 app.route("/api/rooms", roomsRouter);
 app.route("/api/weather", weatherRouter);
 app.route("/api/images", imageRouter);
+app.route("/api/gallery", galleryRouter);
 app.route("/", restRouter);
 
 const server = serve(

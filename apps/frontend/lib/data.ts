@@ -41,3 +41,7 @@ export const fetchWeather = async (): Promise<WeatherResponse> => {
 
   return json;
 };
+
+export const fetchUserUploads = async () => {
+  //
+};

@@ -10,3 +10,7 @@ facebook_client_id     = "<insert client id here>"
 facebook_client_secret = "<insert secret here>"
 webhook_url            = "https://backend.svatba2026.com/api/images/process"
 webhook_secret         = "<insert secret here>"
+allowed_origins = [
+  "http://localhost:3000",
+  "https://svatba2026.com",
+]

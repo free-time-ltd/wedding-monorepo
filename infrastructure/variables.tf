@@ -67,3 +67,9 @@ variable "webhook_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "allowed_origins" {
+  description = "List of allowed origins for S3 CORS"
+  type        = list(string)
+  default     = []
+}
