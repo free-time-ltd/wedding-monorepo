@@ -20,19 +20,6 @@ import {
   WebhookPayload,
 } from "./types";
 
-function validateEnvironment(): void {
-  const required = ["BUCKET_NAME", "WEBHOOK_URL", "WEBHOOK_SECRET"];
-  const missing = required.filter((varName) => !process.env[varName]);
-
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(", ")}`
-    );
-  }
-}
-
-validateEnvironment();
-
 const s3Client = new S3Client({ region: CONFIG.region });
 
 async function fetchImageFromS3(bucket: string, key: string): Promise<Buffer> {

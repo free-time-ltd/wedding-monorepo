@@ -1,8 +1,10 @@
+import { env } from "./env";
+
 const CONFIG = {
-  region: process.env.AWS_REGION || "eu-west-2",
-  bucketName: process.env.BUCKET_NAME!,
-  webhookUrl: process.env.WEBHOOK_URL!,
-  webhookSecret: process.env.WEBHOOK_SECRET!,
+  region: env.AWS_REGION || "eu-west-2",
+  bucketName: env.BUCKET_NAME,
+  webhookUrl: env.WEBHOOK_URL,
+  webhookSecret: env.WEBHOOK_SECRET,
   processedPrefix: "processed/",
 } as const;
 
