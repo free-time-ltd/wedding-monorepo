@@ -106,7 +106,12 @@ export const officialPhotosTable = sqliteTable("official_photos", {
   mimeType: text("mime_type"),
 });
 
-export const guestUploadStatus = ["pending", "approved", "rejected"] as const;
+export const guestUploadStatus = [
+  "pending",
+  "processed",
+  "approved",
+  "rejected",
+] as const;
 export type GuestUploadStatus = (typeof guestUploadStatus)[number];
 export const guestUploadsTable = sqliteTable(
   "guest_uploads",
@@ -128,7 +133,10 @@ export const guestUploadsTable = sqliteTable(
     mimeType: text("mime_type"),
     approvedAt: integer("approved_at", { mode: "timestamp_ms" }),
   },
-  (table) => [index("lookupIndex").on(table.s3Key)]
+  (table) => [
+    index("lookupIndex").on(table.s3Key),
+    index("browseIndex").on(table.status),
+  ]
 );
 
 export const cacheTable = sqliteTable(

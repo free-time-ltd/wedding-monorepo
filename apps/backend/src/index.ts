@@ -21,6 +21,7 @@ import eventData from "@repo/utils/eventData";
 import z from "zod";
 import { fetchOpenMeteoWeather } from "./weather";
 import { Resend } from "resend";
+import { generatePresignedUploadUrl } from "./storage";
 
 const app = new Hono();
 
@@ -387,6 +388,16 @@ app.get("/api/weather", async (c) => {
   });
 });
 
+app.post("/api/images/upload", async (c) => {
+  const body = await c.req.json();
+
+  // @todo parse body to get metadata
+
+  const presignedUrl = generatePresignedUploadUrl();
+
+  return c.json({ success: true, data: presignedUrl });
+});
+
 app.post("/api/images/process", async (c) => {
   // @todo validate body with zod
   const authHeader = c.req.header("Authorization");
@@ -416,6 +427,7 @@ app.post("/api/images/process", async (c) => {
   await db
     .update(guestUploadsTable)
     .set({
+      status: "processed",
       approvedAt: new Date(),
     })
     .where(eq(guestUploadsTable.id, res.id));

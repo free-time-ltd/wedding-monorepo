@@ -1,0 +1,1 @@
+CREATE INDEX `browseIndex` ON `guest_uploads` (`status`);
