@@ -131,6 +131,7 @@ export const guestUploadsTable = sqliteTable(
     height: integer("height"),
     sizeBytes: integer("size_bytes"),
     mimeType: text("mime_type"),
+    origFilename: text("original_filename"),
     approvedAt: integer("approved_at", { mode: "timestamp_ms" }),
   },
   (table) => [

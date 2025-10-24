@@ -1,0 +1,1 @@
+ALTER TABLE `guest_uploads` ADD `original_filename` text;

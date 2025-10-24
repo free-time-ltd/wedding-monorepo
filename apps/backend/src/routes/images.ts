@@ -27,7 +27,7 @@ imageRouter.post("/upload", requireAuth, async (c: SimpleAuthContext) => {
     );
   }
 
-  const { message, width, height, sizeBytes, mimeType } = result.data;
+  const { filename, message, width, height, sizeBytes, mimeType } = result.data;
 
   const res = await db
     .insert(guestUploadsTable)
@@ -41,6 +41,7 @@ imageRouter.post("/upload", requireAuth, async (c: SimpleAuthContext) => {
       height,
       sizeBytes,
       mimeType,
+      origFilename: filename,
     })
     .returning();
 

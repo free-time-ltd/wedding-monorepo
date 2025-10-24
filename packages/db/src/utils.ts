@@ -111,3 +111,39 @@ export const transformRoom = ({
 };
 
 export type RoomApiType = ReturnType<typeof transformRoom>;
+
+export const findProcessedImages = () => {
+  return db.query.guestUploadsTable.findMany({
+    with: {
+      user: {
+        columns: {
+          id: true,
+          name: true,
+          extras: true,
+        },
+      },
+    },
+    where: (table, { notInArray }) =>
+      notInArray(table.status, ["pending", "rejected"]),
+  });
+};
+
+export type ProcessedImageBaseType = NonNullable<
+  Awaited<ReturnType<typeof findProcessedImages>>[number]
+>;
+
+export const transformProcessedImage = (image: ProcessedImageBaseType) => ({
+  id: image.id,
+  key: image.s3Key,
+  originalFilename: image.origFilename,
+  width: image.width,
+  height: image.height,
+  images: {
+    original: `/uploads/${image.s3Key}.ext`,
+    thumb: `/processed/${image.s3Key}.webp`,
+    hd: `/processed/full/${image.s3Key}.webp`,
+    lq: `/processed/medium/${image.s3Key}.webp`,
+  },
+});
+
+export type ProcessedImageApiType = ReturnType<typeof transformProcessedImage>;
