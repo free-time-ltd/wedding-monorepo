@@ -22,6 +22,8 @@ import z from "zod";
 import { fetchOpenMeteoWeather } from "./weather";
 import { Resend } from "resend";
 import { generatePresignedUploadUrl } from "./storage";
+import { imageUploadSchema } from "./types";
+import { getUserId, isValidWebhookRequest } from "./utils";
 
 const app = new Hono();
 
@@ -390,20 +392,64 @@ app.get("/api/weather", async (c) => {
 
 app.post("/api/images/upload", async (c) => {
   const body = await c.req.json();
+  const userId = await getUserId(c);
+  if (!userId) {
+    return c.json(
+      { success: false, error: "Unauthenticated request." },
+      { status: 403 }
+    );
+  }
 
-  // @todo parse body to get metadata
+  const result = imageUploadSchema.safeParse(body);
 
-  const presignedUrl = generatePresignedUploadUrl();
+  if (!result.success) {
+    return c.json(
+      {
+        status: false,
+        error: z.treeifyError(result.error),
+      },
+      400
+    );
+  }
+
+  const { message, width, height, sizeBytes, mimeType } = result.data;
+
+  const res = await db
+    .insert(guestUploadsTable)
+    .values({
+      userId,
+      s3Key: generateId(),
+      message: message,
+      createdAt: new Date(),
+      status: "pending",
+      width,
+      height,
+      sizeBytes,
+      mimeType,
+    })
+    .returning();
+
+  const guestUpload = res.at(0);
+
+  if (!guestUpload) {
+    return c.json(
+      { success: false, error: "Something went wrong with upload creation." },
+      { status: 501 }
+    );
+  }
+
+  const presignedUrl = await generatePresignedUploadUrl({
+    id: guestUpload.id,
+    s3key: guestUpload.s3Key,
+    filename: result.data.filename,
+    mimeType,
+  });
 
   return c.json({ success: true, data: presignedUrl });
 });
 
 app.post("/api/images/process", async (c) => {
-  // @todo validate body with zod
-  const authHeader = c.req.header("Authorization");
-  const expectedSecret = `Bearer ${process.env.WEBHOOK_SECRET}`;
-
-  if (!authHeader || authHeader !== expectedSecret) {
+  if (!isValidWebhookRequest(c)) {
     return c.json({ status: false, error: "Unauthorized" }, { status: 401 });
   }
 
