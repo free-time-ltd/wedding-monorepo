@@ -1,4 +1,7 @@
+import { menuTypes, transportTypes } from "@repo/db/schema";
+import { Context } from "hono";
 import z from "zod";
+import { AuthVariables } from "./middleware";
 
 export const imageUploadSchema = z.object({
   filename: z.string(),
@@ -14,3 +17,16 @@ export const imageUploadSchema = z.object({
   height: z.number(),
   message: z.string().optional(),
 });
+
+export const rsvpSchema = z.object({
+  menuChoice: z.enum(menuTypes),
+  attending: z.boolean(),
+  plusOne: z.boolean(),
+  accommodation: z.boolean(),
+  transportation: z.enum(transportTypes),
+  notes: z.string().optional(),
+});
+
+export type RsvpInput = z.infer<typeof rsvpSchema>;
+
+export type SimpleAuthContext = Context<{ Variables: AuthVariables }>;

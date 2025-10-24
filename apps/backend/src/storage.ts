@@ -1,11 +1,12 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { env } from "./env";
 
 const s3 = new S3Client({
-  region: process.env.AWS_REGION,
+  region: env.AWS_REGION,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: env.AWS_SECRET_ACCESS_KEY!,
   },
 });
 
@@ -23,7 +24,7 @@ export const generatePresignedUploadUrl = ({
   mimeType,
 }: PresignedUrlProps) => {
   const command = new PutObjectCommand({
-    Bucket: process.env.AWS_BUCKET_NAME,
+    Bucket: env.AWS_BUCKET_NAME,
     Key: `uploads/${s3key}`,
     ContentType: mimeType,
     Metadata: {

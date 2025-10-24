@@ -2,8 +2,9 @@ import type { ExtendedError, Socket } from "socket.io";
 import cookie from "cookie";
 import { verify } from "hono/jwt";
 import { findUser, transformUser } from "@repo/db/utils";
+import { env } from "./env";
 
-const sessionName = process.env?.SESSION_COOKIE_NAME ?? "sess";
+const sessionName = env.SESSION_COOKIE_NAME ?? "sess";
 
 export async function authorizedSocket(
   socket: Socket,
@@ -13,12 +14,15 @@ export async function authorizedSocket(
   const jwtCookie = parsed[sessionName];
   if (!jwtCookie) {
     return next(
-      new Error("No session cookie provided in the initial connection request.")
+      new Error(
+        "No session cookie provided in the initial connection request.",
+        { cause: socket.request }
+      )
     );
   }
 
   try {
-    const jwtData = await verify(jwtCookie, process.env.JWT_SECRET);
+    const jwtData = await verify(jwtCookie, env.JWT_SECRET);
     const userModel = await findUser(jwtData.sub as string);
     if (!userModel) {
       return next(new Error("User not found"));
@@ -29,7 +33,9 @@ export async function authorizedSocket(
     socket.data.user = transformedUser;
 
     transformedUser.rooms.forEach((room) => {
-      socket.join(room.id as string);
+      if (room) {
+        socket.join(room.id as string);
+      }
     });
 
     next();
