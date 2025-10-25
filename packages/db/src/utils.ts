@@ -112,7 +112,14 @@ export const transformRoom = ({
 
 export type RoomApiType = ReturnType<typeof transformRoom>;
 
-export const findProcessedImages = () => {
+interface ImageFinderProps {
+  cursor?: string;
+  limit?: number;
+}
+export const findProcessedImages = ({
+  cursor,
+  limit = 20,
+}: ImageFinderProps = {}) => {
   return db.query.guestUploadsTable.findMany({
     with: {
       user: {
@@ -123,8 +130,13 @@ export const findProcessedImages = () => {
         },
       },
     },
-    where: (table, { notInArray }) =>
-      notInArray(table.status, ["pending", "rejected"]),
+    where: (table, { and, lt, notInArray }) =>
+      and(
+        notInArray(table.status, ["pending", "rejected"]),
+        cursor ? lt(table.createdAt, new Date(cursor)) : undefined
+      ),
+    orderBy: (table, { desc }) => desc(table.createdAt),
+    limit,
   });
 };
 

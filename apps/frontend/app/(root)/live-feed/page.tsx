@@ -4,6 +4,8 @@ import { GuestGallery } from "@/components/live-gallery/guest-gallery";
 
 export default function GalleryPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // @todo Make sure customer is logged in
+  // If not logged in - redirect to /guest-select with ?redirectTo=/live-feed
   const images: any[] = [];
   // const images = use(fetchUserUploads() ?? []) as unknown as any[];
 

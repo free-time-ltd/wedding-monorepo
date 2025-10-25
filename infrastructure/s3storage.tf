@@ -29,6 +29,29 @@ resource "aws_s3_bucket_cors_configuration" "uploads" {
   }
 }
 
+resource "aws_s3_bucket_server_side_encryption_configuration" "uploads" {
+  bucket = aws_s3_bucket.uploads.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "uploads" {
+  bucket = aws_s3_bucket.uploads.id
+
+  rule {
+    id     = "abort-incomplete-uploads"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 1
+    }
+  }
+}
+
 # IAM role for Lambda to access S3
 resource "aws_iam_role" "lambda_s3_role" {
   name = "lambda-s3-role-${var.environment}"
@@ -45,6 +68,11 @@ resource "aws_iam_role" "lambda_s3_role" {
       }
     ]
   })
+
+  tags = {
+    Environment = var.environment
+    Application = "wedding-app"
+  }
 }
 
 # Custom policy for S3 access
