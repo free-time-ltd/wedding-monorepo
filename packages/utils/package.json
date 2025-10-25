@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     "./generateId": "./src/generateId.ts",
-    "./eventData": "./src/eventData.ts"
+    "./eventData": "./src/eventData.ts",
+    "./urlFactory": "./src/urlFactory.ts",
+    "./mimeToExt": "./src/mimeToExt.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

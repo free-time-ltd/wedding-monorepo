@@ -6,6 +6,13 @@ terraform {
     }
   }
   required_version = ">=1.5.0"
+
+  backend "s3" {
+    bucket  = "tf-state-krisi"
+    key     = "wedding/live/terraform.tfstate"
+    region  = "eu-west-2"
+    profile = "krisi"
+  }
 }
 
 provider "aws" {

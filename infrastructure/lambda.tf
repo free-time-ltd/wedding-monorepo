@@ -11,7 +11,6 @@ resource "aws_lambda_function" "image_processor" {
 
   environment {
     variables = {
-      AWS_REGION     = var.region
       BUCKET_NAME    = aws_s3_bucket.uploads.id
       WEBHOOK_URL    = var.webhook_url
       WEBHOOK_SECRET = var.webhook_secret

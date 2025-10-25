@@ -1,13 +1,25 @@
 import { Hono } from "hono";
 import { successResponse } from "@/reponses";
-import { findProcessedImages, transformProcessedImage } from "@repo/db/utils";
+import {
+  findProcessedImages,
+  transformProcessedImageWithFullUrl,
+} from "@repo/db/utils";
+import { env } from "@/env";
 
 const galleryRouter = new Hono();
 
 galleryRouter.get("/guests", async (c) => {
-  const images = await findProcessedImages();
+  const limit = 20;
+  const cursor = c.req.param("cursor");
+  const images = await findProcessedImages({ cursor, limit });
 
-  return successResponse(c, { images: images.map(transformProcessedImage) });
+  const nextCursor =
+    images.length === limit ? images[images.length - 1].id : null;
+
+  return successResponse(c, {
+    images: images.map(transformProcessedImageWithFullUrl(env.CDN_DOMAIN)),
+    nextCursor,
+  });
 });
 
 export default galleryRouter;

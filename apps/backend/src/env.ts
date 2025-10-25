@@ -13,6 +13,7 @@ const envSchema = z.object({
   RESEND_KEY: z.string(),
   MAIL_ADDRESS_FROM: z.string().default("no-reply@kristinakostova.com"),
   WEBHOOK_SECRET: z.string(),
+  CDN_DOMAIN: z.string(),
 });
 
 export type EnvType = z.infer<typeof envSchema>;

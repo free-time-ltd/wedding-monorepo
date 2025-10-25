@@ -1,4 +1,6 @@
 import { db } from "./client";
+import UrlFactory from "@repo/utils/urlFactory";
+import mimeToExt from "@repo/utils/mimeToExt";
 
 export const findUser = async (userId: string) => {
   const user = await db.query.usersTable.findFirst({
@@ -133,7 +135,7 @@ export const findProcessedImages = ({
     where: (table, { and, lt, notInArray }) =>
       and(
         notInArray(table.status, ["pending", "rejected"]),
-        cursor ? lt(table.createdAt, new Date(cursor)) : undefined
+        cursor ? lt(table.id, cursor) : undefined
       ),
     orderBy: (table, { desc }) => desc(table.createdAt),
     limit,
@@ -144,18 +146,37 @@ export type ProcessedImageBaseType = NonNullable<
   Awaited<ReturnType<typeof findProcessedImages>>[number]
 >;
 
-export const transformProcessedImage = (image: ProcessedImageBaseType) => ({
-  id: image.id,
-  key: image.s3Key,
-  originalFilename: image.origFilename,
-  width: image.width,
-  height: image.height,
-  images: {
-    original: `/uploads/${image.s3Key}.ext`,
-    thumb: `/processed/${image.s3Key}.webp`,
-    hd: `/processed/full/${image.s3Key}.webp`,
-    lq: `/processed/medium/${image.s3Key}.webp`,
-  },
-});
+export const transformProcessedImage = (image: ProcessedImageBaseType) => {
+  return {
+    id: image.id,
+    key: image.s3Key,
+    originalFilename: image.origFilename,
+    width: image.width,
+    height: image.height,
+    images: {
+      original: `/uploads/${image.s3Key}.${mimeToExt(image.mimeType as string)}`,
+      thumb: `/processed/${image.s3Key}.webp`,
+      hd: `/processed/full/${image.s3Key}.webp`,
+      lq: `/processed/medium/${image.s3Key}.webp`,
+    },
+  };
+};
+
+export const transformProcessedImageWithFullUrl =
+  (domain: string, secure = true) =>
+  (image: ProcessedImageBaseType) => {
+    const urlFactory = new UrlFactory(domain, secure);
+    const transformed = transformProcessedImage(image);
+
+    return {
+      ...transformed,
+      images: Object.fromEntries(
+        Object.entries(transformed.images).map(([key, path]) => [
+          key,
+          urlFactory.create(path),
+        ])
+      ),
+    };
+  };
 
 export type ProcessedImageApiType = ReturnType<typeof transformProcessedImage>;
