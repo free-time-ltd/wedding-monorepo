@@ -113,9 +113,10 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.image_processor.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "uploads/"                          # Only trigger on files in uploads/ prefix
-    filter_suffix       = ".jpg,.jpeg,.png,.heic,.heif,.webp" # Only trigger on image files
+    filter_prefix       = "uploads/" # Only trigger on files in uploads/ prefix
   }
+
+  depends_on = [aws_lambda_permission.allow_bucket]
 }
 
 # Lambda permission to allow S3 to invoke the function

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SelectorPage } from "@/components/guest-selector/selector-page";
 import { fetchGuests } from "@/lib/data";
 import { Heart } from "@repo/ui/icons";
-import { use } from "react";
+import { Suspense, use } from "react";
 
 export const metadata: Metadata = {
   title: "🎟️ Избери своето име – Сватбата на Кристина и Лъчезар",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default function GuestSelect() {
-  const users = use(fetchGuests()) ?? [];
+  const guests = use(fetchGuests()) ?? [];
 
   return (
     <div className="min-h-screen pt-8">
@@ -29,7 +29,9 @@ export default function GuestSelect() {
             Моле изберете вашето име от списъка с гости за да достъпите чата
           </p>
         </div>
-        <SelectorPage guests={users} />
+        <Suspense>
+          <SelectorPage guests={guests} />
+        </Suspense>
       </div>
     </div>
   );

@@ -42,6 +42,53 @@ export const fetchWeather = async (): Promise<WeatherResponse> => {
   return json;
 };
 
-export const fetchUserUploads = async () => {
-  //
+export type ProcessedImageApiType = {
+  id: string;
+  key: string;
+  originalFilename: string | null;
+  width: number | null;
+  height: number | null;
+  images: {
+    original: string;
+    thumb: string;
+    hd: string;
+    lq: string;
+  };
+};
+
+interface UserUploadsResponse {
+  success: boolean;
+  data: {
+    images: ProcessedImageApiType[];
+    nextCursor: string | null;
+  };
+}
+export const fetchUserUploads = async ({
+  cursor,
+  limit = 20,
+}: { cursor?: string; limit?: number } = {}) => {
+  const searchParams = new URLSearchParams(
+    Object.entries({ cursor, limit: limit.toString() }).filter(
+      ([, v]) => v !== undefined
+    ) as [string, string][]
+  );
+  const url = new URL(
+    `/api/gallery/guests?${searchParams.toString()}`,
+    process.env.NEXT_PUBLIC_API_BASE_URL
+  );
+
+  try {
+    const res = await fetch(url, { credentials: "include" });
+
+    if (!res.ok) {
+      throw new Error(`There was a problem fetching the gallery:`);
+    }
+
+    const json = (await res.json()) as UserUploadsResponse;
+
+    return json.data;
+  } catch (e) {
+    console.error(e);
+    return { images: [], nextCursor: null };
+  }
 };

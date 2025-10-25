@@ -1,23 +1,26 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { getInitials } from "@/components/guest-selector/utils";
 import { Users } from "@repo/ui/icons";
 import { Label } from "@repo/ui/components/ui/label";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
+import { Guest } from "@/store/chatStore";
 
 interface Props {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  guests: any[];
+  guests: Guest[];
 }
 
 export function SelectorPage({ guests }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGuest, setSelectedGuest] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const redirectTo = searchParams.get("redirectTo");
+  const shouldRedirect = !!redirectTo && redirectTo.startsWith("/");
 
   const filteredGuests = guests.filter((guest) =>
     guest.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -47,7 +50,7 @@ export function SelectorPage({ guests }: Props) {
         throw new Error(error);
       }
 
-      router.push("/chat");
+      router.push(shouldRedirect ? redirectTo : "/chat");
     } catch (e) {
       console.error(e);
     } finally {

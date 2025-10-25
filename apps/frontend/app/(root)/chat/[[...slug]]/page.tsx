@@ -1,8 +1,7 @@
 import { ChatPage } from "@/components/chat/chat-page";
 import { fetchGuests } from "@/lib/data";
-import { UserApiType } from "@repo/db/utils";
+import { fetchUser } from "@/lib/server-data";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { use } from "react";
 
@@ -13,26 +12,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-const fetchUser = async (): Promise<UserApiType | null> => {
-  try {
-    const cookieStore = await cookies();
-    const url = new URL("/api/me", process.env.NEXT_PUBLIC_API_BASE_URL);
-    const res = await fetch(url, {
-      headers: { Cookie: cookieStore.toString() },
-      cache: "no-cache",
-    });
-    const json = await res.json();
-    if (json.success && "data" in json) {
-      return json.data as UserApiType;
-    }
-    return null;
-  } catch (e) {
-    console.error(e);
-  }
-
-  return null;
-};
 
 export default function ChatPageServer({
   params,

@@ -1,14 +1,17 @@
 "use client";
 
+import type { UserApiType } from "@repo/db/utils";
 import { UploadForm } from "./upload-form";
+import { ProcessedImageApiType } from "@/lib/data";
 
 interface Props {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  images: any[];
+  user: UserApiType;
+  images: ProcessedImageApiType[];
 }
-export function GuestGallery({ images }: Props) {
+export function GuestGallery({ user, images }: Props) {
   return (
     <div className="gallery-container">
+      <p>Uploading image as: {user.name}</p>
       <p>Uploaded images: {images.length}</p>
       <div className="form-container">
         <UploadForm />
