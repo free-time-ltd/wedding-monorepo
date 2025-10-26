@@ -163,6 +163,7 @@ export const transformProcessedImage = (image: ProcessedImageBaseType) => {
       lq: `/processed/medium/${image.s3Key}.webp`,
     },
     message: image.message,
+    createdAt: image.createdAt,
     user: {
       ...image.user,
       table: {

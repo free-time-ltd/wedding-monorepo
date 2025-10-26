@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@repo/ui/components/ui/dialog";
-import { Maximize, Share2, X } from "@repo/ui/icons";
+import { Maximize, Share2, X, ZoomIn } from "@repo/ui/icons";
 import { Button } from "@repo/ui/components/ui/button";
 import {
   Tooltip,
@@ -18,6 +18,7 @@ import {
 } from "@repo/ui/components/ui/tooltip";
 import Link from "next/link";
 import { toast } from "@repo/ui";
+import { getTimeAgo } from "@/lib/date";
 
 interface Props {
   image: ProcessedImageApiType;
@@ -56,7 +57,7 @@ export default function ImageCard({ image }: Props) {
   return (
     <>
       <Card
-        className="w-full max-w-xs shadow-none py-0 gap-0 transition-transform hover:scale-105"
+        className="w-full max-w-xs shadow-none py-0 gap-0 group aspect-[4/3]"
         key={image.id}
       >
         <CardHeader className="flex flex-row items-center justify-between py-2.5 -mr-1">
@@ -76,15 +77,23 @@ export default function ImageCard({ image }: Props) {
         </CardHeader>
         <CardContent className="p-0">
           <div
-            className="relative bg-muted border-y cursor-pointer"
+            className="relative bg-muted border-y cursor-pointer overflow-hidden"
             onClick={() => setIsOpen(true)}
           >
             <img
               src={image.images.thumb}
               loading="lazy"
               alt={image.key}
-              className="block w-full"
+              className="object-cover w-full duration-300 group-hover:scale-110 transition-transform"
             />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center z-10">
+              <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
+            <div className="absolute bottom-0 right-0 z-0">
+              <p className="text-xs text-muted p-1">
+                {getTimeAgo(new Date(image.createdAt))}
+              </p>
+            </div>
           </div>
           <div className="py-5 px-6">
             <p className="mt-1 text-sm text-muted-foreground">

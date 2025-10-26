@@ -11,6 +11,12 @@ import {
   Phone,
 } from "@repo/ui/icons";
 import eventData from "@repo/utils/eventData";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Локация на сватбата на Кристина и Лъчезар",
+  description: "Всичко, което трябва да знаете за нашето сватбено място",
+};
 
 export default function VenuePage() {
   const [lat, lng] = eventData.location.gps;

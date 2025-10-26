@@ -8,6 +8,7 @@ import { guestUploadsTable } from "@repo/db/schema";
 import { generateId } from "@repo/utils/generateId";
 import { Hono } from "hono";
 import { z } from "zod";
+import { getSocketInstance } from "@/socket-instance";
 
 const imageRouter = new Hono();
 
@@ -98,6 +99,11 @@ imageRouter.post("/process", async (c) => {
       approvedAt: new Date(),
     })
     .where(eq(guestUploadsTable.id, res.id));
+
+  const io = getSocketInstance();
+  if (io) {
+    io.emit("live-feed");
+  }
 
   return c.json({
     success: true,

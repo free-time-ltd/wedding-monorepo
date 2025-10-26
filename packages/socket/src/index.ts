@@ -32,6 +32,7 @@ export interface ServerToClientEvents {
     messages: MessageModel[];
     hasMore: boolean;
   }) => void;
+  "live-feed": () => void;
 }
 
 export interface ClientToServerEvents {

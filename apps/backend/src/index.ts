@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import { generateId } from "@repo/utils/generateId";
 import { defineSocketServer } from "./socket";
 import { Server } from "@repo/socket";
+import { setSocketInstance } from "./socket-instance";
 import eventData from "@repo/utils/eventData";
 import { env } from "./env";
 import weatherRouter from "./routes/weather";
@@ -64,6 +65,8 @@ const io = new Server(server, {
 });
 
 defineSocketServer(io);
+
+setSocketInstance(io);
 
 // graceful shutdown
 process.on("SIGINT", async () => {

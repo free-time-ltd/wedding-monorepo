@@ -1,32 +1,34 @@
 "use client";
 import { toast } from "@repo/ui";
 import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import { Label } from "@repo/ui/components/ui/label";
-import { FormEvent, useState } from "react";
+import { Upload } from "@repo/ui/icons";
+import { useState } from "react";
+import { PhotoUploadDialog, UploadPayload } from "./photo-upload-dialog";
 
 export function UploadForm() {
-  const [message, setMessage] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
 
-    if (!file) return false;
+  const getImageDimensions = async (file: File) => {
+    const bitmap = await createImageBitmap(file);
+    const dimensions = { width: bitmap.width, height: bitmap.height };
+    bitmap.close();
+    return dimensions;
+  };
 
-    setLoading(true);
-
+  const handleUpload = async ({ file, message }: UploadPayload) => {
     try {
+      setLoading(true);
+
+      const { width, height } = await getImageDimensions(file);
       const filename = file.name;
       const mimeType = file.type;
       const sizeBytes = file.size;
 
       if (!mimeType.startsWith("image/")) {
         toast.error("Трябва да качите картинка!");
-        return false;
+        return;
       }
-
-      const { width, height } = await getImageDimensions(file);
 
       const payload = {
         filename,
@@ -54,7 +56,7 @@ export function UploadForm() {
 
       if (!res.ok) {
         toast.error("Нещо не е наред с генерацията на адрес. Опитайте отново.");
-        return false;
+        return;
       }
 
       const json = await res.json();
@@ -71,7 +73,7 @@ export function UploadForm() {
 
       if (!uploadRes.ok) {
         toast.error(`Качването имаше проблем със статус: ${uploadRes.status}`);
-        return false;
+        return;
       }
 
       toast.success(
@@ -79,42 +81,28 @@ export function UploadForm() {
       );
     } catch (e) {
       console.error(e);
+      toast.error("Имаше проблем с качването на снимка. Моля опитайте отново!");
     } finally {
       setLoading(false);
     }
   };
 
-  const getImageDimensions = async (file: File) => {
-    const bitmap = await createImageBitmap(file);
-    const dimensions = { width: bitmap.width, height: bitmap.height };
-    bitmap.close();
-    return dimensions;
-  };
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4">
-      <div>
-        <Label htmlFor="image">Image</Label>
-        <Input
-          type="file"
-          id="image"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="message">Message</Label>
-        <Input
-          id="message"
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-      </div>
-
-      <Button type="submit" disabled={loading}>
-        {loading ? "Uploading..." : "Upload"}
+    <>
+      <Button
+        size="lg"
+        onClick={() => setUploadOpen(true)}
+        className="gap-2 mt-2"
+      >
+        <Upload className="h-4 w-4" />
+        Качи снимка
       </Button>
-    </form>
+      <PhotoUploadDialog
+        onOpenChange={setUploadOpen}
+        open={uploadOpen}
+        loading={loading}
+        onUpload={handleUpload}
+      />
+    </>
   );
 }

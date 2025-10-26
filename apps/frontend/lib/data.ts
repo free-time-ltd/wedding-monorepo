@@ -55,6 +55,7 @@ export type ProcessedImageApiType = {
     hd: string;
     lq: string;
   };
+  createdAt: string;
   message: string | null;
   user: UserApiType;
 };
