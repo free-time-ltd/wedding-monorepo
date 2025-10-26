@@ -155,7 +155,7 @@ export const transformProcessedImage = (image: ProcessedImageBaseType) => {
     height: image.height,
     images: {
       original: `/uploads/${image.s3Key}.${mimeToExt(image.mimeType as string)}`,
-      thumb: `/processed/${image.s3Key}.webp`,
+      thumb: `/processed/thumbnail/${image.s3Key}.webp`,
       hd: `/processed/full/${image.s3Key}.webp`,
       lq: `/processed/medium/${image.s3Key}.webp`,
     },
