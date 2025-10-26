@@ -156,7 +156,7 @@ export const handler = async (event: S3Event): Promise<ProcessingResult> => {
     const processedImages = await processAllSizes(imageBuffer, bucket, s3key);
 
     const result: ProcessingResult = {
-      originalKey: key,
+      originalKey: s3key,
       processedImages,
       uploadedAt,
     };
