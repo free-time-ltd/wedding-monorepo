@@ -30,6 +30,7 @@ export const generatePresignedUploadUrl = ({
     ContentType: mimeType,
     Metadata: {
       databaseKey: id,
+      s3key,
       originalFilename: filename,
     },
   });

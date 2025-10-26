@@ -1,6 +1,6 @@
 # Wedding Website With Chat
 
-This is a project for my wedding and website
+This is a project for my wedding and website. Senior developers can't build simple stuff so here's a presentation website that uses AWS, Vercel and a 5$ VPS to split the code into backend and frontend, build an API and deal with CORS because why not?
 
 ## ToDos
 

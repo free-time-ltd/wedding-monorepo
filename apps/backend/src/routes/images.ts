@@ -69,7 +69,9 @@ imageRouter.post("/process", async (c) => {
     return c.json({ status: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const { originalKey } = await c.req.json();
+  const {
+    data: { originalKey },
+  } = await c.req.json();
 
   if (!originalKey) {
     return c.json({ status: false, error: "Not found" }, { status: 404 });

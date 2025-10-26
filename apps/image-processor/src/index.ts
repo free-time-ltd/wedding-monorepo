@@ -3,6 +3,7 @@ import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  GetObjectCommandOutput,
 } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { Readable } from "stream";
@@ -22,16 +23,16 @@ import {
 
 const s3Client = new S3Client({ region: CONFIG.region });
 
-async function fetchImageFromS3(bucket: string, key: string): Promise<Buffer> {
-  const response = await s3Client.send(
-    new GetObjectCommand({ Bucket: bucket, Key: key })
-  );
+async function fetchImageFromS3(bucket: string, key: string) {
+  return s3Client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+}
 
-  if (!response.Body) {
-    throw new Error(`No image data received from S3 for key: ${key}`);
+async function imageToBuffer(output: GetObjectCommandOutput) {
+  if (!output.Body) {
+    throw new Error(`No image data received from S3`, { cause: output });
   }
 
-  return streamToBuffer(response.Body as Readable);
+  return streamToBuffer(output.Body as Readable);
 }
 
 async function processImageSize(
@@ -140,10 +141,19 @@ export const handler = async (event: S3Event): Promise<ProcessingResult> => {
   }
 
   try {
-    const imageBuffer = await fetchImageFromS3(bucket, key);
+    const image = await fetchImageFromS3(bucket, key);
+    const imageBuffer = await imageToBuffer(image);
     const uploadedAt = Date.now();
 
-    const processedImages = await processAllSizes(imageBuffer, bucket, key);
+    const { s3key } = image.Metadata ?? {};
+
+    if (!s3key) {
+      throw new Error(`No s3key metadata available in the image`, {
+        cause: image.Metadata,
+      });
+    }
+
+    const processedImages = await processAllSizes(imageBuffer, bucket, s3key);
 
     const result: ProcessingResult = {
       originalKey: key,
