@@ -1,4 +1,5 @@
 import { Guest } from "@/store/chatStore";
+import type { UserApiType } from "@repo/db/utils";
 import { cache } from "react";
 
 export const fetchGuests = cache(async (): Promise<Guest[] | null> => {
@@ -54,6 +55,8 @@ export type ProcessedImageApiType = {
     hd: string;
     lq: string;
   };
+  message: string | null;
+  user: UserApiType;
 };
 
 interface UserUploadsResponse {

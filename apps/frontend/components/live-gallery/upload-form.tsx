@@ -1,3 +1,4 @@
+"use client";
 import { toast } from "@repo/ui";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";

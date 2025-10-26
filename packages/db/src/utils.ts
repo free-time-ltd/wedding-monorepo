@@ -130,6 +130,9 @@ export const findProcessedImages = ({
           name: true,
           extras: true,
         },
+        with: {
+          table: true,
+        },
       },
     },
     where: (table, { and, lt, notInArray }) =>
@@ -158,6 +161,14 @@ export const transformProcessedImage = (image: ProcessedImageBaseType) => {
       thumb: `/processed/thumbnail/${image.s3Key}.webp`,
       hd: `/processed/full/${image.s3Key}.webp`,
       lq: `/processed/medium/${image.s3Key}.webp`,
+    },
+    message: image.message,
+    user: {
+      ...image.user,
+      table: {
+        ...image.user.table,
+        label: image.user.table?.label ?? image.user.table?.name,
+      },
     },
   };
 };

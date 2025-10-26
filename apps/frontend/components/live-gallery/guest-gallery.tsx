@@ -1,21 +1,21 @@
 "use client";
 
-import type { UserApiType } from "@repo/db/utils";
-import { UploadForm } from "./upload-form";
 import { ProcessedImageApiType } from "@/lib/data";
+import ImageCard from "./image-card";
 
 interface Props {
-  user: UserApiType;
   images: ProcessedImageApiType[];
 }
-export function GuestGallery({ user, images }: Props) {
+export function GuestGallery({ images }: Props) {
   return (
     <div className="gallery-container">
-      <p>Uploading image as: {user.name}</p>
-      <p>Uploaded images: {images.length}</p>
-      <div className="form-container">
-        <UploadForm />
-      </div>
+      {images.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+          {images.map((img) => (
+            <ImageCard image={img} key={img.id} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
