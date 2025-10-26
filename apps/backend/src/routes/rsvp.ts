@@ -9,7 +9,7 @@ import { z } from "zod";
 
 const rsvpRouter = new Hono();
 
-rsvpRouter.get("/api/rsvps/:id", async (c) => {
+rsvpRouter.get("/:id", async (c) => {
   const { id } = c.req.param();
 
   const guest = await db.query.usersTable.findFirst({
@@ -36,7 +36,7 @@ rsvpRouter.get("/api/rsvps/:id", async (c) => {
   return c.json({ success: true, data: guest });
 });
 
-rsvpRouter.post("/api/rsvps/:id", async (c) => {
+rsvpRouter.post("/:id", async (c) => {
   const { id } = c.req.param();
 
   // Parse the body
