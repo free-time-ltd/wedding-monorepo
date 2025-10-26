@@ -83,7 +83,10 @@ imageRouter.post("/process", async (c) => {
 
   if (!res) {
     return c.json(
-      { status: false, error: "Not found by S3 Key" },
+      {
+        status: false,
+        error: `Not found by S3 Key. The key used: "${originalKey}"`,
+      },
       { status: 404 }
     );
   }
