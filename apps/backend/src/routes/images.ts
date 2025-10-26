@@ -99,13 +99,10 @@ imageRouter.post("/process", async (c) => {
     })
     .where(eq(guestUploadsTable.id, res.id));
 
-  return c.json(
-    {
-      status: false,
-      error: "Not implemented yet",
-    },
-    { status: 501 }
-  );
+  return c.json({
+    success: true,
+    data: "ok",
+  });
 });
 
 export default imageRouter;
