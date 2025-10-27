@@ -89,11 +89,14 @@ resource "aws_cognito_user_pool_client" "app_client" {
   name         = "wedding-app-client-${var.environment}"
   user_pool_id = aws_cognito_user_pool.main.id
 
-  supported_identity_providers = ["COGNITO", aws_cognito_identity_provider.google.provider_name, aws_cognito_identity_provider.facebook.provider_name]
-  allowed_oauth_flows          = ["code"]
-  allowed_oauth_scopes         = ["email", "openid", "profile"]
-  callback_urls                = [var.callback_url]
-  logout_urls                  = [var.logout_url]
+
+  allowed_oauth_flows_user_pool_client = true
+  generate_secret                      = false
+  supported_identity_providers         = ["COGNITO", aws_cognito_identity_provider.google.provider_name, aws_cognito_identity_provider.facebook.provider_name]
+  allowed_oauth_flows                  = ["implicit"]
+  allowed_oauth_scopes                 = ["email", "openid", "profile"]
+  callback_urls                        = [var.callback_url]
+  logout_urls                          = [var.logout_url]
 }
 
 resource "aws_cognito_user_group" "admin_group" {
