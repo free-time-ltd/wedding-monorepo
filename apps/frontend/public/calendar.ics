@@ -1,0 +1,43 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Wedding//Kristina & Lachezar//BG
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Сватбата на Кристина и Лъчезар
+X-WR-TIMEZONE:Europe/Sofia
+X-WR-CALDESC:Сватбено тържество
+
+BEGIN:VTIMEZONE
+TZID:Europe/Sofia
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0300
+DTSTART:19700329T030000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+TZNAME:EEST
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0200
+DTSTART:19701025T040000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+TZNAME:EET
+END:STANDARD
+END:VTIMEZONE
+
+BEGIN:VEVENT
+UID:wedding-kristina-lachezar-2026@svatba2026.com
+DTSTAMP:20251027T120000Z
+DTSTART;TZID=Europe/Sofia:20260627T190000
+DTEND;TZID=Europe/Sofia:20260628T020000
+SUMMARY:Сватбата на Кристина и Лъчезар
+DESCRIPTION:Заповядайте на сватбеното тържество на Кристина и Лъчезар! Очакваме ви за незабравима вечер, пълна с любов, музика и веселие.\n\nМоля потвърдете присъствието си до 1 Юни 2026.\n\nПовече информация: https://svatba2026.com
+LOCATION:Collibri Pool and Garden Plovdiv\, 86\, 4015 Plovdiv\, Bulgaria
+GEO:42.1142642;24.6800456
+URL:https://svatba2026.com
+STATUS:CONFIRMED
+SEQUENCE:0
+TRANSP:OPAQUE
+END:VEVENT
+
+END:VCALENDAR

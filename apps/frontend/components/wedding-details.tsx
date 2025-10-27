@@ -1,3 +1,4 @@
+import { Button } from "@repo/ui/components/ui/button";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import {
   Calendar,
@@ -5,8 +6,9 @@ import {
   MapPin,
   Users,
   MessageCircle,
-  Gift,
+  Camera,
 } from "@repo/ui/icons";
+import Link from "next/link";
 
 export function WeddingDetails() {
   const details = [
@@ -15,18 +17,24 @@ export function WeddingDetails() {
       title: "Запази датата!",
       description: "Юни 27, 2026",
       detail: "Отбележете в календарите си нашия специален ден",
+      download: {
+        label: "Запази в календара",
+        filename: "svatba-krisi-lacho.ics",
+        url: "/calendar.ics",
+      },
     },
     {
       icon: Clock,
-      title: "Назало на Церемонията",
-      description: "18:00",
+      title: "Начало на Церемонията",
+      description: "19:00",
       detail: "Следва коктейлен час и прием",
     },
     {
       icon: MapPin,
       title: "Място",
-      description: "Местоположението ще бъде обявено",
-      detail: "Подробности ще бъдат споделени скоро",
+      description: "Colibri Pool Plovdiv",
+      detail:
+        "Околовръстен път, на 2 км от кв. Коматево в посока София, Plovdiv, Bulgaria",
     },
     {
       icon: Users,
@@ -41,10 +49,10 @@ export function WeddingDetails() {
       detail: "Споделете вълнението с другите гости още преди големия ден",
     },
     {
-      icon: Gift,
-      title: "Списък с подаръци",
-      description: "скоро",
-      detail: "Очаквайте скоро информация за сватбения списък.",
+      icon: Camera,
+      title: "Спомени от Сватбата",
+      description: "Споделете снимки и видео",
+      detail: "Помогнете ни да съберем всички красиви моменти от вечерта!",
     },
   ];
 
@@ -67,7 +75,7 @@ export function WeddingDetails() {
               key={item.title}
               className="border-border hover:shadow-lg transition-shadow"
             >
-              <CardContent className="p-6 space-y-4">
+              <CardContent className="p-6 pt-0 space-y-4 relative">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-accent/10">
                     <item.icon className="h-6 w-6 text-accent" />
@@ -83,6 +91,18 @@ export function WeddingDetails() {
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {item.detail}
                   </p>
+                  {!!item.download && (
+                    <div className="absolute -bottom-2 left-0 right-0 text-center">
+                      <Button variant="link" asChild>
+                        <Link
+                          href={item.download.url}
+                          download={item.download.filename}
+                        >
+                          {item.download.label}
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
