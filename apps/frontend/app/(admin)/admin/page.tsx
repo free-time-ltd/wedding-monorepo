@@ -36,6 +36,7 @@ type User = {
     views: number;
     createdAt: Date;
   } | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   uploads: any[];
 };
 
@@ -43,6 +44,7 @@ type TableData = {
   id: number;
   name: string;
   label: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   guests: any[];
 };
 
@@ -178,12 +180,12 @@ export default function AdminPage() {
                         ) : (
                           <Badge
                             variant={
-                              user.invitation.attending
+                              user.invitation?.attending
                                 ? "default"
                                 : "secondary"
                             }
                           >
-                            {user.invitation.attending ? "Yes" : "No"}
+                            {user.invitation?.attending ? "Yes" : "No"}
                           </Badge>
                         )}
                       </TableCell>

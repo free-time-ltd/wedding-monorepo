@@ -109,7 +109,7 @@ export async function seed() {
       id: "lobby",
       name: "Лоби",
       createdAt: new Date(),
-      createdBy: users.at(1)!.id,
+      createdBy: users[1]?.id ?? "",
       isPrivate: false,
     })
     .returning();
