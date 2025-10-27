@@ -1,3 +1,4 @@
+import { SimpleUserProvider } from "@/context/SimpleUserProvider";
 import { decodeToken } from "@/lib/jwt";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -22,15 +23,19 @@ export default function GuestLayout({
   const decodedUser = decodeToken(idToken);
 
   const user = {
-    id: decodedUser.sub,
-    name: [decodedUser.given_name, decodedUser.family_name].join(" "),
-    email: decodedUser.email,
+    id: decodedUser.sub!,
+    name: [decodedUser.given_name ?? "", decodedUser.family_name ?? ""]
+      .join(" ")
+      .trim(),
+    email: decodedUser.email ?? "",
+    admin: true,
   };
 
   return (
     <main className="min-h-screen space-y-4">
-      <article className="page-content pt-12 sm:pt-16">{children}</article>
-      <p className="text-center">{JSON.stringify(user)}</p>
+      <SimpleUserProvider user={user}>
+        <article className="page-content pt-12 sm:pt-16">{children}</article>
+      </SimpleUserProvider>
     </main>
   );
 }

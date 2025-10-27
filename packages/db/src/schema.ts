@@ -9,7 +9,9 @@ import {
 } from "drizzle-orm/sqlite-core";
 
 export const usersTable = sqliteTable("users", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
   name: text("name").notNull(),
   extras: integer("extra_people").default(0),
   email: text("email"),

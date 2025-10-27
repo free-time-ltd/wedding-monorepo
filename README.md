@@ -14,6 +14,7 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Complete the @todos in code or remove them
 - Try replacing Bun with tsup for the backend project one last time
 - Chat needs mobile redesign
+- Implement infinite scrolls for the live-feed page
 
 ## Fixing turborepo
 
@@ -43,6 +44,15 @@ From the project root execute the following command:
 
 ```bash
 npx turbo run db:seed --filter=backend
+```
+
+## Previewing the database
+
+DrizzleORM comes with its own studio, just like PrismaORM. To run it simply run the following and follow instructions
+
+```bash
+cd apps/backend
+npx drizzle-kit studio
 ```
 
 ## Adding ShadCN components

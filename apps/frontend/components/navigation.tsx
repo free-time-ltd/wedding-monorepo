@@ -6,8 +6,10 @@ import { Menu, X, Heart } from "@repo/ui/icons";
 import { Button } from "@repo/ui/components/ui/button";
 import { cn } from "@repo/ui/lib/utils";
 import { usePathname } from "next/navigation";
+import { useAdminRedirect } from "@/hooks/useAdminRedirect";
 
 export function Navigation() {
+  useAdminRedirect();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 

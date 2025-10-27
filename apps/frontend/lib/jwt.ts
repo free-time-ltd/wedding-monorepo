@@ -18,6 +18,14 @@ export async function verifyCognitoToken(token: string) {
   }
 }
 
+type DecodedCognitoToken = {
+  sub: string;
+  given_name?: string;
+  family_name?: string;
+  email?: string;
+  [key: string]: unknown; // allow other fields
+};
+
 export function decodeToken(token: string) {
-  return decodeJwt(token);
+  return decodeJwt(token) as DecodedCognitoToken;
 }

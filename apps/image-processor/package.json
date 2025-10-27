@@ -5,7 +5,6 @@
   "scripts": {
     "build": "npm run clean && tsup && npm run bundle",
     "bundle": "cd dist && zip -r ../lambda.zip .",
-    "dev": "tsx watch src/index.ts",
     "clean": "rm -rf dist lambda.zip",
     "lint": "eslint"
   },
