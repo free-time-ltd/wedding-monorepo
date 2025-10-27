@@ -15,7 +15,7 @@ export default function GuestSelect() {
 
   return (
     <div className="min-h-screen pt-8">
-      <div className="container mx-auto max-w-3xl">
+      <div className="container px-4 sm:px-0 mx-auto max-w-3xl">
         <div className="text-center mb-4 space-y-4">
           <div className="flex justify-center mb-4">
             <div className="p-3 rounded-full bg-accent/10">

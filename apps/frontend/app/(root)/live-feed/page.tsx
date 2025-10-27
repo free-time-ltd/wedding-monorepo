@@ -26,7 +26,7 @@ export default function GalleryPage() {
   const uniqueUserIds = new Set(images.map((image) => image.user.id));
 
   return (
-    <div className="container mx-auto space-y-6 pt-5">
+    <div className="container mx-auto space-y-6 pt-5 px-4 sm:px-0">
       <div className="text-center mb-12">
         <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4 text-balance">
           Сподели своите спомени

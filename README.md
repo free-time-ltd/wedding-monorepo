@@ -8,12 +8,12 @@ This is a project for my wedding and website. Senior developers can't build simp
 - At some point maybe migrate to better-sqlite3?
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
 - For some reason chat duplicates messages at least according to NextJS.
-- Make a better tailwind theme
 - Tests for the backend?
 - Daily or weekly SQLite backup to S3
 - Make a better email at RSVP change
 - Complete the @todos in code or remove them
 - Try replacing Bun with tsup for the backend project one last time
+- Chat needs mobile redesign
 
 ## Fixing turborepo
 
@@ -61,15 +61,3 @@ cd apps/backend
 npx drizzle-kit push
 npx drizzle-kit generate
 ```
-
-### Image processing flow
-
-- User sends request to get presigned upload url
-- User uploads to said presigned upload url
-- S3 upload event triggers image-processing lambda
-- Lambda processes image, minifies it and adds thumbnails
-- Upon success, lambda sends a webhook request.
-
-...
-
-Should I be putting a metadata in the S3 object for the webhook url? Or should i just use env variables?
