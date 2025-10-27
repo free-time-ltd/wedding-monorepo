@@ -16,6 +16,8 @@ import authRouter from "./routes/auth";
 import restRouter from "./routes/restful";
 import handler from "./handler";
 import galleryRouter from "./routes/gallery";
+import adminRouter from "./routes/admin";
+import { requireAdminAuth } from "./middleware";
 
 const app = new Hono();
 
@@ -26,6 +28,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.use("/api/admin/*", requireAdminAuth);
 
 app.onError(handler);
 
@@ -46,6 +50,7 @@ app.route("/api/rooms", roomsRouter);
 app.route("/api/weather", weatherRouter);
 app.route("/api/images", imageRouter);
 app.route("/api/gallery", galleryRouter);
+app.route("/api/admin", adminRouter);
 app.route("/", restRouter);
 
 const server = serve(

@@ -12,6 +12,7 @@ export {
   not,
   isNull,
   isNotNull,
+  desc,
   type InferSelectModel,
   type InferInsertModel,
 } from "drizzle-orm";
