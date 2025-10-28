@@ -73,6 +73,7 @@ const io = new Server(server, {
   path: "/ws",
   serveClient: false,
   cors: { origin: allowedCorsOrigins, credentials: true },
+  allowEIO3: true,
 });
 
 defineSocketServer(io);

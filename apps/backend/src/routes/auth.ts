@@ -1,6 +1,7 @@
 import { env } from "@/env";
 import { requireAuth } from "@/middleware";
 import { SimpleAuthContext } from "@/types";
+import { getRootDomain } from "@/utils";
 import { findUser, transformUser } from "@repo/db/utils";
 import { Hono } from "hono";
 import { deleteCookie, setCookie } from "hono/cookie";
@@ -53,7 +54,12 @@ authRouter.post("/user/set", async (c) => {
     setCookie(c, env.SESSION_COOKIE_NAME ?? "sess_cookie", jwtToken, {
       path: "/",
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: env.NODE_ENV === "production" ? "none" : "lax",
+      domain:
+        env.NODE_ENV === "production"
+          ? `.${getRootDomain(c.req.header("Host"))}`
+          : undefined,
+      secure: env.NODE_ENV === "production",
     });
 
     return c.json({ success: true, data: userModel }, 201);
