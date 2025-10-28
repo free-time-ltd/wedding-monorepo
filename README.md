@@ -15,6 +15,7 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Try replacing Bun with tsup for the backend project one last time
 - Chat needs mobile redesign
 - Implement infinite scrolls for the live-feed page
+- Add SameSite: None for the admin panel cookie
 
 ## Fixing turborepo
 
