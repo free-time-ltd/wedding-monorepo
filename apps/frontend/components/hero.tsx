@@ -21,7 +21,7 @@ export function Hero() {
             Добре дошли на сватбата на
           </p>
           <h1 className=" text-5xl md:text-7xl lg:text-8xl text-balance text-foreground">
-            Kristina &amp; Lachezar
+            Кристина &amp; Лъчезар
           </h1>
         </div>
 

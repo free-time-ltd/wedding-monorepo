@@ -1,9 +1,9 @@
 import {
-  MonteCarlo as MonteCarloFont,
+  Great_Vibes as GreatVibesFont,
   Noto_Sans as RegularFont,
 } from "next/font/google";
 
-export const MonteCarlo = MonteCarloFont({
+export const MonteCarlo = GreatVibesFont({
   weight: "400",
   variable: "--font-montecarlo",
   subsets: ["latin"],
