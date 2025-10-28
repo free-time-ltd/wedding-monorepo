@@ -16,6 +16,15 @@ import {
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@repo/ui/components/ui/dialog";
+import { Input } from "@repo/ui/components/ui/input";
+import { Label } from "@repo/ui/components/ui/label";
+import Link from "next/link";
 
 type User = {
   id: string;
@@ -79,7 +88,8 @@ type Upload = {
   user: { id: string; name: string };
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -87,6 +97,21 @@ export default function AdminPage() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    extras: 0 as number,
+    tableId: "" as string | "",
+  });
+  const [isTableModalOpen, setIsTableModalOpen] = useState(false);
+  const [editingTable, setEditingTable] = useState<TableData | null>(null);
+  const [tableForm, setTableForm] = useState({
+    name: "",
+    label: "",
+  });
 
   useEffect(() => {
     fetchAll();
@@ -97,10 +122,18 @@ export default function AdminPage() {
     try {
       const [usersRes, tablesRes, invitationsRes, uploadsRes] =
         await Promise.all([
-          fetch(`${API_BASE}/api/admin/users`),
-          fetch(`${API_BASE}/api/admin/tables`),
-          fetch(`${API_BASE}/api/admin/invitations`),
-          fetch(`${API_BASE}/api/admin/uploads`),
+          fetch(new URL(`/api/admin/users`, API_BASE), {
+            credentials: "include",
+          }),
+          fetch(new URL(`/api/admin/tables`, API_BASE), {
+            credentials: "include",
+          }),
+          fetch(new URL(`/api/admin/invitations`, API_BASE), {
+            credentials: "include",
+          }),
+          fetch(new URL(`/api/admin/uploads`, API_BASE), {
+            credentials: "include",
+          }),
         ]);
 
       const usersData = await usersRes.json();
@@ -120,7 +153,8 @@ export default function AdminPage() {
   };
 
   const updateUploadStatus = async (id: string, status: string) => {
-    await fetch(`${API_BASE}/api/admin/uploads/${id}`, {
+    await fetch(new URL(`/api/admin/uploads/${id}`, API_BASE), {
+      credentials: "include",
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
@@ -128,40 +162,143 @@ export default function AdminPage() {
     fetchAll();
   };
 
+  const openAddUser = () => {
+    setEditingUser(null);
+    setForm({ name: "", email: "", phone: "", extras: 0, tableId: "" });
+    setIsUserModalOpen(true);
+  };
+
+  const openEditUser = (user: User) => {
+    setEditingUser(user);
+    setForm({
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      extras: user.extras ?? 0,
+      tableId: user.tableId ? String(user.tableId) : "",
+    });
+    setIsUserModalOpen(true);
+  };
+
+  const submitUserForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const body = {
+      name: form.name.trim(),
+      email: form.email.trim() || null,
+      phone: form.phone.trim() || null,
+      extras: Number.isNaN(Number(form.extras)) ? 0 : Number(form.extras),
+      tableId:
+        form.tableId === "" || form.tableId === null
+          ? null
+          : Number(form.tableId),
+    };
+
+    try {
+      if (editingUser) {
+        await fetch(new URL(`/api/admin/users/${editingUser.id}`, API_BASE), {
+          credentials: "include",
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } else {
+        await fetch(new URL(`/api/admin/users`, API_BASE), {
+          credentials: "include",
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      }
+      setIsUserModalOpen(false);
+      setEditingUser(null);
+      await fetchAll();
+    } catch (err) {
+      console.error("Failed to submit user form", err);
+    }
+  };
+
+  const openAddTable = () => {
+    setEditingTable(null);
+    setTableForm({ name: "", label: "" });
+    setIsTableModalOpen(true);
+  };
+
+  const openEditTable = (table: TableData) => {
+    setEditingTable(table);
+    setTableForm({ name: table.name || "", label: table.label || "" });
+    setIsTableModalOpen(true);
+  };
+
+  const submitTableForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const body = {
+      name: tableForm.name.trim(),
+      label: tableForm.label.trim() || null,
+    };
+
+    try {
+      if (editingTable) {
+        await fetch(new URL(`/api/admin/tables/${editingTable.id}`, API_BASE), {
+          credentials: "include",
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } else {
+        await fetch(new URL(`/api/admin/tables`, API_BASE), {
+          credentials: "include",
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      }
+      setIsTableModalOpen(false);
+      setEditingTable(null);
+      await fetchAll();
+    } catch (err) {
+      console.error("Failed to submit table form", err);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Admin Panel</h1>
+        <h1 className="text-3xl font-bold">Администраторски панел</h1>
         <p className="text-muted-foreground">
-          Manage users, tables, invitations, and uploads
+          Управление на потребители, маси, покани и качени файлове
         </p>
       </div>
 
       <Tabs defaultValue="users" className="w-full">
         <TabsList>
-          <TabsTrigger value="users">Users ({users.length})</TabsTrigger>
-          <TabsTrigger value="tables">Tables ({tables.length})</TabsTrigger>
+          <TabsTrigger value="users">Гости ({users.length})</TabsTrigger>
+          <TabsTrigger value="tables">Маси ({tables.length})</TabsTrigger>
           <TabsTrigger value="invitations">
-            Invitations ({invitations.length})
+            Покани ({invitations.length})
           </TabsTrigger>
-          <TabsTrigger value="uploads">Uploads ({uploads.length})</TabsTrigger>
+          <TabsTrigger value="uploads">Снимки ({uploads.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
           <div className="mt-4 border rounded-lg">
+            <div className="p-4 flex justify-between items-center">
+              <div className="font-medium">Списък с гости</div>
+              <Button onClick={openAddUser}>Добави гост</Button>
+            </div>
             {loading ? (
               <p className="p-4">Loading...</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Extras</TableHead>
-                    <TableHead>Table</TableHead>
-                    <TableHead>Invitation</TableHead>
-                    <TableHead>Uploads</TableHead>
+                    <TableHead>Име</TableHead>
+                    <TableHead>Имейл</TableHead>
+                    <TableHead>Телефон</TableHead>
+                    <TableHead>Придружители</TableHead>
+                    <TableHead>Маса</TableHead>
+                    <TableHead>Отговор на поканата</TableHead>
+                    <TableHead>Снимки</TableHead>
+                    <TableHead>Действия</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -185,11 +322,20 @@ export default function AdminPage() {
                                 : "secondary"
                             }
                           >
-                            {user.invitation?.attending ? "Yes" : "No"}
+                            {user.invitation?.attending ? "Да" : "Не"}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell>{user.uploads.length}</TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openEditUser(user)}
+                        >
+                          Редактирай
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -200,6 +346,10 @@ export default function AdminPage() {
 
         <TabsContent value="tables">
           <div className="mt-4 border rounded-lg">
+            <div className="p-4 flex justify-between items-center">
+              <div className="font-medium">Списък с маси</div>
+              <Button onClick={openAddTable}>Добави маса</Button>
+            </div>
             {loading ? (
               <p className="p-4">Loading...</p>
             ) : (
@@ -207,9 +357,10 @@ export default function AdminPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Label</TableHead>
-                    <TableHead>Guests Count</TableHead>
+                    <TableHead>Име</TableHead>
+                    <TableHead>Етикет</TableHead>
+                    <TableHead>Брой гости</TableHead>
+                    <TableHead>Действия</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -221,6 +372,15 @@ export default function AdminPage() {
                       </TableCell>
                       <TableCell>{table.label || "-"}</TableCell>
                       <TableCell>{table.guests.length}</TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openEditTable(table)}
+                        >
+                          Редактирай
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -237,14 +397,14 @@ export default function AdminPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Attending</TableHead>
-                    <TableHead>Plus One</TableHead>
-                    <TableHead>Menu</TableHead>
-                    <TableHead>Transportation</TableHead>
-                    <TableHead>Accommodation</TableHead>
-                    <TableHead>Notes</TableHead>
-                    <TableHead>Views</TableHead>
+                    <TableHead>Гост</TableHead>
+                    <TableHead>Присъства</TableHead>
+                    <TableHead>Придружител</TableHead>
+                    <TableHead>Меню</TableHead>
+                    <TableHead>Транспорт</TableHead>
+                    <TableHead>Нощувка</TableHead>
+                    <TableHead>Бележки</TableHead>
+                    <TableHead>Прегледи</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -260,14 +420,14 @@ export default function AdminPage() {
                           <Badge
                             variant={inv.attending ? "default" : "secondary"}
                           >
-                            {inv.attending ? "Yes" : "No"}
+                            {inv.attending ? "Да" : "Не"}
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell>{inv.plusOne ? "Yes" : "No"}</TableCell>
+                      <TableCell>{inv.plusOne ? "Да" : "Не"}</TableCell>
                       <TableCell>{inv.menuChoice || "-"}</TableCell>
                       <TableCell>{inv.transportation || "-"}</TableCell>
-                      <TableCell>{inv.accommodation ? "Yes" : "No"}</TableCell>
+                      <TableCell>{inv.accommodation ? "Да" : "Не"}</TableCell>
                       <TableCell className="max-w-xs truncate">
                         {inv.notes || "-"}
                       </TableCell>
@@ -288,12 +448,12 @@ export default function AdminPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Filename</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>Гост</TableHead>
+                    <TableHead>Име на файл</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Размер</TableHead>
+                    <TableHead>Създаден на</TableHead>
+                    <TableHead>Действия</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -331,7 +491,7 @@ export default function AdminPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          {upload.status === "pending" && (
+                          {upload.status !== "pending" && (
                             <>
                               <Button
                                 size="sm"
@@ -340,7 +500,7 @@ export default function AdminPage() {
                                   updateUploadStatus(upload.id, "approved")
                                 }
                               >
-                                Approve
+                                Одобри
                               </Button>
                               <Button
                                 size="sm"
@@ -349,7 +509,7 @@ export default function AdminPage() {
                                   updateUploadStatus(upload.id, "rejected")
                                 }
                               >
-                                Reject
+                                Отхвърли
                               </Button>
                             </>
                           )}
@@ -363,6 +523,139 @@ export default function AdminPage() {
           </div>
         </TabsContent>
       </Tabs>
+      <Dialog open={isTableModalOpen} onOpenChange={setIsTableModalOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {editingTable ? "Редакция на маса" : "Добавяне на маса"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitTableForm} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="t-name">Име</Label>
+              <Input
+                id="t-name"
+                value={tableForm.name}
+                onChange={(e) =>
+                  setTableForm((f) => ({ ...f, name: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="t-label">Етикет</Label>
+              <Input
+                id="t-label"
+                value={tableForm.label}
+                onChange={(e) =>
+                  setTableForm((f) => ({ ...f, label: e.target.value }))
+                }
+                placeholder="напр. Сватбарска маса"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsTableModalOpen(false)}
+              >
+                Отказ
+              </Button>
+              <Button type="submit">
+                {editingTable ? "Запази" : "Добави"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isUserModalOpen} onOpenChange={setIsUserModalOpen}>
+        <DialogContent className="sm:max-w-[520px]">
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {editingUser ? "Редакция на гост" : "Добавяне на гост"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitUserForm} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Име</Label>
+              <Input
+                id="name"
+                value={form.name}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, name: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Имейл</Label>
+              <Input
+                id="email"
+                type="email"
+                value={form.email}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, email: e.target.value }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Телефон</Label>
+              <Input
+                id="phone"
+                value={form.phone}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, phone: e.target.value }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="extras">Придружители</Label>
+              <Input
+                id="extras"
+                type="number"
+                min={0}
+                value={form.extras}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, extras: Number(e.target.value) }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="tableId">Маса</Label>
+              <select
+                id="tableId"
+                className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={form.tableId}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, tableId: e.target.value }))
+                }
+              >
+                <option value="">-- без маса --</option>
+                {tables.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label || t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsUserModalOpen(false)}
+              >
+                Отказ
+              </Button>
+              <Button type="submit">{editingUser ? "Запази" : "Добави"}</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <div className="text-center py-6">
+        <Button type="button" asChild>
+          <Link href="/">Към началната страница</Link>
+        </Button>
+      </div>
     </div>
   );
 }
