@@ -8,6 +8,8 @@ const konamiCode = [
   "ArrowDown",
   "ArrowLeft",
   "ArrowRight",
+  "ArrowLeft",
+  "ArrowRight",
   "b",
   "a",
 ] as const;

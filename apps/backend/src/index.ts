@@ -21,14 +21,16 @@ import { requireAdminAuth } from "./middleware";
 
 const app = new Hono();
 
+const allowedCorsOrigins = [
+  env.FRONTEND_URL ?? "*",
+  "https://wedding-monorepo-frontend.vercel.app",
+  "https://preview.svatba2026.com",
+];
+
 app.use(
   "*",
   cors({
-    origin: [
-      env.FRONTEND_URL ?? "*",
-      "https://wedding-monorepo-frontend.vercel.app",
-      "https://preview.svatba2026.com",
-    ],
+    origin: allowedCorsOrigins,
     credentials: true,
   })
 );
@@ -70,7 +72,7 @@ const server = serve(
 const io = new Server(server, {
   path: "/ws",
   serveClient: false,
-  cors: { origin: env.FRONTEND_URL, credentials: true },
+  cors: { origin: allowedCorsOrigins, credentials: true },
 });
 
 defineSocketServer(io);
