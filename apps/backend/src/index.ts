@@ -24,7 +24,11 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: env.FRONTEND_URL ?? "*",
+    origin: [
+      env.FRONTEND_URL ?? "*",
+      "https://wedding-monorepo-frontend.vercel.app",
+      "https://preview.svatba2026.com",
+    ],
     credentials: true,
   })
 );
