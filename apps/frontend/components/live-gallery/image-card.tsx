@@ -7,7 +7,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@repo/ui/components/ui/dialog";
-import { Maximize, Share2, X, ZoomIn } from "@repo/ui/icons";
+import { Loader2, Maximize, Share2, X, ZoomIn } from "@repo/ui/icons";
 import { Button } from "@repo/ui/components/ui/button";
 import {
   Tooltip,
@@ -25,6 +25,8 @@ interface Props {
 
 export default function ImageCard({ image }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isHDLoaded, setIsHDLoaded] = useState(false);
 
   const handleShare = async () => {
     const shareData = {
@@ -64,8 +66,16 @@ export default function ImageCard({ image }: Props) {
           src={image.images.lq || "/placeholder.svg"}
           alt={image.originalFilename ?? image.message ?? image.id}
           loading="lazy"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setIsLoaded(true)}
           className="object-cover transition-transform duration-300 group-hover:scale-105 absolute inset-0 w-full h-full object-center"
         />
+
+        {!isLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
 
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
           <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -106,8 +116,13 @@ export default function ImageCard({ image }: Props) {
               alt={image.key}
               width={Number(image.width)}
               height={Number(image.height)}
+              onLoad={() => setIsHDLoaded(true)}
+              onError={() => setIsHDLoaded(true)}
               className="max-h-[85vh] max-w-full object-contain"
             />
+            {!isHDLoaded && (
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            )}
           </div>
           <div className="flex justify-between items-start text-muted px-4 pb-2 -mt-2 gap-2">
             <div className="message-container">
