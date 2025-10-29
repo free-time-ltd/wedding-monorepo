@@ -1,4 +1,10 @@
-import { messagesTable, roomsTable, tablesTable, usersTable } from "./schema";
+import {
+  guestUploadsTable,
+  messagesTable,
+  roomsTable,
+  tablesTable,
+  usersTable,
+} from "./schema";
 import { db } from "./client";
 import { generateId } from "@repo/utils/generateId";
 
@@ -124,6 +130,34 @@ export async function seed() {
       userId: users.at(1)!.id,
     });
   }
+
+  console.log("✅ Seeder completed successfully.");
+}
+
+export async function seedImages() {
+  const user = await db.query.usersTable.findFirst();
+  if (!user) return;
+
+  const images: Array<typeof guestUploadsTable.$inferInsert> = Array.from(
+    {
+      length: 123,
+    },
+    (_, i) => ({
+      s3Key: generateId(),
+      userId: user.id,
+      message: `Test image #${i}`,
+      mimeType: "image/jpeg",
+      origFilename: `test-img-00${i}.jpg`,
+      width: 1280,
+      height: 1280,
+      sizeBytes: 12323124,
+      createdAt: new Date(),
+      approvedAt: new Date(),
+      status: "processed",
+    })
+  );
+
+  await db.insert(guestUploadsTable).values(images);
 
   console.log("✅ Seeder completed successfully.");
 }

@@ -125,14 +125,8 @@ export const findProcessedImages = ({
   return db.query.guestUploadsTable.findMany({
     with: {
       user: {
-        columns: {
-          id: true,
-          name: true,
-          extras: true,
-        },
-        with: {
-          table: true,
-        },
+        columns: { id: true, name: true, extras: true },
+        with: { table: true },
       },
     },
     where: (table, { and, lt, notInArray }) =>
@@ -140,7 +134,7 @@ export const findProcessedImages = ({
         notInArray(table.status, ["pending", "rejected"]),
         cursor ? lt(table.id, cursor) : undefined
       ),
-    orderBy: (table, { desc }) => desc(table.createdAt),
+    orderBy: (table, { desc }) => desc(table.id),
     limit,
   });
 };

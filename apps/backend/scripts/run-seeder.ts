@@ -1,7 +1,10 @@
-import { seed } from "@repo/db/seeder";
+import "dotenv/config";
+
+import { seed, seedImages } from "@repo/db/seeder";
 
 async function main() {
   await seed();
+  await seedImages();
   process.exit(0);
 }
 

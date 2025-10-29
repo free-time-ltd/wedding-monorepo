@@ -1,18 +1,31 @@
 "use client";
 
-import { ProcessedImageApiType } from "@/lib/data";
-import ImageCard from "./image-card";
+import { fetchUserUploads, ProcessedImageApiType } from "@/lib/data";
+import ImageCard, { ImageCardSkeleton } from "./image-card";
 import { useSocketEvent } from "@/hooks/useSocketEvent";
 import { useSocket } from "@/context/SocketContext";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useGalleryStore } from "@/store/galleryStore";
+import { Loader } from "../loader";
 
 interface Props {
   images: ProcessedImageApiType[];
 }
+
 export function GuestGallery({ images }: Props) {
+  const loaderRef = useRef<HTMLDivElement>(null);
   const { isConnected, connect, socket } = useSocket();
+  const photos = useGalleryStore((state) => state.photos);
+  const setPhotos = useGalleryStore((state) => state.setPhotos);
+  const addPhoto = useGalleryStore((state) => state.addImage);
+  const isProcessing = useGalleryStore((state) => state.processing);
+  const setProcessing = useGalleryStore((state) => state.setProcessing);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const nextCursor = useRef(images.at(-1)?.id ?? null);
+
   useSocketEvent(socket, "live-feed", () => {
-    // @todo Refetch the images
+    setProcessing(false);
+    loadImages();
   });
 
   useEffect(() => {
@@ -22,14 +35,83 @@ export function GuestGallery({ images }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Hydrate the store
+  useEffect(() => {
+    if (photos.length === 0 && images.length > 0) {
+      setPhotos(images);
+    }
+  }, [images, photos.length, setPhotos]);
+
+  const loadImages = useCallback(async () => {
+    const cursor = nextCursor.current;
+    if (isLoadingMore || !cursor) return;
+
+    setIsLoadingMore(true);
+
+    try {
+      const { images: newImages = [], nextCursor: newCursor } =
+        await fetchUserUploads({
+          cursor: nextCursor.current,
+          limit: 20,
+        });
+
+      nextCursor.current = newCursor;
+      newImages.forEach((image) => addPhoto(image));
+    } catch (e) {
+      console.error("Error loading more images:", e);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, addPhoto]);
+
+  // Trigger the infinite scroll
+  useEffect(() => {
+    const loaderEl = loaderRef.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target?.isIntersecting && !!nextCursor.current) {
+          loadImages();
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    if (loaderEl) {
+      observer.observe(loaderEl);
+    }
+
+    return () => {
+      if (loaderEl) {
+        observer.unobserve(loaderEl);
+      }
+    };
+  }, [loadImages]);
+
   return (
-    <div className="gallery-container">
-      {images.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {images.map((img) => (
-            <ImageCard image={img} key={img.id} />
-          ))}
+    <div className="gallery-container container">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {isProcessing && <ImageCardSkeleton />}
+        {photos.map((img) => (
+          <ImageCard image={img} key={img.id} />
+        ))}
+      </div>
+      {!!nextCursor.current && (
+        <div ref={loaderRef} className="w-full py-8 flex justify-center">
+          {isLoadingMore && (
+            <>
+              <Loader />
+              <p className="text-center text-gray-500 py-8">
+                Зареждане на снимки...
+              </p>
+            </>
+          )}
         </div>
+      )}
+      {!nextCursor.current && (
+        <p className="text-center text-gray-500 py-8">
+          Няма повече снимки. Винаги можеш да добавиш от своите!
+        </p>
       )}
     </div>
   );

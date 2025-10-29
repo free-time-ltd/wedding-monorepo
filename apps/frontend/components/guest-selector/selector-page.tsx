@@ -60,10 +60,6 @@ export function SelectorPage({ guests }: Props) {
 
   return (
     <div className="card space-y-6">
-      <div className="card-header">
-        <h1 className="text-2xl font-bold">Достъп до сайта</h1>
-        <p>Моля изберете вашето име от списъка по-долу.</p>
-      </div>
       <div className="card-body space-y-4">
         <div className="space-y-6">
           <div className="search-field flex flex-col gap-2">

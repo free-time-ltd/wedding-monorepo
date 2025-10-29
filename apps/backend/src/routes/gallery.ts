@@ -9,9 +9,11 @@ import { env } from "@/env";
 const galleryRouter = new Hono();
 
 galleryRouter.get("/guests", async (c) => {
-  const limit = 20;
-  const cursor = c.req.param("cursor");
-  const images = await findProcessedImages({ cursor, limit });
+  const { cursor, limit = 20 } = c.req.query();
+
+  console.log({ cursor, limit });
+
+  const images = await findProcessedImages({ cursor, limit: Number(limit) });
 
   const nextCursor =
     images.length === limit ? images[images.length - 1].id : null;

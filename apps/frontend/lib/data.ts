@@ -70,10 +70,10 @@ interface UserUploadsResponse {
 export const fetchUserUploads = async ({
   cursor,
   limit = 20,
-}: { cursor?: string; limit?: number } = {}) => {
+}: { cursor?: string | null; limit?: number } = {}) => {
   const searchParams = new URLSearchParams(
     Object.entries({ cursor, limit: limit.toString() }).filter(
-      ([, v]) => v !== undefined
+      ([, v]) => !!v
     ) as [string, string][]
   );
   const url = new URL(
