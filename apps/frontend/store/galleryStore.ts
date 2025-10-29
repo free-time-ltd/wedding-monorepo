@@ -17,7 +17,9 @@ export const useGalleryStore = create<GalleryStore>((set) => ({
   processing: false,
   addImage: (image) =>
     set((state) => ({
-      photos: [image, ...state.photos],
+      photos: state.photos.some((photo) => photo.id === image.id)
+        ? state.photos
+        : [...state.photos, image],
     })),
   removeImage: (imgId) =>
     set((state) => ({
