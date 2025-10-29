@@ -5,7 +5,9 @@ export default function LiveFeedPage() {
         <h1 className="text-4xl md:text-8xl text-center font-serif font-bold">
           Очаквайте скоро
         </h1>
-        <h2 className="text-center">Най-вероятно след сватбата 😅</h2>
+        <h2 className="text-center font-serif">
+          Най-вероятно след сватбата 😅
+        </h2>
       </div>
     </div>
   );

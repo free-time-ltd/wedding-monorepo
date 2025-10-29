@@ -4,10 +4,12 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Upload } from "@repo/ui/icons";
 import { useState } from "react";
 import { PhotoUploadDialog, UploadPayload } from "./photo-upload-dialog";
+import { useGalleryStore } from "@/store/galleryStore";
 
 export function UploadForm() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const setProcessing = useGalleryStore((state) => state.setProcessing);
 
   const getImageDimensions = async (file: File) => {
     const bitmap = await createImageBitmap(file);
@@ -79,7 +81,10 @@ export function UploadForm() {
       toast.success(
         "Казването на картинката беше успешно. До няколко минути ще бъде обработена и ще бъде видима в сайта!"
       );
+
+      setProcessing(true);
     } catch (e) {
+      setProcessing(false);
       console.error(e);
       toast.error("Имаше проблем с качването на снимка. Моля опитайте отново!");
     } finally {
