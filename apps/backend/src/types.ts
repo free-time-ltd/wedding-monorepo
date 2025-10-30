@@ -32,3 +32,9 @@ export const rsvpSchema = z.object({
 export type RsvpInput = z.infer<typeof rsvpSchema>;
 
 export type SimpleAuthContext = Context<{ Variables: AuthVariables }>;
+
+export const newsletterSignSchema = z.object({
+  email: z.email(),
+});
+
+export type NewsletterSignInput = z.infer<typeof newsletterSignSchema>;

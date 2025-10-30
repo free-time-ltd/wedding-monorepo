@@ -148,6 +148,13 @@
       "when": 1761815945570,
       "tag": "0020_simple_vision",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1761828273936,
+      "tag": "0021_rapid_crusher_hogan",
+      "breakpoints": true
     }
   ]
 }
