@@ -159,11 +159,14 @@ export const newsletterTable = sqliteTable("newsletter", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => generateId()),
-  email: text("email").notNull(),
+  email: text("email").notNull().unique(),
   userId: text("user_id").references(() => usersTable.id, {
     onDelete: "cascade",
   }),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+    () => new Date()
+  ),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$defaultFn(
     () => new Date()
   ),
 });
