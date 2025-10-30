@@ -155,6 +155,19 @@ export const cacheTable = sqliteTable(
   (table) => [index("expireIndex").on(table.expiresAt)]
 );
 
+export const newsletterTable = sqliteTable("newsletter", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
+  email: text("email").notNull(),
+  userId: text("user_id").references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
 export const userRoomsRelations = relations(userRooms, ({ one }) => ({
   user: one(usersTable, {
     fields: [userRooms.userId],

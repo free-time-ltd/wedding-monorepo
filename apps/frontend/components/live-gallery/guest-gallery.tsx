@@ -23,9 +23,14 @@ export function GuestGallery({ images }: Props) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const nextCursor = useRef(images.at(-1)?.id ?? null);
 
-  useSocketEvent(socket, "live-feed", () => {
+  useSocketEvent(socket, "live-feed", async () => {
     setProcessing(false);
-    loadImages();
+
+    const { images: newImages, nextCursor: newCursor } =
+      await loadImagesWithParams({ cursor: null });
+
+    setPhotos(newImages);
+    nextCursor.current = newCursor;
   });
 
   useEffect(() => {
@@ -42,26 +47,39 @@ export function GuestGallery({ images }: Props) {
     }
   }, [images, photos.length, setPhotos]);
 
+  const loadImagesWithParams = async ({
+    cursor,
+    limit = 20,
+  }: {
+    cursor: string | null;
+    limit?: number;
+  }) => {
+    setIsLoadingMore(true);
+    try {
+      const { images: newImages = [], nextCursor: newCursor } =
+        await fetchUserUploads({
+          cursor,
+          limit,
+        });
+
+      return { images: newImages, nextCursor: newCursor };
+    } catch (e) {
+      console.error("Error loading more images:", e);
+      return { images: [], nextCursor: null };
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   const loadImages = useCallback(async () => {
     const cursor = nextCursor.current;
     if (isLoadingMore || !cursor) return;
 
-    setIsLoadingMore(true);
+    const { images: newImages, nextCursor: newCursor } =
+      await loadImagesWithParams({ cursor, limit: 20 });
 
-    try {
-      const { images: newImages = [], nextCursor: newCursor } =
-        await fetchUserUploads({
-          cursor: nextCursor.current,
-          limit: 20,
-        });
-
-      nextCursor.current = newCursor;
-      newImages.forEach((image) => addPhoto(image));
-    } catch (e) {
-      console.error("Error loading more images:", e);
-    } finally {
-      setIsLoadingMore(false);
-    }
+    nextCursor.current = newCursor;
+    newImages.forEach((image) => addPhoto(image));
   }, [isLoadingMore, addPhoto]);
 
   // Trigger the infinite scroll

@@ -134,6 +134,20 @@
       "when": 1761328632894,
       "tag": "0018_ordinary_thunderball",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1761815917454,
+      "tag": "0019_pretty_xavin",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1761815945570,
+      "tag": "0020_simple_vision",
+      "breakpoints": true
     }
   ]
 }
