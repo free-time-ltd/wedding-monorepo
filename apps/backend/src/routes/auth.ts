@@ -1,8 +1,8 @@
 import { env } from "@/env";
 import { requireAuth } from "@/middleware";
 import { SimpleAuthContext } from "@/types";
-import { getRootDomain } from "@/utils";
 import { findUser, transformUser } from "@repo/db/utils";
+import { getRootDomain } from "@repo/utils/getRootDomain";
 import { Hono } from "hono";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
