@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { Card } from "@repo/ui/components/ui/card";
 import { ProcessedImageApiType } from "@/lib/data";
-import { useState } from "react";
+import { SyntheticEvent, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -55,6 +55,13 @@ export default function ImageCard({ image }: Props) {
     }
   };
 
+  const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
+    setIsLoaded(true);
+    const target = e.currentTarget;
+    target.src = "/broken-image.png";
+    target.onerror = null;
+  };
+
   return (
     <>
       <Card
@@ -67,7 +74,7 @@ export default function ImageCard({ image }: Props) {
           alt={image.originalFilename ?? image.message ?? image.id}
           loading="lazy"
           onLoad={() => setIsLoaded(true)}
-          onError={() => setIsLoaded(true)}
+          onError={handleImageError}
           className="object-cover transition-transform duration-300 group-hover:scale-105 absolute inset-0 w-full h-full object-center"
         />
 

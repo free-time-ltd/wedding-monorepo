@@ -1,7 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": ["JWT_SECRET", "DB_PATH", "BACKEND_PORT", "FRONTEND_PORT", "NEXT_PUBLIC_API_BASE_URL", "SESSION_COOKIE_NAME", "NEXT_PUBLIC_WS_SERVER_URL", "FRONTEND_URL", "RESEND_KEY", "MAIL_ADDRESS_FROM", "WEBHOOK_SECRET"],
+  "globalEnv": ["NODE_ENV", "JWT_SECRET", "DB_PATH", "BACKEND_PORT", "FRONTEND_PORT", "NEXT_PUBLIC_API_BASE_URL", "SESSION_COOKIE_NAME", "NEXT_PUBLIC_WS_SERVER_URL", "FRONTEND_URL", "RESEND_KEY", "MAIL_ADDRESS_FROM", "WEBHOOK_SECRET"],
   "globalDependencies": [".env*"],
   "tasks": {
     "build": {

@@ -11,8 +11,6 @@ const galleryRouter = new Hono();
 galleryRouter.get("/guests", async (c) => {
   const { cursor, limit = 20 } = c.req.query();
 
-  console.log({ cursor, limit });
-
   const images = await findProcessedImages({ cursor, limit: Number(limit) });
 
   const nextCursor =
