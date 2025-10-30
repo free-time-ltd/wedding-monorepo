@@ -24,14 +24,14 @@ variable "allowed_domain" {
 
 variable "callback_url" {
   description = "URL to redirect the customer to after successful login"
-  type        = string
-  default     = "https://svatba2026.com/auth/callback"
+  type        = list(string)
+  default     = ["https://svatba2026.com/auth/callback"]
 }
 
 variable "logout_url" {
   description = "URL to redirect the customer after logout"
-  type        = string
-  default     = "https://svatba2026.com/auth/logout"
+  type        = list(string)
+  default     = ["https://svatba2026.com/auth/logout"]
 }
 
 # OAuth Providers
