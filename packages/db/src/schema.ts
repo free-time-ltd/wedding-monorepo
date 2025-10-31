@@ -221,3 +221,10 @@ export const guestUploadRelations = relations(guestUploadsTable, ({ one }) => ({
     references: [usersTable.id],
   }),
 }));
+
+export const newsletterRelations = relations(newsletterTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [newsletterTable.userId],
+    references: [usersTable.id],
+  }),
+}));

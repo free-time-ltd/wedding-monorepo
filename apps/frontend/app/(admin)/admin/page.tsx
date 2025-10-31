@@ -88,6 +88,14 @@ type Upload = {
   user: { id: string; name: string };
 };
 
+type Newsletter = {
+  id: string;
+  email: string;
+  user: { id: string; name: string };
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
@@ -96,6 +104,7 @@ export default function AdminPage() {
   const [tables, setTables] = useState<TableData[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [uploads, setUploads] = useState<Upload[]>([]);
+  const [newsletter, setNewsletter] = useState<Newsletter[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -120,7 +129,7 @@ export default function AdminPage() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [usersRes, tablesRes, invitationsRes, uploadsRes] =
+      const [usersRes, tablesRes, invitationsRes, uploadsRes, newsletterRes] =
         await Promise.all([
           fetch(new URL(`/api/admin/users`, API_BASE), {
             credentials: "include",
@@ -134,17 +143,22 @@ export default function AdminPage() {
           fetch(new URL(`/api/admin/uploads`, API_BASE), {
             credentials: "include",
           }),
+          fetch(new URL(`/api/admin/newsletter`, API_BASE), {
+            credentials: "include",
+          }),
         ]);
 
       const usersData = await usersRes.json();
       const tablesData = await tablesRes.json();
       const invitationsData = await invitationsRes.json();
       const uploadsData = await uploadsRes.json();
+      const newsletterData = await newsletterRes.json();
 
       if (usersData.success) setUsers(usersData.data);
       if (tablesData.success) setTables(tablesData.data);
       if (invitationsData.success) setInvitations(invitationsData.data);
       if (uploadsData.success) setUploads(uploadsData.data);
+      if (newsletterData.success) setNewsletter(newsletterData.data);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -260,6 +274,30 @@ export default function AdminPage() {
     }
   };
 
+  const deleteNewsletter = async (id: string) => {
+    if (confirm("Сигурен ли си, че искаш да изтриеш записа?")) {
+      await fetch(new URL(`/api/admin/newsletter/${id}`, API_BASE), {
+        credentials: "include",
+        method: "DELETE",
+      });
+      fetchAll();
+    }
+  };
+
+  const deleteTable = async (id: number) => {
+    const table = tables.find((table) => table.id === id);
+    if (
+      table &&
+      confirm(`Сигурен ли си че искаш да изтриеш маса "${table.name}"`)
+    ) {
+      await fetch(new URL(`/api/admin/tables/${id}`, API_BASE), {
+        credentials: "include",
+        method: "DELETE",
+      });
+      fetchAll();
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
@@ -277,6 +315,9 @@ export default function AdminPage() {
             Покани ({invitations.length})
           </TabsTrigger>
           <TabsTrigger value="uploads">Снимки ({uploads.length})</TabsTrigger>
+          <TabsTrigger value="newsletter">
+            Бюлетин ({newsletter.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -373,13 +414,22 @@ export default function AdminPage() {
                       <TableCell>{table.label || "-"}</TableCell>
                       <TableCell>{table.guests.length}</TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openEditTable(table)}
-                        >
-                          Редактирай
-                        </Button>
+                        <div className="flex gap-2 shrink grow-0">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEditTable(table)}
+                          >
+                            Редактирай
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deleteTable(table.id)}
+                          >
+                            Изтрий
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -513,6 +563,48 @@ export default function AdminPage() {
                               </Button>
                             </>
                           )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </TabsContent>
+        <TabsContent value="newsletter">
+          <div className="mt-4 border rounded-lg">
+            {loading ? (
+              <p className="p-4">Loading...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Имейл</TableHead>
+                    <TableHead>Записан на</TableHead>
+                    <TableHead>Избран потребител</TableHead>
+                    <TableHead>-</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {newsletter.map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell className="font-medium">{row.email}</TableCell>
+                      <TableCell>
+                        {new Date(row.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {row.user?.name ?? "Няма избран потребител"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deleteNewsletter(row.id)}
+                          >
+                            Изтрий
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

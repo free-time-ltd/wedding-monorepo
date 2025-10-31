@@ -23,6 +23,7 @@ import { useSocket } from "@/context/SocketContext";
 import ChatControls from "./chat-controls";
 import ChatArea, { ChatAreaHandle } from "./chat-area";
 import { ChatSidebar } from "./chat-sidebar";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export interface RoomCreationType {
   name: string;
@@ -54,6 +55,7 @@ export function ChatUI({
   const [isChatAtBottom, setIsChatAtBottom] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<ChatAreaHandle>(null);
+  const isMobile = useIsMobile();
 
   const filteredRooms = Object.values(chatrooms);
 
@@ -84,7 +86,7 @@ export function ChatUI({
   return (
     <div className="min-h-screen pt-8">
       <div className="container mx-auto h-[calc(100vh-4rem)] max-w-7xl p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-1 md:gap-4 h-full">
           {/* Rooms Sidebar */}
           <ChatSidebar
             guests={guests}
@@ -93,13 +95,17 @@ export function ChatUI({
             selectedRoom={selectedRoom}
             onRoomChange={handleRoomChange}
             onRoomCreate={handleCreateRoom}
+            hidden={isMobile && selectedRoom !== null}
           />
 
           {/* Chat Area */}
-          <Card className="md:col-span-2 flex flex-col h-full min-h-0 relative">
+          <Card
+            className="md:col-span-2 flex flex-col h-full min-h-0 relative py-2 md:py-6"
+            hidden={isMobile && selectedRoom === null}
+          >
             {selectedRoom ? (
               <>
-                <div className="p-4 border-b border-border">
+                <div className="px-4 py-0 md:py-4 border-b border-border">
                   <div className="flex items-center gap-3">
                     <Button
                       size="icon"
