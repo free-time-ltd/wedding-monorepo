@@ -1,5 +1,5 @@
 import type { ExtendedError, Socket } from "socket.io";
-import cookie from "cookie";
+import * as cookie from "cookie";
 import { verify } from "hono/jwt";
 import { findUser, transformUser } from "@repo/db/utils";
 import { env } from "./env";
