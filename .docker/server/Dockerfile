@@ -1,14 +1,16 @@
-FROM oven/bun:1.2-alpine AS base
+FROM node:22.20-alpine AS base
 
 WORKDIR /app
 
-RUN apk add --no-cache nodejs npm
-
-RUN npm install -g turbo pm2
+RUN npm install -g turbo
 
 FROM base AS builder
 
-COPY . .
+COPY package.json package-lock.json turbo.json ./
+COPY apps ./apps
+COPY packages ./packages
+
+RUN npm ci --omit=dev --prefer-offline
 
 RUN turbo prune --scope=backend --docker
 
@@ -17,22 +19,28 @@ FROM base AS installer
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/package-lock.json ./package-lock.json
 
-RUN npm install --omit=dev
+RUN npm ci
 
-# Build the project
 COPY --from=builder /app/out/full/ .
 
-COPY turbo.json turbo.json
-
 RUN turbo run build --filter=backend
+
+FROM base AS prod-deps
+
+COPY --from=builder /app/out/json/ .
+COPY --from=builder /app/out/package-lock.json ./package-lock.json
+
+RUN npm ci --omit=dev --prefer-offline
 
 FROM node:22.20-alpine AS runner
 
 WORKDIR /app
 
-RUN npm install -g pm2
+COPY --from=installer /app/apps/backend/package.json ./
 
-COPY --from=installer /app/node_modules ./node_modules
-COPY --from=installer /app/apps/backend/dist/index.js index.js
+RUN npm install -g pm2 
 
-CMD ["pm2-runtime", "index.js"]
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=installer /app/apps/backend/dist ./dist
+
+CMD ["pm2-runtime", "start", "npm", "--", "start"]
