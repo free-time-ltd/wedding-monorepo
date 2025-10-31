@@ -12,7 +12,6 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Daily or weekly SQLite backup to S3
 - Make a better email at RSVP change
 - Complete the @todos in code or remove them
-- Try replacing Bun with tsup for the backend project one last time
 
 ## Fixing turborepo
 
@@ -22,7 +21,6 @@ This is a project for my wedding and website. Senior developers can't build simp
 
 For now the project requires both:
 
-- Bun v1.2.10+
 - NodeJS v22+
 - NPM v10.9+
 
