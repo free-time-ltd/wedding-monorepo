@@ -76,6 +76,7 @@ export function CreateRoomDialog({
               id="room-name"
               placeholder="пример Чат на стая №5"
               value={roomName}
+              autoComplete="off"
               onChange={(e) => setRoomName(e.target.value)}
             />
           </div>

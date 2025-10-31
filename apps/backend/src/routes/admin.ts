@@ -5,8 +5,10 @@ import {
   tablesTable,
   invitationTable,
   guestUploadsTable,
+  newsletterTable,
 } from "@repo/db/schema";
 import { eq, desc } from "@repo/db";
+import { successResponse } from "@/reponses";
 
 const adminRouter = new Hono();
 
@@ -228,6 +230,39 @@ adminRouter.delete("/uploads/:id", async (c) => {
   const { id } = c.req.param();
 
   await db.delete(guestUploadsTable).where(eq(guestUploadsTable.id, id));
+
+  return c.json({ success: true });
+});
+
+// Newsletter
+adminRouter.get("/newsletter", async (c) => {
+  const newsletter = await db.query.newsletterTable.findMany({
+    with: {
+      user: true,
+    },
+    orderBy: (table, { desc }) => desc(table.id),
+  });
+
+  return successResponse(c, newsletter);
+});
+
+adminRouter.patch("/newsletter/:id", async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json();
+
+  const [newsletter] = await db
+    .update(newsletterTable)
+    .set(body)
+    .where(eq(newsletterTable.id, id))
+    .returning();
+
+  return successResponse(c, newsletter);
+});
+
+adminRouter.delete("/newsletter/:id", async (c) => {
+  const { id } = c.req.param();
+
+  await db.delete(newsletterTable).where(eq(newsletterTable.id, id));
 
   return c.json({ success: true });
 });

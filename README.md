@@ -13,9 +13,6 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Make a better email at RSVP change
 - Complete the @todos in code or remove them
 - Try replacing Bun with tsup for the backend project one last time
-- Chat needs mobile redesign
-- Implement infinite scrolls for the live-feed page
-- Add SameSite: None for the admin panel cookie
 
 ## Fixing turborepo
 
