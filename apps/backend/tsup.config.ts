@@ -1,4 +1,5 @@
 import { defineConfig } from "tsup";
+import { builtinModules } from "module";
 
 export default defineConfig({
   entry: ["src/index.ts"],
@@ -11,5 +12,6 @@ export default defineConfig({
   clean: true,
   sourcemap: false,
   noExternal: [/^@repo\//],
+  external: [...builtinModules, "cookie", "zod"],
   outExtension: () => ({ js: ".js" }),
 });
