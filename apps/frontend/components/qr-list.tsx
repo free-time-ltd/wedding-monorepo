@@ -17,11 +17,7 @@ export function QrList({ guests }: Props) {
         {guests.map((guest, i) => (
           <Card
             key={i}
-            className="
-              flex flex-col items-center justify-center 
-              p-1 print:p-0 bg-white
-              shadow-none print:shadow-none border border-gray-200 print:border-none
-            "
+            className="flex flex-col items-center justify-center p-1 print:p-0 bg-white shadow-none print:shadow-none border border-gray-200 print:border-none"
           >
             <p className="text-center">{guest.name}</p>
             <Canvas

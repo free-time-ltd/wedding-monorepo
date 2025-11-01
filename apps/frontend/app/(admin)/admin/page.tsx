@@ -745,9 +745,12 @@ export default function AdminPage() {
           </form>
         </DialogContent>
       </Dialog>
-      <div className="text-center py-6">
+      <div className="flex justify-center items-center gap-4 py-6">
         <Button type="button" asChild>
           <Link href="/">Към началната страница</Link>
+        </Button>
+        <Button type="button" variant="outline" asChild>
+          <Link href="/admin/rsvp-list">Виж QR кодове на поканите</Link>
         </Button>
       </div>
     </div>
