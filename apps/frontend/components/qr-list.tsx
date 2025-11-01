@@ -13,15 +13,7 @@ export function QrList({ guests }: Props) {
 
   return (
     <>
-      <div
-        className="
-          grid 
-          grid-cols-10 
-          gap-2 
-          justify-items-center 
-          print:grid-cols-10
-        "
-      >
+      <div className="grid grid-cols-10 gap-2 justify-items-center print:grid-cols-10">
         {guests.map((guest, i) => (
           <Card
             key={i}
