@@ -301,7 +301,9 @@ export default function AdminPage() {
   return (
     <div className="container mx-auto p-2 md:p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Администраторски панел</h1>
+        <h1 className="text-3xl font-bold font-serif">
+          Администраторски панел
+        </h1>
         <p className="text-muted-foreground">
           Управление на потребители, маси, покани и качени файлове
         </p>
@@ -743,9 +745,12 @@ export default function AdminPage() {
           </form>
         </DialogContent>
       </Dialog>
-      <div className="text-center py-6">
+      <div className="flex justify-center items-center gap-4 py-6">
         <Button type="button" asChild>
           <Link href="/">Към началната страница</Link>
+        </Button>
+        <Button type="button" variant="outline" asChild>
+          <Link href="/admin/rsvp-list">Виж QR кодове на поканите</Link>
         </Button>
       </div>
     </div>

@@ -10,8 +10,6 @@ COPY package.json package-lock.json turbo.json ./
 COPY apps ./apps
 COPY packages ./packages
 
-RUN npm ci --omit=dev --prefer-offline
-
 RUN turbo prune --scope=backend --docker
 
 FROM base AS installer

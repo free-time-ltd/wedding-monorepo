@@ -4,22 +4,16 @@ This is a project for my wedding and website. Senior developers can't build simp
 
 ## ToDos
 
-- Gotta add the event handler for when user gets invites to a new room
-- At some point maybe migrate to better-sqlite3?
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
 - For some reason chat duplicates messages at least according to NextJS.
 - Tests for the backend?
 - Daily or weekly SQLite backup to S3
-- Make a better email at RSVP change
-- Complete the @todos in code or remove them
 
 ## Fixing turborepo
 
 - npx syncpack@alpha fix --dependency-types prod
 
 ## Requirements
-
-For now the project requires both:
 
 - NodeJS v22+
 - NPM v10.9+

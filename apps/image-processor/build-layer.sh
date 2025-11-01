@@ -9,7 +9,7 @@ cp layer/nodejs/package.json layer-build/nodejs/
 
 # Install dependencies in the layer directory
 cd layer-build/nodejs
-npm install --platform=linux --arch=x64 --omit=dev
+npm install --platform=linux --arch=arm64 --omit=dev
 
 # Create the layer ZIP file
 cd ..

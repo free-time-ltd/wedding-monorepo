@@ -23,6 +23,7 @@ const app = new Hono();
 
 const allowedCorsOrigins = [
   env.FRONTEND_URL ?? "*",
+  "https://svatba2026.com",
   "https://wedding-monorepo-frontend.vercel.app",
   "https://preview.svatba2026.com",
 ];

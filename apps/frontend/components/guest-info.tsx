@@ -30,10 +30,10 @@ export function GuestInfo({ guests }: Props) {
   const guestsByTable = filteredGuests.reduce(
     (acc, guest) => {
       if (!acc[guest.table.label]) {
-        acc[guest.table.label] = [];
+        acc[guest.table.label ?? "Чакащи настаняване"] = [];
       }
 
-      (acc[guest.table.label] ??= []).push(guest);
+      (acc[guest.table.label ?? "Чакащи настаняване"] ??= []).push(guest);
 
       return acc;
     },
