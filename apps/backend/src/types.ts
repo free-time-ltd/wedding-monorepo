@@ -3,8 +3,6 @@ import type { Context } from "hono";
 import z from "zod";
 import { AuthVariables } from "./middleware";
 
-// @todo maybe move this into a separate package so its shared between BE/FE?
-
 export const imageUploadSchema = z.object({
   filename: z.string(),
   mimeType: z.enum([

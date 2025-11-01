@@ -58,7 +58,6 @@ export function defineSocketServer(io: Server) {
     });
 
     socket.on("chat-message", async ({ roomId, message }) => {
-      // @todo Maybe add a check to see if the user can really add messages to this room?
       const userId = socket.data.user.id as string;
 
       if (message.trim().length === 0) return;

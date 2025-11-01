@@ -97,7 +97,7 @@ rsvpRouter.post("/:id", async (c) => {
       from: `Wedding Mailer <${env.MAIL_ADDRESS_FROM}>`,
       to: ["ltsochev@live.com", "krisi.v.kostova@gmail.com"],
       subject: `RSVP update from: ${user.name}`,
-      html: `${user.name} changed their RSVP status. Details below:`,
+      html: `${user.name} changed their RSVP status.`,
     });
 
     if (error) {

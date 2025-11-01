@@ -301,7 +301,9 @@ export default function AdminPage() {
   return (
     <div className="container mx-auto p-2 md:p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Администраторски панел</h1>
+        <h1 className="text-3xl font-bold font-serif">
+          Администраторски панел
+        </h1>
         <p className="text-muted-foreground">
           Управление на потребители, маси, покани и качени файлове
         </p>
