@@ -8,17 +8,12 @@ This is a project for my wedding and website. Senior developers can't build simp
 - For some reason chat duplicates messages at least according to NextJS.
 - Tests for the backend?
 - Daily or weekly SQLite backup to S3
-- Make a better email at RSVP change
-- Complete the @todos in code or remove them
-- Migrate lambda to ARM architecture to cut down costs
 
 ## Fixing turborepo
 
 - npx syncpack@alpha fix --dependency-types prod
 
 ## Requirements
-
-For now the project requires both:
 
 - NodeJS v22+
 - NPM v10.9+
