@@ -1,7 +1,9 @@
 "use client";
 import { Guest } from "@/store/chatStore";
+import { toast } from "@repo/ui";
 import { Button } from "@repo/ui/components/ui/button";
 import { Card } from "@repo/ui/components/ui/card";
+import { Copy } from "@repo/ui/icons";
 import { useQRCode } from "next-qrcode";
 
 interface Props {
@@ -17,15 +19,33 @@ export function QrList({ guests }: Props) {
       : "https://preview.svatba2026.com"
   );
 
+  const handleCopy = async (str: string) => {
+    try {
+      await navigator.clipboard.writeText(str);
+      toast.success("Успешно копиране в клипборда");
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <>
-      <div className="grid grid-cols-10 gap-2 justify-items-center print:grid-cols-10">
+      <div className="grid grid-cols-8 gap-2 justify-items-center print:grid-cols-5">
         {guests.map((guest, i) => (
           <Card
             key={i}
-            className="flex flex-col items-center justify-center p-1 print:p-0 bg-white shadow-none print:shadow-none border border-gray-200 print:border-none"
+            className="relative flex flex-col items-center justify-center p-1 print:p-0 bg-white shadow-none print:shadow-none border border-gray-200 print:border-none"
           >
             <p className="text-center">{guest.name}</p>
+            <div className="print:hidden absolute -top-5 -right-5">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => handleCopy(`${baseUrl.toString()}/${guest.id}`)}
+              >
+                <Copy />
+              </Button>
+            </div>
             <Canvas
               text={`${baseUrl.toString()}/${guest.id}`}
               options={{
@@ -38,7 +58,6 @@ export function QrList({ guests }: Props) {
                 },
               }}
             />
-            <p>text={`${baseUrl.toString()}/${guest.id}`}</p>
           </Card>
         ))}
 
