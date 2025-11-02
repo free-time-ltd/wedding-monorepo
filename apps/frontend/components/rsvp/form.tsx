@@ -165,7 +165,7 @@ export function RsvpForm({
       <div className="pt-4">
         <Button
           type="submit"
-          className="w-full bg-rose-gold-500 hover:bg-rose-gold-600 text-secondary text-lg py-6"
+          className="w-full bg-rose-gold-500 hover:bg-rose-gold-600 text-lg py-6"
           disabled={disabled}
         >
           Отговорете на поканата

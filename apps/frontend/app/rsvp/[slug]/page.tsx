@@ -104,7 +104,7 @@ export default function RSVPPage() {
           <CardContent>
             <Button
               onClick={() => router.push("/")}
-              className="bg-rose-gold-500 hover:bg-rose-gold-600 text-secondary"
+              className="bg-rose-gold-500 hover:bg-rose-gold-600"
             >
               Към началната страница
             </Button>
@@ -119,11 +119,7 @@ export default function RSVPPage() {
       {/* Header */}
       <header className="border-b border-sage-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/")}
-            className="text-sage-700 hover:text-sage-900"
-          >
+          <Button variant="ghost" onClick={() => router.push("/")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Към началната страница
           </Button>
