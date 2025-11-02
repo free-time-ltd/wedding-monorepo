@@ -10,6 +10,12 @@ interface Props {
 
 export function QrList({ guests }: Props) {
   const { Canvas } = useQRCode();
+  const baseUrl = new URL(
+    "/rsvp",
+    process.env.NODE_ENV === "production"
+      ? "https://svatba2026.com"
+      : "https://preview.svatba2026.com"
+  );
 
   return (
     <>
@@ -21,17 +27,18 @@ export function QrList({ guests }: Props) {
           >
             <p className="text-center">{guest.name}</p>
             <Canvas
-              text={`https://svatba2026/rsvp/${guest.id}`}
+              text={`${baseUrl.toString()}/${guest.id}`}
               options={{
-                margin: 4,
+                margin: 2,
                 scale: 4,
-                width: 70,
+                width: 120,
                 color: {
                   dark: "#000000",
                   light: "#ffffff",
                 },
               }}
             />
+            <p>text={`${baseUrl.toString()}/${guest.id}`}</p>
           </Card>
         ))}
 
