@@ -19,7 +19,7 @@ export default function GuestsPage() {
             Списък Гости
           </h1>
           <p className="text-lg text-muted-foreground text-pretty">
-            Вижте кой ще се присъедини на празнува с нас
+            Вижте с кого ще споделим нашия ден
           </p>
         </div>
 
