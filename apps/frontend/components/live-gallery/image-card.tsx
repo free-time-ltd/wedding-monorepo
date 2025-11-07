@@ -107,11 +107,11 @@ export default function ImageCard({ image }: Props) {
             <TooltipTrigger asChild>
               <Button
                 size="icon"
-                variant="outline"
-                className="absolute -right-4 -top-4"
+                variant="ghost"
+                className="absolute top-0 right-0 text-muted cursor-pointer"
                 onClick={() => setIsOpen(false)}
               >
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6" strokeWidth={5} />
                 <span className="sr-only">Close</span>
               </Button>
             </TooltipTrigger>
