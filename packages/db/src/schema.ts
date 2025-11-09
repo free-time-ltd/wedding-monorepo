@@ -52,9 +52,7 @@ export const userRooms = sqliteTable(
     }),
     joinedAt: integer("created_at", { mode: "timestamp_ms" }),
   },
-  (table) => ({
-    uniqueUserRoom: unique("unique_user_room").on(table.userId, table.roomId),
-  })
+  (table) => [unique("unique_user_room").on(table.userId, table.roomId)]
 );
 
 export const messagesTable = sqliteTable(
@@ -70,9 +68,7 @@ export const messagesTable = sqliteTable(
     content: text("content").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   },
-  (table) => ({
-    roomIndex: index("roomIndex").on(table.roomId),
-  })
+  (table) => [index("roomIndex").on(table.roomId)]
 );
 
 export const menuTypes = ["vegan", "regular", "fish"] as const;
@@ -171,6 +167,56 @@ export const newsletterTable = sqliteTable("newsletter", {
   ),
 });
 
+export const pollsTable = sqliteTable("polls", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
+  title: text("title"),
+  subtitle: text("subtitle"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+    () => new Date()
+  ),
+  validUntil: integer("validUntil", { mode: "timestamp_ms" }).$defaultFn(
+    () => new Date("2026-07-28")
+  ),
+});
+
+export const pollOptionsTable = sqliteTable("poll_options", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => generateId()),
+  pollId: text("poll_id")
+    .references(() => pollsTable.id, { onDelete: "cascade" })
+    .notNull(),
+  title: text("title"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
+export const pollAnswersTable = sqliteTable(
+  "poll_answers",
+  {
+    id: integer().primaryKey({ autoIncrement: true }),
+    userId: text("user_id")
+      .references(() => usersTable.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    pollId: text("poll_id")
+      .references(() => pollsTable.id, { onDelete: "cascade" })
+      .notNull(),
+    answer: text("answer")
+      .references(() => pollOptionsTable.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }),
+  },
+  (table) => [
+    index("answer_poll_index").on(table.pollId, table.answer),
+    unique("userpoll_index").on(table.userId, table.pollId),
+  ]
+);
+
 export const userRoomsRelations = relations(userRooms, ({ one }) => ({
   user: one(usersTable, {
     fields: [userRooms.userId],
@@ -193,6 +239,7 @@ export const userRelations = relations(usersTable, ({ one, many }) => ({
     references: [invitationTable.userId],
   }),
   uploads: many(guestUploadsTable),
+  pollAnswers: many(pollAnswersTable),
 }));
 
 export const tableRelations = relations(tablesTable, ({ many }) => ({
@@ -226,5 +273,32 @@ export const newsletterRelations = relations(newsletterTable, ({ one }) => ({
   user: one(usersTable, {
     fields: [newsletterTable.userId],
     references: [usersTable.id],
+  }),
+}));
+
+export const pollsRelations = relations(pollsTable, ({ many }) => ({
+  options: many(pollOptionsTable),
+  answers: many(pollAnswersTable),
+}));
+
+export const pollAnswersRelations = relations(pollAnswersTable, ({ one }) => ({
+  poll: one(pollsTable, {
+    fields: [pollAnswersTable.pollId],
+    references: [pollsTable.id],
+  }),
+  user: one(usersTable, {
+    fields: [pollAnswersTable.userId],
+    references: [usersTable.id],
+  }),
+  answer: one(pollOptionsTable, {
+    fields: [pollAnswersTable.answer],
+    references: [pollOptionsTable.id],
+  }),
+}));
+
+export const pollOptionRelations = relations(pollOptionsTable, ({ one }) => ({
+  poll: one(pollsTable, {
+    fields: [pollOptionsTable.pollId],
+    references: [pollsTable.id],
   }),
 }));

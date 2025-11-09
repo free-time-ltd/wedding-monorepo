@@ -1,0 +1,1 @@
+CREATE INDEX `answer_index` ON `poll_answers` (`poll_id`,`answer`);

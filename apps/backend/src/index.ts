@@ -18,6 +18,7 @@ import handler from "./handler";
 import galleryRouter from "./routes/gallery";
 import adminRouter from "./routes/admin";
 import { requireAdminAuth } from "./middleware";
+import pollsRouter from "./routes/polls";
 
 const app = new Hono();
 
@@ -58,6 +59,7 @@ app.route("/api/weather", weatherRouter);
 app.route("/api/images", imageRouter);
 app.route("/api/gallery", galleryRouter);
 app.route("/api/admin", adminRouter);
+app.route("/api/polls", pollsRouter);
 app.route("/", restRouter);
 
 const server = serve(
