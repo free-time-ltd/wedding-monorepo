@@ -1,9 +1,9 @@
 import { PollList } from "@/components/poll-list";
-import { fetchPollsServer } from "@/lib/server-data";
+import { fetchPollsServer, fetchUser } from "@/lib/server-data";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { CheckCircle2, TrendingUp, Trophy, Users } from "@repo/ui/icons";
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { use } from "react";
 
 export const metadata: Metadata = {
@@ -15,6 +15,11 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default function PollsPage() {
+  const user = use(fetchUser());
+  if (!user) {
+    redirect(`/guest-select?redirectTo=${encodeURIComponent("/polls")}`);
+  }
+
   const data = use(fetchPollsServer());
   if (!data) {
     return notFound();
