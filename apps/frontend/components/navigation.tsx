@@ -21,6 +21,7 @@ export function Navigation() {
     { href: "/guests", label: "Списък Гости" },
     { href: "/gallery", label: "Галерия" },
     { href: "/live-feed", label: "Моменти на Живо" },
+    { href: "/polls", label: "Познай!" },
   ];
 
   return (

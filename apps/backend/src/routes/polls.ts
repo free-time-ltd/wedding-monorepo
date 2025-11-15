@@ -1,48 +1,33 @@
 import { requireAuth } from "@/middleware";
 import { errorResponse, successResponse } from "@/reponses";
+import { PollService } from "@/services/polls-service";
 import { SimpleAuthContext } from "@/types";
+import { getUserId } from "@/utils";
 import { db } from "@repo/db/client";
-import { pollAnswersTable } from "@repo/db/schema";
 import { Hono } from "hono";
 
 const pollsRouter = new Hono();
+const pollService = new PollService(db);
 
 pollsRouter.get("/", async (c) => {
-  const polls = await db.query.pollsTable.findMany({
-    with: {
-      options: {
-        columns: {
-          id: true,
-          title: true,
-        },
-        orderBy: (table, { asc }) => asc(table.id),
-      },
-      answers: {
-        with: {
-          answer: {
-            columns: {
-              id: true,
-              title: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  const userId = await getUserId(c);
 
-  return successResponse(c, polls);
+  const polls = await pollService.getPollsWithDetails();
+  const totalVotes = await pollService.getTotalVotes();
+  const userVotes = await pollService.getTotalVotesByUser(userId);
+
+  return successResponse(c, {
+    polls: pollService.transformDetailedPoll(polls, userId),
+    totalVotes,
+    userVotes,
+  });
 });
 
 pollsRouter.post("/:id", requireAuth, async (c: SimpleAuthContext) => {
   const { id: pollId } = c.req.param();
   const userId = c.get("userId");
 
-  const poll = await db.query.pollsTable.findFirst({
-    where: (table, { eq }) => eq(table.id, pollId),
-    with: {
-      options: true,
-    },
-  });
+  const poll = await pollService.findPoll(pollId);
 
   if (!poll || !userId) {
     return errorResponse(c, "Poll or user not found", 404);
@@ -64,21 +49,22 @@ pollsRouter.post("/:id", requireAuth, async (c: SimpleAuthContext) => {
     return errorResponse(c, "Option not available in poll", 403);
   }
 
-  await db
-    .insert(pollAnswersTable)
-    .values({
-      userId,
-      pollId,
-      answer,
-    })
-    .onConflictDoUpdate({
-      target: [pollAnswersTable.userId, pollAnswersTable.pollId],
-      set: {
-        answer,
-      },
-    });
+  if (poll.validUntil! <= new Date()) {
+    return errorResponse(c, "Poll has expired", 403);
+  }
 
-  return successResponse(c, "ok");
+  await pollService.upsertPollAnswer({
+    userId,
+    pollId,
+    answer,
+  });
+
+  const updatedPoll = await pollService.findPollDetailed(pollId);
+  if (!updatedPoll) {
+    return errorResponse(c, "Unexpected poll missing error.", 404);
+  }
+
+  return successResponse(c, pollService.transformPoll(updatedPoll, userId));
 });
 
 export default pollsRouter;

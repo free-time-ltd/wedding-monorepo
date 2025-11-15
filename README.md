@@ -8,6 +8,8 @@ This is a project for my wedding and website. Senior developers can't build simp
 - For some reason chat duplicates messages at least according to NextJS.
 - Tests for the backend?
 - Daily or weekly SQLite backup to S3
+- Revamp the poll types, do more work on the backend to transform output to be simple for FE to implement
+- Animations on the homepage?
 
 ## Fixing turborepo
 

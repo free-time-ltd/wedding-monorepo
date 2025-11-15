@@ -36,3 +36,14 @@ export const newsletterSignSchema = z.object({
 });
 
 export type NewsletterSignInput = z.infer<typeof newsletterSignSchema>;
+
+export const pollUpdate = z.object({
+  pollId: z.string(),
+  optionId: z.string(),
+});
+
+export const pollBatchUpdate = z.object({
+  answers: z.array(pollUpdate),
+});
+
+export type PollBatchUpdateInput = z.infer<typeof pollBatchUpdate>;
