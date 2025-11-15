@@ -6,9 +6,12 @@ import {
   invitationTable,
   guestUploadsTable,
   newsletterTable,
+  pollsTable,
+  pollOptionsTable,
 } from "@repo/db/schema";
-import { eq, desc } from "@repo/db";
-import { successResponse } from "@/reponses";
+import { eq, desc, count } from "@repo/db";
+import { errorResponse, successResponse } from "@/reponses";
+import { PollService } from "@/services/polls-service";
 
 const adminRouter = new Hono();
 
@@ -265,6 +268,114 @@ adminRouter.delete("/newsletter/:id", async (c) => {
   await db.delete(newsletterTable).where(eq(newsletterTable.id, id));
 
   return c.json({ success: true });
+});
+
+// Routes for polls
+adminRouter.get("/polls", async (c) => {
+  const pollService = new PollService(db);
+
+  const polls = await pollService.getPollsWithDetails();
+
+  return successResponse(c, polls);
+});
+
+adminRouter.post("/polls", async (c) => {
+  const body = await c.req.json();
+  const pollService = new PollService(db);
+  const { title, subtitle, options = [], validUntil } = body;
+
+  if (Array.from(options).length === 0) {
+    return errorResponse(c, "You need at least 1 option", 403);
+  }
+
+  const [poll] = await db
+    .insert(pollsTable)
+    .values({
+      title,
+      subtitle,
+      validUntil: new Date(validUntil ?? "2026-06-27"),
+    })
+    .returning();
+
+  if (!poll) {
+    return errorResponse(c, "Something went wrong creating a poll.");
+  }
+
+  await db.insert(pollOptionsTable).values(
+    // @ts-expect-error I'm too lazy to write types for the option really
+    options.map((option) => ({
+      pollId: poll.id,
+      title: option.title,
+    }))
+  );
+
+  const newPoll = await pollService.findPollDetailed(poll.id);
+
+  return successResponse(c, newPoll);
+});
+
+adminRouter.patch("/polls/:id", async (c) => {
+  const { id: pollId } = c.req.param();
+  const body = await c.req.json();
+
+  const pollService = new PollService(db);
+  const poll = await pollService.findPollDetailed(pollId);
+
+  if (!poll) {
+    return errorResponse(c, "Poll not found", 404);
+  }
+
+  const { title, subtitle, options = [] } = body;
+
+  if (Array.from(options).length === 0) {
+    return errorResponse(c, "You need at least 1 option", 403);
+  }
+
+  await db
+    .update(pollsTable)
+    .set({ title, subtitle })
+    .where(eq(pollsTable.id, poll.id));
+
+  Array.from(options).forEach(async (option) => {
+    await db
+      .update(pollOptionsTable)
+      // @ts-expect-error I'm too lazy to write types for the option really
+      .set({ title: option.title })
+      // @ts-expect-error I'm too lazy to write types for the option really
+      .where(eq(pollOptionsTable.id, option.id));
+  });
+
+  const newPoll = await pollService.findPollDetailed(pollId);
+
+  return successResponse(c, newPoll);
+});
+
+adminRouter.delete("/polls/:id", async (c) => {
+  const { id } = c.req.param();
+
+  await db.delete(pollsTable).where(eq(pollsTable.id, id));
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.delete("/polls/:id/:option", async (c) => {
+  const { id: pollId, option } = c.req.param();
+
+  const optionCount =
+    (await db.select({ count: count() }).from(pollOptionsTable)).at(0)?.count ??
+    0;
+
+  if (optionCount <= 1) {
+    return errorResponse(c, "You need at least 1 option left.");
+  }
+
+  await db.delete(pollOptionsTable).where(eq(pollOptionsTable.id, option));
+
+  const pollService = new PollService(db);
+
+  const poll = pollService.findPollDetailed(pollId);
+
+  return successResponse(c, poll);
 });
 
 export default adminRouter;

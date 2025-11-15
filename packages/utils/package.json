@@ -8,7 +8,10 @@
     "./eventData": "./src/eventData.ts",
     "./urlFactory": "./src/urlFactory.ts",
     "./mimeToExt": "./src/mimeToExt.ts",
-    "./getRootDomain": "./src/getRootDomain.ts"
+    "./getRootDomain": "./src/getRootDomain.ts",
+    "./doubleKeyMap": "./src/doubleKeyMap.ts",
+    "./mapByKey": "./src/mapByKey.ts",
+    "./pluralize": "./src/pluralize.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

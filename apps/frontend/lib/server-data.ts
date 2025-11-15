@@ -2,6 +2,7 @@
 
 import type { UserApiType } from "@repo/db/utils";
 import { cookies } from "next/headers";
+import { PollsResponse } from "./data";
 
 export const fetchUser = async (): Promise<UserApiType | null> => {
   try {
@@ -21,4 +22,29 @@ export const fetchUser = async (): Promise<UserApiType | null> => {
   }
 
   return null;
+};
+
+export const fetchPollsServer = async () => {
+  try {
+    const cookieStore = await cookies();
+    const url = new URL("/api/polls", process.env.NEXT_PUBLIC_API_BASE_URL);
+    const res = await fetch(url, {
+      headers: { Cookie: cookieStore.toString() },
+      cache: "no-cache",
+    });
+
+    const json = (await res.json()) as PollsResponse;
+
+    if (json.success) {
+      return json.data;
+    }
+
+    return {
+      polls: [],
+      totalVotes: 0,
+      userVotes: 0,
+    };
+  } catch (e) {
+    console.error(e);
+  }
 };

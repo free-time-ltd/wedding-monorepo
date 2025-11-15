@@ -17,15 +17,15 @@ export function Hero() {
 
       <div className="max-w-4xl mx-auto text-center space-y-8">
         <div className="space-y-4">
-          <p className="text-xl md:text-2xl text-muted-foreground font-light">
+          <p className="text-xl md:text-2xl text-muted-foreground font-light opacity-0 animate-fadeup delay-200">
             Добре дошли на сватбата на
           </p>
-          <h1 className=" text-5xl md:text-7xl lg:text-8xl text-balance text-foreground">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl text-balance text-foreground opacity-0 animate-fadeup delay-500">
             Кристина &amp; Лъчезар
           </h1>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-muted-foreground opacity-0 animate-fadeup delay-700">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-accent" />
             <span className="text-lg">Юни 27, 2026</span>
@@ -37,15 +37,20 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 opacity-0 animate-fadeup">
           <Button
             asChild
             size="lg"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 hover:scale-105 hover:shadow-lg"
           >
             <Link href="/guest-select">Портал за Гости</Link>
           </Button>
-          <Button asChild variant="outline" size="lg">
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="transition-all duration-300 hover:scale-105 hover:shadow-md"
+          >
             <Link href="/venue">Вижте Локация</Link>
           </Button>
         </div>

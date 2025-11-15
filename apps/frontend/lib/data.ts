@@ -2,6 +2,10 @@ import { Guest } from "@/store/chatStore";
 import type { UserApiType } from "@repo/db/utils";
 import { cache } from "react";
 
+export type ApiResponse<T> =
+  | { success: true; data: T }
+  | { success: false; error: string | string[] };
+
 export const fetchGuests = cache(async (): Promise<Guest[] | null> => {
   try {
     const url = new URL("/api/users", process.env.NEXT_PUBLIC_API_BASE_URL);
@@ -96,3 +100,48 @@ export const fetchUserUploads = async ({
     return { images: [], nextCursor: null };
   }
 };
+
+export type Poll = {
+  id: string;
+  title: string;
+  subtitle: string;
+  createdAt: Date;
+  validUntil: Date;
+  options: {
+    votes: number;
+    id: string;
+    title: string;
+  }[];
+  active: boolean;
+  userVote: string;
+  totalVotes: number;
+};
+
+type PollResponseData = {
+  polls: Poll[];
+  totalVotes: number;
+  userVotes: number;
+};
+
+export type PollsResponse = ApiResponse<PollResponseData>;
+
+export const fetchPolls = cache(async () => {
+  const url = new URL(`/api/polls`, process.env.NEXT_PUBLIC_API_BASE_URL);
+
+  try {
+    const res = await fetch(url, { credentials: "include" });
+    const json = (await res.json()) as PollsResponse;
+
+    if (json.success) {
+      return json.data;
+    }
+
+    return {
+      polls: [],
+      totalVotes: 0,
+      userVotes: 0,
+    };
+  } catch (e) {
+    console.error(e);
+  }
+});

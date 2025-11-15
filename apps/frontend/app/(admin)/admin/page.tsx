@@ -25,6 +25,9 @@ import {
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import Link from "next/link";
+import { toast } from "@repo/ui";
+import { CircleX } from "@repo/ui/icons";
+import { generateId } from "@repo/utils/generateId";
 
 type User = {
   id: string;
@@ -96,6 +99,37 @@ type Newsletter = {
   updatedAt: Date;
 };
 
+type Poll = {
+  id: string;
+  title: string;
+  subtitle: string;
+  createdAt: string;
+  validUntil: string;
+  options: Array<{
+    id: string;
+    title: string;
+  }>;
+  answers: Array<{
+    id: string;
+    pollId: string;
+    userId: string;
+    answer: {
+      id: string;
+      title: string;
+    };
+  }>;
+};
+
+type PollData = {
+  title: string;
+  subtitle: string;
+  validUntil: string;
+  options: Array<{
+    id?: string;
+    title: string;
+  }>;
+};
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
@@ -107,7 +141,10 @@ export default function AdminPage() {
   const [newsletter, setNewsletter] = useState<Newsletter[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingPoll, setEditingPoll] = useState<Poll | null>(null);
+  const [polls, setPolls] = useState<Poll[]>([]);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -121,6 +158,12 @@ export default function AdminPage() {
     name: "",
     label: "",
   });
+  const [pollForm, setPollForm] = useState<PollData>({
+    title: "",
+    subtitle: "",
+    validUntil: "2026-06-27",
+    options: [],
+  });
 
   useEffect(() => {
     fetchAll();
@@ -129,36 +172,47 @@ export default function AdminPage() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [usersRes, tablesRes, invitationsRes, uploadsRes, newsletterRes] =
-        await Promise.all([
-          fetch(new URL(`/api/admin/users`, API_BASE), {
-            credentials: "include",
-          }),
-          fetch(new URL(`/api/admin/tables`, API_BASE), {
-            credentials: "include",
-          }),
-          fetch(new URL(`/api/admin/invitations`, API_BASE), {
-            credentials: "include",
-          }),
-          fetch(new URL(`/api/admin/uploads`, API_BASE), {
-            credentials: "include",
-          }),
-          fetch(new URL(`/api/admin/newsletter`, API_BASE), {
-            credentials: "include",
-          }),
-        ]);
+      const [
+        usersRes,
+        tablesRes,
+        invitationsRes,
+        uploadsRes,
+        newsletterRes,
+        pollsRes,
+      ] = await Promise.all([
+        fetch(new URL(`/api/admin/users`, API_BASE), {
+          credentials: "include",
+        }),
+        fetch(new URL(`/api/admin/tables`, API_BASE), {
+          credentials: "include",
+        }),
+        fetch(new URL(`/api/admin/invitations`, API_BASE), {
+          credentials: "include",
+        }),
+        fetch(new URL(`/api/admin/uploads`, API_BASE), {
+          credentials: "include",
+        }),
+        fetch(new URL(`/api/admin/newsletter`, API_BASE), {
+          credentials: "include",
+        }),
+        fetch(new URL(`/api/admin/polls`, API_BASE), {
+          credentials: "include",
+        }),
+      ]);
 
       const usersData = await usersRes.json();
       const tablesData = await tablesRes.json();
       const invitationsData = await invitationsRes.json();
       const uploadsData = await uploadsRes.json();
       const newsletterData = await newsletterRes.json();
+      const pollsData = await pollsRes.json();
 
       if (usersData.success) setUsers(usersData.data);
       if (tablesData.success) setTables(tablesData.data);
       if (invitationsData.success) setInvitations(invitationsData.data);
       if (uploadsData.success) setUploads(uploadsData.data);
       if (newsletterData.success) setNewsletter(newsletterData.data);
+      if (pollsData.success) setPolls(pollsData.data);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -192,6 +246,17 @@ export default function AdminPage() {
       tableId: user.tableId ? String(user.tableId) : "",
     });
     setIsUserModalOpen(true);
+  };
+
+  const openAddPoll = () => {
+    setEditingPoll(null);
+    setPollForm({
+      title: "",
+      subtitle: "",
+      validUntil: "2026-06-27",
+      options: [],
+    });
+    setIsPollModalOpen(true);
   };
 
   const submitUserForm = async (e: React.FormEvent) => {
@@ -298,6 +363,82 @@ export default function AdminPage() {
     }
   };
 
+  const editPoll = (id: string) => {
+    const poll = polls.find((poll) => poll.id === id);
+    if (!poll) return;
+
+    console.log({ poll });
+
+    setEditingPoll(poll);
+    setPollForm(poll);
+    setIsPollModalOpen(true);
+  };
+
+  const deletePoll = async (id: string) => {
+    if (confirm(`Сигурен ли си че искаш да изтриеш анкетата?`)) {
+      await fetch(new URL(`/api/admin/polls/${id}`, API_BASE), {
+        credentials: "include",
+        method: "DELETE",
+      });
+      fetchAll();
+    }
+  };
+
+  const submitPollForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      ...pollForm,
+      title: pollForm.title.trim(),
+      subtitle: pollForm.subtitle.trim(),
+      options: [...pollForm.options].filter((opt) => Boolean(opt.title.trim())),
+    };
+
+    try {
+      if (editingPoll) {
+        await fetch(new URL(`/api/admin/polls/${editingPoll.id}`, API_BASE), {
+          credentials: "include",
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await fetch(new URL(`/api/admin/polls`, API_BASE), {
+          credentials: "include",
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+      setIsPollModalOpen(false);
+      setEditingPoll(null);
+      await fetchAll();
+    } catch (e) {
+      console.error(e);
+      toast.error("Възникна грешка със запазването.");
+    }
+  };
+
+  const addNewFormVariant = () => {
+    setPollForm((prev) => ({
+      ...prev,
+      options: [
+        ...prev.options,
+        {
+          id: generateId(),
+          title: "",
+        },
+      ],
+    }));
+  };
+
+  const removeFormVariant = (id: string) => {
+    setPollForm((prev) => ({
+      ...prev,
+      options: prev.options.filter((option) => option.id !== id),
+    }));
+  };
+
   return (
     <div className="container mx-auto p-2 md:p-6">
       <div className="mb-6">
@@ -320,6 +461,7 @@ export default function AdminPage() {
           <TabsTrigger value="newsletter">
             Бюлетин ({newsletter.length})
           </TabsTrigger>
+          <TabsTrigger value="polls">Анкети ({polls.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -616,7 +758,182 @@ export default function AdminPage() {
             )}
           </div>
         </TabsContent>
+        <TabsContent value="polls">
+          <div className="mt-4 border rounded-lg">
+            <div className="p-4 flex justify-between items-center">
+              <div className="font-medium">Списък с анкети</div>
+              <Button onClick={openAddPoll}>Добави анкета</Button>
+            </div>
+            {loading ? (
+              <p className="p-4">Loading...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Заглавие</TableHead>
+                    <TableHead>Варианти</TableHead>
+                    <TableHead>Отговори</TableHead>
+                    <TableHead>Валидна до</TableHead>
+                    <TableHead>-</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {polls.map((poll) => (
+                    <TableRow key={poll.id}>
+                      <TableCell>{poll.title}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          {poll.options.map((option) => (
+                            <div
+                              className="truncate text-nowrap whitespace-nowrap"
+                              key={option.id}
+                            >
+                              {option.title} (
+                              {
+                                poll.answers.filter(
+                                  (answer) => answer.answer.id === option.id
+                                ).length
+                              }
+                              )
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>{poll.answers.length}</TableCell>
+                      <TableCell>
+                        {new Date(poll.validUntil).toDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => editPoll(poll.id)}
+                          >
+                            Редактирай
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deletePoll(poll.id)}
+                          >
+                            Изтрий
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
+      <Dialog open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {editingPoll ? "Редакция на анкета" : "Добавяне на анкета"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitPollForm} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="p-title">Въпрос</Label>
+              <Input
+                id="p.title"
+                value={pollForm?.title ?? ""}
+                onChange={(e) =>
+                  setPollForm((prev) => ({ ...prev, title: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="p-subtitle">Описание</Label>
+              <Input
+                id="p-subtitle"
+                value={pollForm?.subtitle ?? ""}
+                onChange={(e) =>
+                  setPollForm((prev) => ({ ...prev, subtitle: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="p-validuntil">Валидна до</Label>
+              <Input
+                id="p.validuntil"
+                type="date"
+                value={
+                  new Date(pollForm?.validUntil).toISOString().split("T")[0] ??
+                  "2026-06-27"
+                }
+                onChange={(e) =>
+                  setPollForm((prev) => ({
+                    ...prev,
+                    validUntil: e.target.value,
+                  }))
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Варианти</Label>
+              <div className="space-y-2">
+                {pollForm.options.map((option) => (
+                  <div className="flex gap-2 items-center" key={option.id}>
+                    <div className="flex-1 grid gap-2">
+                      <Input
+                        id="p.validuntil"
+                        type="text"
+                        value={option.title}
+                        onChange={(e) =>
+                          setPollForm((prev) => ({
+                            ...prev,
+                            options: [...prev.options].map((opt) =>
+                              opt.id !== option.id
+                                ? opt
+                                : { ...opt, title: e.target.value }
+                            ),
+                          }))
+                        }
+                        required
+                      />
+                    </div>
+                    {!editingPoll && (
+                      <div className="icons">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="text-destructive"
+                          onClick={() => removeFormVariant(option?.id ?? "")}
+                        >
+                          <CircleX />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {!editingPoll && (
+                  <Button onClick={addNewFormVariant}>
+                    Добави нов вариант
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsPollModalOpen(false)}
+              >
+                Отказ
+              </Button>
+              <Button type="submit">{editingPoll ? "Запази" : "Добави"}</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
       <Dialog open={isTableModalOpen} onOpenChange={setIsTableModalOpen}>
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
