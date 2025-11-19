@@ -7,7 +7,6 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
 - For some reason chat duplicates messages at least according to NextJS.
 - Tests for the backend?
-- Daily or weekly SQLite backup to S3
 
 ## Fixing turborepo
 

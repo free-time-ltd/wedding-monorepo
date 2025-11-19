@@ -16,6 +16,9 @@ export const usersTable = sqliteTable("users", {
   extras: integer("extra_people").default(0),
   email: text("email"),
   phone: text("phone"),
+  gender: text("gender", { enum: ["male", "female", "unknown"] }).default(
+    "unknown"
+  ),
   tableId: integer("table_id").references(() => tablesTable.id, {
     onDelete: "set null",
   }),

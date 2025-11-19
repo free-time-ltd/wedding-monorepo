@@ -11,7 +11,8 @@
     "./getRootDomain": "./src/getRootDomain.ts",
     "./doubleKeyMap": "./src/doubleKeyMap.ts",
     "./mapByKey": "./src/mapByKey.ts",
-    "./pluralize": "./src/pluralize.ts"
+    "./pluralize": "./src/pluralize.ts",
+    "./toArray": "./src/toArray.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
