@@ -29,7 +29,10 @@ export function PollList({ polls: initialPolls }: Props) {
       const poll = prev.get(pollId);
       if (!poll) return prev;
 
-      const option = poll.options.find((option) => option.id === optionId);
+      const options =
+        (Array.isArray(poll) ? poll.at(0)?.options : poll.options) ?? [];
+
+      const option = options.find((option) => option.id === optionId);
       if (!option) return prev;
 
       const updatedPoll = { ...poll, userVote: optionId };
@@ -88,7 +91,10 @@ export function PollList({ polls: initialPolls }: Props) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {Array.from(pollList.entries()).map(([, poll]) => {
+      {Array.from(pollList.entries()).map(([, pollRes]) => {
+        const poll = Array.isArray(pollRes) ? pollRes.at(0) : pollRes;
+        if (!poll) return;
+
         const leadingOption = getLeadingOption(poll);
         return (
           <Card key={poll.id} className="overflow-hidden">
