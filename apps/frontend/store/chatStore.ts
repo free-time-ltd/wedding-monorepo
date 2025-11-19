@@ -5,6 +5,7 @@ export interface Guest {
   name: string;
   extras?: number;
   tableId: number;
+  gender: "male" | "female" | "unknown";
   table: {
     id: number;
     name: string;

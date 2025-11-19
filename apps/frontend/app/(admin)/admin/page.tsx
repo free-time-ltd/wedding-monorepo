@@ -24,6 +24,13 @@ import {
 } from "@repo/ui/components/ui/dialog";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/ui/select";
 import Link from "next/link";
 import { toast } from "@repo/ui";
 import { CircleX } from "@repo/ui/icons";
@@ -36,6 +43,7 @@ type User = {
   email: string | null;
   phone: string | null;
   tableId: number | null;
+  gender: "male" | "female" | "unknown";
   table: { id: number; name: string; label: string | null } | null;
   invitation: {
     id: number;
@@ -149,6 +157,7 @@ export default function AdminPage() {
     name: "",
     email: "",
     phone: "",
+    gender: "unknown",
     extras: 0 as number,
     tableId: "" as string | "",
   });
@@ -232,7 +241,14 @@ export default function AdminPage() {
 
   const openAddUser = () => {
     setEditingUser(null);
-    setForm({ name: "", email: "", phone: "", extras: 0, tableId: "" });
+    setForm({
+      name: "",
+      email: "",
+      phone: "",
+      extras: 0,
+      gender: "unknown",
+      tableId: "",
+    });
     setIsUserModalOpen(true);
   };
 
@@ -243,6 +259,7 @@ export default function AdminPage() {
       email: user.email || "",
       phone: user.phone || "",
       extras: user.extras ?? 0,
+      gender: user.gender ?? "unknown",
       tableId: user.tableId ? String(user.tableId) : "",
     });
     setIsUserModalOpen(true);
@@ -266,6 +283,7 @@ export default function AdminPage() {
       email: form.email.trim() || null,
       phone: form.phone.trim() || null,
       extras: Number.isNaN(Number(form.extras)) ? 0 : Number(form.extras),
+      gender: form.gender || "unknown",
       tableId:
         form.tableId === "" || form.tableId === null
           ? null
@@ -366,8 +384,6 @@ export default function AdminPage() {
   const editPoll = (id: string) => {
     const poll = polls.find((poll) => poll.id === id);
     if (!poll) return;
-
-    console.log({ poll });
 
     setEditingPoll(poll);
     setPollForm(poll);
@@ -477,6 +493,7 @@ export default function AdminPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Име</TableHead>
+                    <TableHead>Пол</TableHead>
                     <TableHead>Имейл</TableHead>
                     <TableHead>Телефон</TableHead>
                     <TableHead>Придружители</TableHead>
@@ -490,6 +507,7 @@ export default function AdminPage() {
                   {users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell>{user.gender || "unknown"}</TableCell>
                       <TableCell>{user.email || "-"}</TableCell>
                       <TableCell>{user.phone || "-"}</TableCell>
                       <TableCell>{user.extras}</TableCell>
@@ -1032,22 +1050,42 @@ export default function AdminPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="tableId">Маса</Label>
-              <select
-                id="tableId"
-                className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={form.tableId}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, tableId: e.target.value }))
+              <Label htmlFor="gender">Придружители</Label>
+              <Select
+                value={form.gender}
+                onValueChange={(newVal) =>
+                  setForm((f) => ({ ...f, gender: newVal }))
                 }
               >
-                <option value="">-- без маса --</option>
-                {tables.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.label || t.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Пол" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Мъж</SelectItem>
+                  <SelectItem value="female">Жена</SelectItem>
+                  <SelectItem value="unknown">Без пол</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="tableId">Маса</Label>
+              <Select
+                value={String(form.tableId)}
+                onValueChange={(newVal) =>
+                  setForm((f) => ({ ...f, tableId: newVal }))
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Избери маса" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tables.map((t) => (
+                    <SelectItem key={t.id} value={String(t.id)}>
+                      {t.label || t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button

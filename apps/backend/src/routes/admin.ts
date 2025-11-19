@@ -52,7 +52,7 @@ adminRouter.get("/users/:id", async (c) => {
 
 adminRouter.post("/users", async (c) => {
   const body = await c.req.json();
-  const { name, extras, email, phone, tableId } = body;
+  const { name, extras, email, phone, tableId, gender } = body;
 
   const [newUser] = await db
     .insert(usersTable)
@@ -61,6 +61,7 @@ adminRouter.post("/users", async (c) => {
       extras: extras ?? 0,
       email: email ?? null,
       phone: phone ?? null,
+      gender: gender ?? "unknown",
       tableId: tableId ?? null,
     })
     .returning();
