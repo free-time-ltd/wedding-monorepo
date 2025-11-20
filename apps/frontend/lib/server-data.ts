@@ -11,6 +11,7 @@ export const fetchUser = async (): Promise<UserApiType | null> => {
     const res = await fetch(url, {
       headers: { Cookie: cookieStore.toString() },
       cache: "no-cache",
+      next: { tags: ["current-user"] },
     });
     const json = await res.json();
     if (json.success && "data" in json) {
@@ -31,6 +32,7 @@ export const fetchPollsServer = async () => {
     const res = await fetch(url, {
       headers: { Cookie: cookieStore.toString() },
       cache: "no-cache",
+      next: { tags: ["polls"] },
     });
 
     const json = (await res.json()) as PollsResponse;
