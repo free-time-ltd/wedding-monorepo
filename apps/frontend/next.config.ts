@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: "/api/revalidate",
+        destination: "/api/revalidate",
+      },
+      {
         source: "/api/:path*",
         destination: new URL(
           "/api/:path*",

@@ -9,7 +9,10 @@ export type ApiResponse<T> =
 export const fetchGuests = cache(async (): Promise<Guest[] | null> => {
   try {
     const url = new URL("/api/users", process.env.NEXT_PUBLIC_API_BASE_URL);
-    const res = await fetch(url, { cache: "force-cache" });
+    const res = await fetch(url, {
+      cache: "force-cache",
+      next: { tags: ["guests"] },
+    });
     const json = await res.json();
     if (json.success && "data" in json) {
       return json.data as Guest[];
@@ -41,7 +44,7 @@ export interface WeatherResponse {
 
 export const fetchWeather = async (): Promise<WeatherResponse> => {
   const url = new URL("/api/weather", process.env.NEXT_PUBLIC_API_BASE_URL);
-  const res = await fetch(url);
+  const res = await fetch(url, { next: { tags: ["weather"] } });
   const json = (await res.json()) as WeatherResponse;
 
   return json;
@@ -86,7 +89,10 @@ export const fetchUserUploads = async ({
   );
 
   try {
-    const res = await fetch(url, { credentials: "include" });
+    const res = await fetch(url, {
+      credentials: "include",
+      next: { tags: ["uploads"] },
+    });
 
     if (!res.ok) {
       throw new Error(`There was a problem fetching the gallery:`);
@@ -129,7 +135,10 @@ export const fetchPolls = cache(async () => {
   const url = new URL(`/api/polls`, process.env.NEXT_PUBLIC_API_BASE_URL);
 
   try {
-    const res = await fetch(url, { credentials: "include" });
+    const res = await fetch(url, {
+      credentials: "include",
+      next: { tags: ["polls"] },
+    });
     const json = (await res.json()) as PollsResponse;
 
     if (json.success) {
