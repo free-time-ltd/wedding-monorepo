@@ -2,7 +2,7 @@ resource "aws_lambda_layer_version" "sharp" {
   filename                 = "../apps/image-processor/layer/sharp-layer.zip"
   layer_name               = "sharp-layer-${var.environment}"
   description              = "Sharp image processing library for Node.js"
-  compatible_runtimes      = ["nodejs20.x"]
+  compatible_runtimes      = ["nodejs22.x"]
   compatible_architectures = ["arm64"]
 
   source_code_hash = filebase64sha256("../apps/image-processor/layer/sharp-layer.zip")
@@ -14,7 +14,7 @@ resource "aws_lambda_function" "image_processor" {
   role             = aws_iam_role.lambda_s3_role.arn
   handler          = "index.handler"
   source_code_hash = filebase64sha256("../apps/image-processor/lambda.zip")
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
   architectures    = ["arm64"]
 
   layers = [aws_lambda_layer_version.sharp.arn]
