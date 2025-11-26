@@ -7,6 +7,7 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
 - For some reason chat duplicates messages at least according to NextJS.
 - Tests for the backend?
+- Rework GuestGallery component. Something is wrong with the state. Preserve optimistic updates
 
 ## Fixing turborepo
 

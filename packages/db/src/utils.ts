@@ -115,10 +115,16 @@ export const transformRoom = ({
 export type RoomApiType = ReturnType<typeof transformRoom>;
 
 interface ImageFinderProps {
+  sort?: string;
+  orderBy?: string;
+  uploader?: string;
   cursor?: string;
   limit?: number;
 }
 export const findProcessedImages = ({
+  sort,
+  orderBy = "createdAt",
+  uploader,
   cursor,
   limit = 20,
 }: ImageFinderProps = {}) => {
@@ -129,12 +135,30 @@ export const findProcessedImages = ({
         with: { table: true },
       },
     },
-    where: (table, { and, lt, notInArray }) =>
+    where: (table, { and, eq, lt, notInArray }) =>
       and(
         notInArray(table.status, ["pending", "rejected"]),
+        uploader ? eq(table.userId, uploader) : undefined,
         cursor ? lt(table.id, cursor) : undefined
       ),
-    orderBy: (table, { desc }) => desc(table.id),
+    orderBy: (table, { desc, asc }) => {
+      const dirFn = sort === "asc" ? asc : desc;
+
+      const columnMap = {
+        id: table.id,
+        message: table.message,
+        createdAt: table.createdAt,
+        approvedAt: table.approvedAt,
+        sizeBytes: table.sizeBytes,
+      } as const;
+
+      const sortField =
+        orderBy in columnMap
+          ? columnMap[orderBy as keyof typeof columnMap]
+          : table.createdAt;
+
+      return dirFn(sortField);
+    },
     limit,
   });
 };

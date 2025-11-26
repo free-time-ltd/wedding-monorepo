@@ -7,6 +7,7 @@ import { useSocket } from "@/context/SocketContext";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useGalleryStore } from "@/store/galleryStore";
 import { Loader } from "../loader";
+import { useGalleryFilters } from "@/hooks/useGalleryFilters";
 
 interface Props {
   images: ProcessedImageApiType[];
@@ -22,6 +23,7 @@ export function GuestGallery({ images }: Props) {
   const setProcessing = useGalleryStore((state) => state.setProcessing);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const nextCursor = useRef(images.at(-1)?.id ?? null);
+  const galleryFilters = useGalleryFilters();
 
   useSocketEvent(socket, "live-feed", async () => {
     setProcessing(false);
@@ -42,34 +44,35 @@ export function GuestGallery({ images }: Props) {
 
   // Hydrate the store
   useEffect(() => {
-    if (photos.length === 0 && images.length > 0) {
-      setPhotos(images);
+    setPhotos(images);
+    if (nextCursor.current) {
+      nextCursor.current = null;
     }
-  }, [images, photos.length, setPhotos]);
+  }, [images, setPhotos]);
 
-  const loadImagesWithParams = async ({
-    cursor,
-    limit = 20,
-  }: {
-    cursor: string | null;
-    limit?: number;
-  }) => {
-    setIsLoadingMore(true);
-    try {
-      const { images: newImages = [], nextCursor: newCursor } =
-        await fetchUserUploads({
-          cursor,
-          limit,
-        });
+  const loadImagesWithParams = useCallback(
+    async ({
+      cursor,
+      limit = 20,
+    }: {
+      cursor: string | null;
+      limit?: number;
+    }) => {
+      setIsLoadingMore(true);
+      try {
+        const { images: newImages = [], nextCursor: newCursor } =
+          await fetchUserUploads({ ...galleryFilters, cursor, limit });
 
-      return { images: newImages, nextCursor: newCursor };
-    } catch (e) {
-      console.error("Error loading more images:", e);
-      return { images: [], nextCursor: null };
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
+        return { images: newImages, nextCursor: newCursor };
+      } catch (e) {
+        console.error("Error loading more images:", e);
+        return { images: [], nextCursor: null };
+      } finally {
+        setIsLoadingMore(false);
+      }
+    },
+    [galleryFilters]
+  );
 
   const loadImages = useCallback(async () => {
     const cursor = nextCursor.current;
@@ -80,7 +83,7 @@ export function GuestGallery({ images }: Props) {
 
     nextCursor.current = newCursor;
     newImages.forEach((image) => addPhoto(image));
-  }, [isLoadingMore, addPhoto]);
+  }, [isLoadingMore, loadImagesWithParams, addPhoto]);
 
   // Trigger the infinite scroll
   useEffect(() => {
