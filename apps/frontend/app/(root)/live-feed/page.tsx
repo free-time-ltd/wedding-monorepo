@@ -52,8 +52,6 @@ export default async function GalleryPage({
     .filter((guest) => uniqueUserIds.has(guest.id))
     .toSorted();
 
-  console.log({ images });
-
   return (
     <div className="container mx-auto space-y-6 pt-5 px-4 sm:px-0">
       <div className="text-center mb-12">
