@@ -15,9 +15,21 @@ import { newsletterTable } from "@repo/db/schema";
 const galleryRouter = new Hono();
 
 galleryRouter.get("/guests", async (c) => {
-  const { cursor, limit = 20 } = c.req.query();
+  const {
+    cursor,
+    sort = "desc",
+    orderBy,
+    uploader,
+    limit = 20,
+  } = c.req.query();
 
-  const images = await findProcessedImages({ cursor, limit: Number(limit) });
+  const images = await findProcessedImages({
+    cursor,
+    orderBy,
+    sort,
+    uploader,
+    limit: Number(limit),
+  });
 
   const nextCursor =
     images.length === limit ? images[images.length - 1].id : null;

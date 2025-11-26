@@ -76,12 +76,25 @@ interface UserUploadsResponse {
 }
 export const fetchUserUploads = async ({
   cursor,
+  sort,
+  orderBy,
+  uploader,
   limit = 20,
-}: { cursor?: string | null; limit?: number } = {}) => {
+}: {
+  sort?: string;
+  orderBy?: string;
+  uploader?: string;
+  cursor?: string | null;
+  limit?: number;
+} = {}) => {
   const searchParams = new URLSearchParams(
-    Object.entries({ cursor, limit: limit.toString() }).filter(
-      ([, v]) => !!v
-    ) as [string, string][]
+    Object.entries({
+      sort,
+      orderBy,
+      uploader,
+      cursor,
+      limit: limit.toString(),
+    }).filter(([, v]) => !!v) as [string, string][]
   );
   const url = new URL(
     `/api/gallery/guests?${searchParams.toString()}`,
