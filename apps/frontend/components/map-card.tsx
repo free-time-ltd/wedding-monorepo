@@ -30,7 +30,7 @@ export function MapCard({ name, address, iframeUrl, mapsUrl }: Props) {
         </div>
       </CardContent>
       <CardHeader className="p-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-4">
           <div className="space-y-2">
             <h3 className="font-serif text-2xl text-foreground">{name}</h3>
             <p className="text-muted-foreground flex items-start gap-2">
@@ -38,7 +38,7 @@ export function MapCard({ name, address, iframeUrl, mapsUrl }: Props) {
               <span>{address}</span>
             </p>
           </div>
-          <Button type="button" className="shrink-0" asChild>
+          <Button type="button" className="shrink-0 w-full md:w-auto" asChild>
             <Link href={mapsUrl} target="_blank" rel="noopener noreferrer">
               <Navigation className="h-4 w-4 mr-2" />
               Навигация

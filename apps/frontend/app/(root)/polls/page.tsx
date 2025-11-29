@@ -1,6 +1,6 @@
 import { PollList } from "@/components/poll-list";
+import { StaticCard } from "@/components/static-card";
 import { fetchPollsServer, fetchUser } from "@/lib/server-data";
-import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { CheckCircle2, TrendingUp, Trophy, Users } from "@repo/ui/icons";
 import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -29,6 +29,24 @@ export default function PollsPage() {
 
   const activePolls = polls.filter((poll) => poll.active).length;
 
+  const staticCards = [
+    {
+      icon: TrendingUp,
+      label: "Общо гласа",
+      value: totalVotes,
+    },
+    {
+      icon: Users,
+      label: "Активни анкети",
+      value: activePolls,
+    },
+    {
+      icon: CheckCircle2,
+      label: "Ваш облог",
+      value: userVotes,
+    },
+  ];
+
   return (
     <main className="container mx-auto px-4 pt-24 pb-16">
       {/* Header */}
@@ -48,54 +66,15 @@ export default function PollsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-accent" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalVotes}
-                </p>
-                <p className="text-sm text-muted-foreground">Общо гласа</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-accent" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">
-                  {activePolls}
-                </p>
-                <p className="text-sm text-muted-foreground">Активни анкети</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <CheckCircle2 className="h-6 w-6 text-accent" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">
-                  {userVotes}
-                </p>
-                <p className="text-sm text-muted-foreground">Ваш облог</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-3 gap-4 mb-12">
+        {staticCards.map((sCard) => (
+          <StaticCard
+            key={sCard.label}
+            icon={sCard.icon}
+            label={sCard.label}
+            value={String(sCard.value)}
+          />
+        ))}
       </div>
 
       {/* Polls */}

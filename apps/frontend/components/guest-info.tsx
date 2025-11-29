@@ -44,7 +44,7 @@ export function GuestInfo({ guests }: Props) {
     <div className="space-y-6">
       {/* Search */}
       <Card className="mb-8">
-        <CardContent className="p-6">
+        <CardContent className="p-0 px-4 md:p-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
