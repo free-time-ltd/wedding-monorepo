@@ -59,7 +59,7 @@ export function SelectorPage({ guests }: Props) {
   };
 
   return (
-    <div className="card space-y-6">
+    <div className="card space-y-6 mb-20 md:mb-0">
       <div className="card-body space-y-4">
         <div className="space-y-6">
           <div className="search-field flex flex-col gap-2">
@@ -135,16 +135,20 @@ export function SelectorPage({ guests }: Props) {
             </div>
           </div>
         </div>
-        <Button
-          type="button"
-          onClick={selectGuest}
-          disabled={!selectedGuest || isLoading}
-          className="w-full cursor-pointer"
-          size="lg"
-        >
-          {selectedGuest && <>Продлъжете като &quot;{userGuest?.name}&quot;</>}
-          {!selectedGuest && <>Продължете напред</>}
-        </Button>
+        <div className="fixed -bottom-4 left-0 right-0 p-4 bg-background md:static">
+          <Button
+            type="button"
+            onClick={selectGuest}
+            disabled={!selectedGuest || isLoading}
+            className="w-full cursor-pointer"
+            size="lg"
+          >
+            {selectedGuest && (
+              <>Продлъжете като &quot;{userGuest?.name}&quot;</>
+            )}
+            {!selectedGuest && <>Продължете напред</>}
+          </Button>
+        </div>
         <p className="text-sm text-muted-foreground text-center text-pretty">
           Не откривате името си? Моля свържете се с младоженците за подкрепа.
         </p>

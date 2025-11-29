@@ -65,7 +65,7 @@ export function FilterBar({ guests = [] }: Props) {
       </Select>
 
       <Select value={uploader} onValueChange={handleUploaderChange}>
-        <SelectTrigger className="w-[170px] bg-card shadow-sm flex items-center gap-2">
+        <SelectTrigger className="w-[160px] bg-card shadow-sm flex items-center gap-2">
           <UserRound className="h-4 w-4 opacity-70" />
           <SelectValue placeholder="Добавено от" />
         </SelectTrigger>
