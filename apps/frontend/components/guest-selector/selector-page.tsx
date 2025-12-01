@@ -8,6 +8,7 @@ import { Label } from "@repo/ui/components/ui/label";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
 import { Guest } from "@/store/chatStore";
+import { useSocket } from "@/context/SocketContext";
 
 interface Props {
   guests: Guest[];
@@ -21,6 +22,7 @@ export function SelectorPage({ guests }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const redirectTo = searchParams.get("redirectTo");
   const shouldRedirect = !!redirectTo && redirectTo.startsWith("/");
+  const { isConnected, reconnect } = useSocket();
 
   const filteredGuests = guests.filter((guest) =>
     guest.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -48,6 +50,10 @@ export function SelectorPage({ guests }: Props) {
       if (!res.ok) {
         const error = await res.text();
         throw new Error(error);
+      }
+
+      if (isConnected) {
+        reconnect();
       }
 
       router.push(shouldRedirect ? redirectTo : "/chat");

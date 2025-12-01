@@ -44,6 +44,7 @@ export interface ClientToServerEvents {
   "get-messages": (props: { roomId: string; lastMessageId?: number }) => void;
   "chat-message": (props: { roomId: string; message: string }) => void;
   "invite-room": (props: { roomId: string; userId: string }) => void;
+  "change-user": (props: { userId: string }, callback?: () => void) => void;
   ping: (callback?: () => void) => void;
 }
 
