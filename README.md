@@ -7,8 +7,6 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
 - For some reason chat duplicates messages at least according to NextJS.
 - Tests for the backend?
-- Rework GuestGallery component. Something is wrong with the state. Preserve optimistic updates
-- After initially picking who you are and connecting to chat, if you go back to the guest portal and select another name, your state in the websocket connection is not being updated so you continue chatting as the previous account.
 
 ## Fixing turborepo
 

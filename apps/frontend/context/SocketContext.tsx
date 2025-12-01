@@ -21,6 +21,7 @@ interface SocketContextValue {
   transport: string;
   connect: (props?: ConnectProps) => void;
   disconnect: (removeListeners?: boolean) => void;
+  reconnect: () => void;
 }
 
 interface ConnectProps {
@@ -32,6 +33,7 @@ export const SocketContext = createContext<SocketContextValue | null>(null);
 
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const socketRef = useRef<Socket | null>(null);
+  const lastConnectProps = useRef<ConnectProps | undefined>(undefined);
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
 
@@ -68,6 +70,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       socketRef.current.on("connect_error", console.log);
 
       socketRef.current.connect();
+      lastConnectProps.current = props;
     },
     [onConnect]
   );
@@ -83,11 +86,18 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const reconnect = useCallback(() => {
+    if (!isConnected) return;
+    disconnect(false);
+    connect(lastConnectProps.current);
+  }, [connect, disconnect, isConnected]);
+
   return (
     <SocketContext.Provider
       value={{
         connect,
         disconnect,
+        reconnect,
         socket: socketRef.current,
         isConnected,
         transport,
