@@ -1,10 +1,11 @@
 import { env } from "@/env";
+import { MailerService } from "@/services/mailer/mailer-service";
+import { RsvpRepository } from "@/services/rsvp/rsvp-repository";
 import { RsvpInput, rsvpSchema } from "@/types";
 import { eq, sql } from "@repo/db";
 import { db } from "@repo/db/client";
 import { invitationTable } from "@repo/db/schema";
 import { Hono } from "hono";
-import { Resend } from "resend";
 import { z } from "zod";
 
 const rsvpRouter = new Hono();
@@ -12,7 +13,7 @@ const rsvpRouter = new Hono();
 rsvpRouter.get("/:id", async (c) => {
   const { id } = c.req.param();
 
-  const guest = await db.query.usersTable.findFirst({
+  const guestRes = await db.query.usersTable.findFirst({
     where: (colums, { eq }) => eq(colums.id, id),
     with: {
       table: true,
@@ -20,20 +21,25 @@ rsvpRouter.get("/:id", async (c) => {
     },
   });
 
-  if (!guest) {
+  if (!guestRes) {
     return c.json({ success: false, error: "404 Not Found" }, { status: 404 });
   }
 
-  if (guest.invitation) {
+  const { invitation, ...guest } = guestRes;
+
+  if (invitation) {
     await db
       .update(invitationTable)
       .set({
         views: sql`${invitationTable.views} + 1`,
       })
-      .where(eq(invitationTable.id, guest.invitation.id));
+      .where(eq(invitationTable.id, invitation.id));
   }
 
-  return c.json({ success: true, data: guest });
+  return c.json({
+    success: true,
+    data: { guest, invitation },
+  });
 });
 
 rsvpRouter.post("/:id", async (c) => {
@@ -55,45 +61,43 @@ rsvpRouter.post("/:id", async (c) => {
   const {
     attending,
     plusOne,
+    extraGuests,
     menuChoice,
     transportation,
     accommodation,
     notes,
   } = parsed.data;
 
-  await db
-    .insert(invitationTable)
-    .values({
-      userId: id,
-      attending,
-      plusOne,
-      menuChoice,
-      transportation,
-      accommodation,
-      notes: notes ?? null,
-      createdAt: new Date(),
-      views: 0,
-    })
-    .onConflictDoUpdate({
-      target: [invitationTable.userId],
-      set: {
-        attending,
-        plusOne,
-        menuChoice,
-        transportation,
-        accommodation,
-        notes: notes ?? null,
-      },
-    });
+  const plusOneNames =
+    !!extraGuests &&
+    extraGuests
+      .split(",")
+      .map((str) => str.trim())
+      .filter(Boolean);
+
+  const rsvpRepo = new RsvpRepository(db);
+
+  await rsvpRepo.createRsvp({
+    userId: id,
+    attending,
+    plusOne,
+    plusOneNames,
+    menuChoice,
+    transportation,
+    accommodation,
+    notes: notes ?? null,
+    createdAt: new Date(),
+    views: 0,
+  });
 
   const user = await db.query.usersTable.findFirst({
     where: (columns, { eq }) => eq(columns.id, id),
   });
 
   if (user) {
-    const resend = new Resend(env.RESEND_KEY);
+    const mailer = new MailerService(env.RESEND_KEY, true);
 
-    const { error } = await resend.emails.send({
+    const { error } = await mailer.send({
       from: `Wedding Mailer <${env.MAIL_ADDRESS_FROM}>`,
       to: ["ltsochev@live.com", "krisi.v.kostova@gmail.com"],
       subject: `RSVP update from: ${user.name}`,

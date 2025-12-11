@@ -5,8 +5,9 @@ This is a project for my wedding and website. Senior developers can't build simp
 ## ToDos
 
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
-- For some reason chat duplicates messages at least according to NextJS.
 - Tests for the backend?
+- When invitation gets opened, we have to detect if the client is invitee or inviter. And if there is something like this on the invitation page we should show all the names concerning this invitation. Make sure you are handling all states. Maybe if i'm invitee and i'm trying to access /rsvp/my-unique-id I should get redirected to /rsvp/whoever-invite-me-id to minimize risks. But then I might lose track of who's accepted and who isn't in the admin panel. Maybe I should improve that table as well.
+- Also fix the designs for the RSVP page. It needs to look more like a wedding invitation and less like a e-commerce form
 
 ## Fixing turborepo
 

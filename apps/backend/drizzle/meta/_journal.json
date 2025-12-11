@@ -204,6 +204,20 @@
       "when": 1763541764390,
       "tag": "0028_empty_blue_shield",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "6",
+      "when": 1764608634421,
+      "tag": "0029_chief_lockheed",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "6",
+      "when": 1764608699664,
+      "tag": "0030_woozy_multiple_man",
+      "breakpoints": true
     }
   ]
 }

@@ -18,14 +18,29 @@ export const imageUploadSchema = z.object({
   message: z.string().optional(),
 });
 
-export const rsvpSchema = z.object({
-  menuChoice: z.enum(menuTypes),
-  attending: z.boolean(),
-  plusOne: z.boolean(),
-  accommodation: z.boolean(),
-  transportation: z.enum(transportTypes),
-  notes: z.string().optional(),
-});
+export const rsvpSchema = z
+  .object({
+    menuChoice: z.enum(menuTypes),
+    attending: z.boolean(),
+    plusOne: z.boolean(),
+    extraGuests: z.string().optional(),
+    accommodation: z.boolean(),
+    transportation: z.enum(transportTypes),
+    notes: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.plusOne) {
+        return !!data.extraGuests;
+      }
+
+      return true;
+    },
+    {
+      message: "Plus one name is required when bringing a guest.",
+      path: ["plusOneName"],
+    }
+  );
 
 export type RsvpInput = z.infer<typeof rsvpSchema>;
 
