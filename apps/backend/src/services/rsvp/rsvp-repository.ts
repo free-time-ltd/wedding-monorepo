@@ -30,6 +30,7 @@ export class RsvpRepository {
           menuChoice: input.menuChoice,
           transportation: input.transportation,
           accommodation: input.accommodation,
+          plusOneNames: input.plusOneNames,
           notes: input.notes ?? null,
         },
       })

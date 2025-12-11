@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormValues, RsvpForm } from "./form";
 import { serializeFormValues } from "./utils";
+import { toast } from "@repo/ui";
 
 interface Props {
   guestId: string;
@@ -137,7 +138,12 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
           <CardContent>
             <RsvpForm
               name="rsvp-form"
-              defaultValues={invitation as unknown as FormValues}
+              defaultValues={
+                {
+                  ...invitation,
+                  extraGuests: invitation?.plusOneNames,
+                } as unknown as FormValues
+              }
               onSubmit={handleSubmit}
             />
           </CardContent>

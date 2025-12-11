@@ -95,7 +95,7 @@ rsvpRouter.post("/:id", async (c) => {
   });
 
   if (user) {
-    const mailer = new MailerService(env.RESEND_KEY, true);
+    const mailer = new MailerService(env.RESEND_KEY, Boolean(env.MAIL_PRETEND));
 
     const { error } = await mailer.send({
       from: `Wedding Mailer <${env.MAIL_ADDRESS_FROM}>`,

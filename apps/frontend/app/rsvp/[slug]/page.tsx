@@ -2,10 +2,6 @@ import { Metadata } from "next";
 import { RsvpPage } from "@/components/rsvp/rsvp-page";
 import { RsvpResponse } from "@/store/chatStore";
 
-interface Props {
-  params: Promise<{ slug: string }>;
-}
-
 const fetchRsvp = async (rsvpId: string) => {
   const url = new URL(
     `/api/rsvps/${rsvpId}`,
@@ -18,7 +14,9 @@ const fetchRsvp = async (rsvpId: string) => {
   return json?.data;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/rsvp/[slug]">): Promise<Metadata> {
   const { slug: guestId } = await params;
 
   const data: RsvpResponse = await fetchRsvp(guestId);
@@ -28,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function RSVPPage({ params }: Props) {
+export default async function RSVPPage({ params }: PageProps<"/rsvp/[slug]">) {
   const { slug: guestId } = await params;
   const { guest, invitation } = (await fetchRsvp(guestId)) as RsvpResponse;
 

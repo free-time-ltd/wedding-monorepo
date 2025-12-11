@@ -26,6 +26,8 @@ const fieldConfig = {
     label: "Моля въведете имената на хората, които ще доведете с Вас!",
     placeholder: "Въведете имената тук",
     notes: `Ако каните повече от един човек - моля разделете имената със запетайки (,)`,
+    dependsOn: "plusOne",
+    showWhen: (value: string) => value === "true",
   },
   menuChoice: {
     label: "Предпочитания за меню?",
@@ -104,6 +106,7 @@ export function RsvpForm({
       Object.entries(payload).forEach(([k, v]) => {
         if (v !== undefined && v !== null) formData.append(k, String(v));
       });
+
       onSubmit?.(formData);
     },
   });
@@ -112,11 +115,59 @@ export function RsvpForm({
     <form
       name={name}
       id={name}
-      onSubmit={form.handleSubmit}
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
       onReset={(e) => onReset?.(e.currentTarget)}
     >
       <div className="space-y-6">
         {Object.entries(fieldConfig).map(([key, field]) => {
+          if ("dependsOn" in field && "showWhen" in field) {
+            return (
+              <form.Subscribe
+                key={key}
+                selector={(state) => state.values[field.dependsOn]}
+              >
+                {(dependentValue) => {
+                  if (!field.showWhen(dependentValue as string)) {
+                    return null;
+                  }
+
+                  return (
+                    <form.Field name={key}>
+                      {(fieldState) => (
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor={key}
+                            className="text-base font-medium text-sage-800"
+                          >
+                            {field.label}
+                          </Label>
+                          <Textarea
+                            id={key}
+                            name={key}
+                            placeholder={field.placeholder}
+                            value={fieldState.state.value ?? ""}
+                            onChange={(e) =>
+                              fieldState.handleChange(e.target.value)
+                            }
+                            className="min-h-[100px] resize-none"
+                          />
+                          {field.notes && (
+                            <p className="text-sm text-sage-600">
+                              {field.notes}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </form.Field>
+                  );
+                }}
+              </form.Subscribe>
+            );
+          }
+
           if ("options" in field) {
             return (
               <form.Field key={key} name={key}>
