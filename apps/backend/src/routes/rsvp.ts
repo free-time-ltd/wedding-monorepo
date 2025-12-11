@@ -25,6 +25,14 @@ rsvpRouter.get("/:id", async (c) => {
     return c.json({ success: false, error: "404 Not Found" }, { status: 404 });
   }
 
+  // Detect role
+  const isInvited = await db.query.invitationUsers.findFirst({
+    where: (table, { eq }) => eq(table.invitedUserId, id),
+  });
+
+  const role = isInvited ? "invitee" : "guest";
+  const invitedBy = isInvited ? isInvited.userId : null;
+
   const { invitation, ...guest } = guestRes;
 
   if (invitation) {
@@ -38,7 +46,7 @@ rsvpRouter.get("/:id", async (c) => {
 
   return c.json({
     success: true,
-    data: { guest, invitation },
+    data: { guest, invitation, role, invitedBy },
   });
 });
 

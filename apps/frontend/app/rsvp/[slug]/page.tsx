@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { RsvpPage } from "@/components/rsvp/rsvp-page";
 import { RsvpResponse } from "@/store/chatStore";
+import { redirect } from "next/navigation";
 
 const fetchRsvp = async (rsvpId: string) => {
   const url = new URL(
@@ -28,7 +29,13 @@ export async function generateMetadata({
 
 export default async function RSVPPage({ params }: PageProps<"/rsvp/[slug]">) {
   const { slug: guestId } = await params;
-  const { guest, invitation } = (await fetchRsvp(guestId)) as RsvpResponse;
+  const { guest, invitation, invitedBy } = (await fetchRsvp(
+    guestId
+  )) as RsvpResponse;
+
+  if (invitedBy) {
+    return redirect(`/rsvp/${invitedBy}`);
+  }
 
   return <RsvpPage guestId={guestId} guest={guest} invitation={invitation} />;
 }

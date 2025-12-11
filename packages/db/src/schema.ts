@@ -93,18 +93,31 @@ export const invitationTable = sqliteTable("invitations", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
-export const invitationUsers = sqliteTable("invitation_users", {
-  id: integer().primaryKey({ autoIncrement: true }),
-  userId: text("user_id").references(() => usersTable.id, {
-    onDelete: "cascade",
-  }),
-  invitedUserId: text("invited_user_id").references(() => usersTable.id, {
-    onDelete: "cascade",
-  }),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date()
-  ),
-});
+export const invitationUsers = sqliteTable(
+  "invitation_users",
+  {
+    id: integer().primaryKey({ autoIncrement: true }),
+    invitationId: integer("invitation_id").references(
+      () => invitationTable.id,
+      {
+        onDelete: "cascade",
+      }
+    ),
+    userId: text("user_id").references(() => usersTable.id, {
+      onDelete: "cascade",
+    }),
+    invitedUserId: text("invited_user_id").references(() => usersTable.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+      () => new Date()
+    ),
+  },
+  (table) => [
+    index("invite_idx").on(table.invitationId),
+    unique("user_uniq_key").on(table.userId, table.invitedUserId),
+  ]
+);
 
 export const officialPhotosTable = sqliteTable("official_photos", {
   id: text("id")

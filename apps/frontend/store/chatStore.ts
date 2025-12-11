@@ -55,6 +55,8 @@ export interface Invitation {
 export interface RsvpResponse {
   guest: Guest;
   invitation: Invitation | null;
+  role: "guest" | "invitee";
+  invitedBy: string | null;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
