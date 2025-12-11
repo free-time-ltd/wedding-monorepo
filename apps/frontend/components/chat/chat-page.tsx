@@ -69,7 +69,7 @@ export function ChatPage({ user, guests, initialChatroom }: ChatProps) {
         addChatroom({
           ...room,
           guests: [],
-          messages: new Set(),
+          messages: new Map(),
           lastMessage: null,
         } satisfies Chatroom);
       }

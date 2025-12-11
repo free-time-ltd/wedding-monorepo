@@ -15,6 +15,7 @@ const envSchema = z.object({
   MAIL_ADDRESS_FROM: z.string().default("no-reply@kristinakostova.com"),
   WEBHOOK_SECRET: z.string(),
   CDN_DOMAIN: z.string(),
+  MAIL_PRETEND: z.coerce.boolean().optional().default(false),
 });
 
 export type EnvType = z.infer<typeof envSchema>;

@@ -84,6 +84,7 @@ export const invitationTable = sqliteTable("invitations", {
     .unique(),
   attending: integer("attending", { mode: "boolean" }),
   plusOne: integer("plus_one", { mode: "boolean" }),
+  plusOneNames: text("plus_one_names", { mode: "json" }),
   menuChoice: text("menu_choice", { enum: menuTypes }),
   transportation: text("transportation", { enum: transportTypes }),
   accommodation: integer("accommodation", { mode: "boolean" }),
@@ -91,6 +92,32 @@ export const invitationTable = sqliteTable("invitations", {
   views: integer("views").default(0),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
+
+export const invitationUsers = sqliteTable(
+  "invitation_users",
+  {
+    id: integer().primaryKey({ autoIncrement: true }),
+    invitationId: integer("invitation_id").references(
+      () => invitationTable.id,
+      {
+        onDelete: "cascade",
+      }
+    ),
+    userId: text("user_id").references(() => usersTable.id, {
+      onDelete: "cascade",
+    }),
+    invitedUserId: text("invited_user_id").references(() => usersTable.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+      () => new Date()
+    ),
+  },
+  (table) => [
+    index("invite_idx").on(table.invitationId),
+    unique("user_uniq_key").on(table.userId, table.invitedUserId),
+  ]
+);
 
 export const officialPhotosTable = sqliteTable("official_photos", {
   id: text("id")

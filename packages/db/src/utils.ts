@@ -102,11 +102,14 @@ export const transformRoom = ({
         label: user?.table?.label,
       },
     })),
-    messages: new Set(
-      room.messages.map((msg) => ({
-        ...msg,
-        createdAt: room.createdAt.getTime(),
-      }))
+    messages: new Map(
+      room.messages.map((msg) => [
+        msg.id,
+        {
+          ...msg,
+          createdAt: room.createdAt.getTime(),
+        },
+      ])
     ),
     lastMessage: room.messages.at(0) ?? null,
   };

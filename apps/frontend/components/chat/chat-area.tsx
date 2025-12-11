@@ -29,7 +29,7 @@ const ChatArea = forwardRef<ChatAreaHandle, Props>(
   ({ messages, guests, user, onScroll }, ref: Ref<ChatAreaHandle>) => {
     const messagesRef = useRef<HTMLDivElement>(null);
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
-    const roomMessages = Array.from(messages);
+    const roomMessages = Array.from(messages.values());
 
     const isAtBottom = () => {
       const el = messagesRef.current;
