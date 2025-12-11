@@ -2,8 +2,9 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Label } from "@repo/ui/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/ui/radio-group";
 import { Textarea } from "@repo/ui/components/ui/textarea";
-import { FormEvent, useMemo } from "react";
-import { normalizeFormDefaults } from "./utils";
+import { useMemo } from "react";
+import { useForm } from "@tanstack/react-form";
+import { normalizeFormDefaults, serializeFormValues } from "./utils";
 
 const fieldConfig = {
   attending: {
@@ -20,6 +21,11 @@ const fieldConfig = {
       { value: "true", label: "Да, ще доведа някого!" },
       { value: "false", label: "Не, само аз ще бъда" },
     ],
+  },
+  extraGuests: {
+    label: "Моля въведете имената на хората, които ще доведете с Вас!",
+    placeholder: "Въведете имената тук",
+    notes: `Ако каните повече от един човек - моля разделете имената със запетайки (,)`,
   },
   menuChoice: {
     label: "Предпочитания за меню?",
@@ -87,78 +93,100 @@ export function RsvpForm({
     if (defaultValues && defaultValues !== null) {
       return normalizeFormDefaults(defaultValues);
     }
-  }, [defaultValues]) as Record<string, string> | undefined;
+    return {};
+  }, [defaultValues]) as Record<string, string>;
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.currentTarget);
-
-    onSubmit?.(formData);
-  };
-
-  const handleReset = (e: FormEvent<HTMLFormElement>) => {
-    onReset?.(e.currentTarget);
-  };
+  const form = useForm({
+    defaultValues: defaults,
+    onSubmit: async ({ value }) => {
+      const payload = serializeFormValues(value);
+      const formData = new FormData();
+      Object.entries(payload).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) formData.append(k, String(v));
+      });
+      onSubmit?.(formData);
+    },
+  });
 
   return (
-    <form onSubmit={handleSubmit} onReset={handleReset} name={name} id={name}>
+    <form
+      name={name}
+      id={name}
+      onSubmit={form.handleSubmit}
+      onReset={(e) => onReset?.(e.currentTarget)}
+    >
       <div className="space-y-6">
         {Object.entries(fieldConfig).map(([key, field]) => {
           if ("options" in field) {
             return (
-              <div className="space-y-3" key={`question-${key}`}>
-                <Label className="text-base font-medium text-sage-800">
-                  {field.label}
-                </Label>
-                <RadioGroup name={key} defaultValue={defaults?.[key]} required>
-                  {field.options.map((option, i) => (
-                    <div
-                      className="flex items-center space-x-2"
-                      key={`option-${key}-${i}`}
+              <form.Field key={key} name={key}>
+                {(fieldState) => (
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium text-sage-800">
+                      {field.label}
+                    </Label>
+                    <RadioGroup
+                      name={key}
+                      value={fieldState.state.value ?? ""}
+                      onValueChange={fieldState.handleChange}
+                      required
                     >
-                      <RadioGroupItem
-                        value={String(option.value)}
-                        id={`${key}-${option.value}`}
-                      />
-                      <Label
-                        htmlFor={`${key}-${option.value}`}
-                        className="font-normal cursor-pointer"
-                      >
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
+                      {field.options.map((option, i) => (
+                        <div
+                          className="flex items-center space-x-2"
+                          key={`option-${key}-${i}`}
+                        >
+                          <RadioGroupItem
+                            value={String(option.value)}
+                            id={`${key}-${option.value}`}
+                            checked={
+                              fieldState.state.value === String(option.value)
+                            }
+                            onClick={() =>
+                              fieldState.handleChange(String(option.value))
+                            }
+                          />
+                          <Label
+                            htmlFor={`${key}-${option.value}`}
+                            className="font-normal cursor-pointer"
+                          >
+                            {option.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                )}
+              </form.Field>
             );
           }
-
           if ("placeholder" in field) {
             return (
-              <div className="space-y-3" key={`question-${key}`}>
-                <div className="space-y-3">
-                  <Label
-                    htmlFor={key}
-                    className="text-base font-medium text-sage-800"
-                  >
-                    {field.label}
-                  </Label>
-                  <Textarea
-                    id={key}
-                    name={key}
-                    placeholder={field.placeholder}
-                    defaultValue={defaults?.[key]}
-                    className="min-h-[100px] resize-none"
-                  />
-                  {field.notes && (
-                    <p className="text-sm text-sage-600">{field.notes}</p>
-                  )}
-                </div>
-              </div>
+              <form.Field key={key} name={key}>
+                {(fieldState) => (
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor={key}
+                      className="text-base font-medium text-sage-800"
+                    >
+                      {field.label}
+                    </Label>
+                    <Textarea
+                      id={key}
+                      name={key}
+                      placeholder={field.placeholder}
+                      value={fieldState.state.value ?? ""}
+                      onChange={(e) => fieldState.handleChange(e.target.value)}
+                      className="min-h-[100px] resize-none"
+                    />
+                    {field.notes && (
+                      <p className="text-sm text-sage-600">{field.notes}</p>
+                    )}
+                  </div>
+                )}
+              </form.Field>
             );
           }
-
           return null;
         })}
       </div>
@@ -166,7 +194,7 @@ export function RsvpForm({
         <Button
           type="submit"
           className="w-full bg-rose-gold-500 hover:bg-rose-gold-600 text-lg py-6"
-          disabled={disabled}
+          disabled={disabled || form.state.isSubmitting}
         >
           Отговорете на поканата
         </Button>

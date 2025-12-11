@@ -11,7 +11,7 @@ function isAdmin(decoded: unknown): boolean {
   return Array.isArray(groups) && groups.includes("admin");
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const protectedRoutes = ["/admin", "/dashboard"];
   const isProtected = protectedRoutes.some((route) =>
     req.nextUrl.pathname.startsWith(route)

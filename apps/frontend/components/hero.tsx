@@ -33,7 +33,11 @@ export function Hero() {
           <div className="hidden sm:block w-px h-6 bg-border" />
           <div className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-accent" />
-            <span className="text-lg">Colibri Pool Plovdiv</span>
+            <Link href="/venue">
+              <span className="text-lg hover:underline">
+                Colibri Pool Plovdiv
+              </span>
+            </Link>
           </div>
         </div>
 

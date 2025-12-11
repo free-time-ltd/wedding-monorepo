@@ -26,7 +26,7 @@ export interface Chatroom {
   name: string;
   guests: Guest[];
   isPrivate: boolean;
-  messages: Set<Message>;
+  messages: Map<number, Message>;
   lastMessage: Message | null;
 }
 
@@ -40,17 +40,21 @@ export interface ChatStore {
   setGuests: (guestList: Guest[]) => void;
 }
 
-export interface RsvpResponse extends Guest {
-  invitation: {
-    id: number;
-    attending: boolean;
-    plusOne: boolean;
-    createdAt: Date;
-    menuChoice: "vegan" | "regular" | "fish";
-    notes: string | null;
-    userId: string;
-    views: number;
-  } | null;
+export interface Invitation {
+  id: number;
+  attending: boolean;
+  plusOne: boolean;
+  plusOneNames: string;
+  createdAt: Date;
+  menuChoice: "vegan" | "regular" | "fish";
+  notes: string | null;
+  userId: string;
+  views: number;
+}
+
+export interface RsvpResponse {
+  guest: Guest;
+  invitation: Invitation | null;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
@@ -65,7 +69,10 @@ export const useChatStore = create<ChatStore>((set) => ({
       const chatroom = state.chatrooms[chatroomId];
       if (!chatroom) return state;
 
-      const updatedMessages = [...Array.from(chatroom.messages), message];
+      const updatedMessages = [
+        ...Array.from(chatroom.messages.values()),
+        message,
+      ];
 
       if (message.createdAt < (updatedMessages.at(-1)?.createdAt ?? 0)) {
         const index = updatedMessages.findIndex(
@@ -84,7 +91,9 @@ export const useChatStore = create<ChatStore>((set) => ({
           ...state.chatrooms,
           [chatroomId]: {
             ...chatroom,
-            messages: new Set(updatedMessages),
+            messages: new Map<number, Message>(
+              updatedMessages.map((msg) => [msg.id, msg])
+            ),
             lastMessage: message,
           },
         },

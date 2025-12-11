@@ -17,9 +17,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  experimental: {
-    reactCompiler: true,
-  },
+  reactCompiler: true,
   images: {
     remotePatterns: [new URL(`${process.env.NEXT_PUBLIC_CDN_URL}/**`)],
   },
