@@ -95,7 +95,9 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
     );
   }
 
-  const invitationNameList = [guest.name, invitation?.plusOneNames];
+  const invitationNameList = [guest.name, ...(invitation?.plusOneNames ?? [])]
+    .map((name) => name.trim())
+    .filter(Boolean);
 
   return (
     <div className="min-h-screen bg-cream-50">
