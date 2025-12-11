@@ -218,6 +218,13 @@
       "when": 1764608699664,
       "tag": "0030_woozy_multiple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "6",
+      "when": 1765477041875,
+      "tag": "0031_wealthy_slayback",
+      "breakpoints": true
     }
   ]
 }
