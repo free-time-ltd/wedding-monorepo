@@ -15,10 +15,12 @@ import {
 } from "@repo/ui/components/ui/table";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@repo/ui/components/ui/dialog";
@@ -33,7 +35,7 @@ import {
 } from "@repo/ui/components/ui/select";
 import Link from "next/link";
 import { toast } from "@repo/ui";
-import { CircleX } from "@repo/ui/icons";
+import { CircleX, UserPlus2, X } from "@repo/ui/icons";
 import { generateId } from "@repo/utils/generateId";
 
 type User = {
@@ -79,6 +81,8 @@ type Invitation = {
   notes: string | null;
   views: number;
   createdAt: Date;
+  plusOneNames: string[] | null;
+  invited: string[];
   user: { id: string; name: string; email: string | null };
 };
 
@@ -138,6 +142,15 @@ type PollData = {
   }>;
 };
 
+type ExtraGuests = {
+  invitation: number;
+  userId: string;
+  guests: Array<{
+    name: string;
+    gender?: "male" | "female" | "unknown";
+  }>;
+};
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
@@ -173,6 +186,8 @@ export default function AdminPage() {
     validUntil: "2026-06-27",
     options: [],
   });
+  const [addGuestOpen, setAddGuestOpen] = useState(false);
+  const [extraGuests, setExtraGuests] = useState<ExtraGuests>();
 
   useEffect(() => {
     fetchAll();
@@ -311,6 +326,40 @@ export default function AdminPage() {
       await fetchAll();
     } catch (err) {
       console.error("Failed to submit user form", err);
+    }
+  };
+
+  const submitNewGuestForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!extraGuests) return;
+
+    const body = {
+      invitation: extraGuests.invitation,
+      userId: extraGuests.userId,
+      guests: extraGuests.guests,
+    };
+
+    try {
+      await fetch(
+        new URL(
+          `/api/admin/invitations/${extraGuests.invitation}/guests`,
+          API_BASE
+        ),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          credentials: "include",
+        }
+      );
+
+      fetchAll();
+
+      setExtraGuests(undefined);
+      setAddGuestOpen(false);
+    } catch (e) {
+      console.error(e);
+      toast.error("Имаше проблем със редакцията на поканата");
     }
   };
 
@@ -453,6 +502,15 @@ export default function AdminPage() {
       ...prev,
       options: prev.options.filter((option) => option.id !== id),
     }));
+  };
+
+  const handleOpenAddGuestModal = (inv: Invitation) => {
+    setAddGuestOpen(true);
+    setExtraGuests({
+      invitation: inv.id,
+      userId: inv.userId,
+      guests: (inv.plusOneNames ?? []).map((name) => ({ name })),
+    });
   };
 
   return (
@@ -636,7 +694,29 @@ export default function AdminPage() {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell>{inv.plusOne ? "Да" : "Не"}</TableCell>
+                      <TableCell>
+                        {inv.plusOne ? <>Да</> : <>Не</>}{" "}
+                        {(() => {
+                          if ((inv.plusOneNames?.length ?? 0) > 0) {
+                            if (
+                              inv.invited.length !== inv.plusOneNames?.length
+                            ) {
+                              return (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="cursor-pointer"
+                                  onClick={() => handleOpenAddGuestModal(inv)}
+                                >
+                                  виж поканени
+                                </Button>
+                              );
+                            }
+
+                            return <>({inv.plusOneNames?.length})</>;
+                          }
+                        })()}
+                      </TableCell>
                       <TableCell>{inv.menuChoice || "-"}</TableCell>
                       <TableCell>{inv.transportation || "-"}</TableCell>
                       <TableCell>{inv.accommodation ? "Да" : "Не"}</TableCell>
@@ -1098,6 +1178,127 @@ export default function AdminPage() {
               <Button type="submit">{editingUser ? "Запази" : "Добави"}</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={addGuestOpen && !!extraGuests}
+        onOpenChange={setAddGuestOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex justify-between">
+              <DialogTitle className="font-serif">
+                Добавяне на гости
+              </DialogTitle>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() =>
+                  setExtraGuests((prev) => {
+                    if (!prev) return prev;
+
+                    return {
+                      ...prev,
+                      guests: [...prev.guests, { name: "" }],
+                    };
+                  })
+                }
+              >
+                <UserPlus2 />
+                Добави още
+              </Button>
+            </div>
+          </DialogHeader>
+          {!!extraGuests && (
+            <form id="new-guest-form" onSubmit={submitNewGuestForm}>
+              <div className="space-y-2">
+                {extraGuests.guests.map(({ name, gender }, i) => (
+                  <div className="grid gap-2" key={i}>
+                    <Label htmlFor={`name-${name}-${i}`}>Име</Label>
+                    <div className="flex gap-1">
+                      <Input
+                        type="text"
+                        value={name}
+                        onChange={(e) =>
+                          setExtraGuests((prev) => {
+                            if (!prev) return prev;
+
+                            const next = {
+                              ...prev,
+                              guests: prev.guests ?? [],
+                            };
+                            next.guests[i] = {
+                              ...next.guests[i],
+                              name: e.target.value,
+                            };
+
+                            return next;
+                          })
+                        }
+                      />
+                      <Select
+                        value={gender}
+                        onValueChange={(val) =>
+                          setExtraGuests((prev) => {
+                            if (!prev) return prev;
+
+                            return {
+                              ...prev,
+                              guests: prev.guests.map((guest, index) =>
+                                index === i
+                                  ? {
+                                      ...guest,
+                                      gender:
+                                        val as ExtraGuests["guests"][number]["gender"],
+                                    }
+                                  : guest
+                              ),
+                            };
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Пол" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Мъж</SelectItem>
+                          <SelectItem value="female">Жена</SelectItem>
+                          <SelectItem value="unknown">Не знаем</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="destructive"
+                        type="button"
+                        size="icon"
+                        onClick={() =>
+                          setExtraGuests((prev) => {
+                            if (!prev) return prev;
+
+                            return {
+                              ...prev,
+                              guests: prev.guests.filter(
+                                (_, index) => i !== index
+                              ),
+                            };
+                          })
+                        }
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </form>
+          )}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Откажи</Button>
+            </DialogClose>
+            <Button type="submit" form="new-guest-form">
+              Запази гостите
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       <div className="flex justify-center items-center gap-4 py-6">

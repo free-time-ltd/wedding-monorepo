@@ -8,21 +8,25 @@ import {
   index,
 } from "drizzle-orm/sqlite-core";
 
-export const usersTable = sqliteTable("users", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => generateId()),
-  name: text("name").notNull(),
-  extras: integer("extra_people").default(0),
-  email: text("email"),
-  phone: text("phone"),
-  gender: text("gender", { enum: ["male", "female", "unknown"] }).default(
-    "unknown"
-  ),
-  tableId: integer("table_id").references(() => tablesTable.id, {
-    onDelete: "set null",
-  }),
-});
+export const usersTable = sqliteTable(
+  "users",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    name: text("name").notNull(),
+    extras: integer("extra_people").default(0),
+    email: text("email"),
+    phone: text("phone"),
+    gender: text("gender", { enum: ["male", "female", "unknown"] }).default(
+      "unknown"
+    ),
+    tableId: integer("table_id").references(() => tablesTable.id, {
+      onDelete: "set null",
+    }),
+  },
+  (table) => [unique("unique_name_idx").on(table.name)]
+);
 
 export const tablesTable = sqliteTable("tables", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -285,12 +289,26 @@ export const roomRelations = relations(roomsTable, ({ many, one }) => ({
   messages: many(messagesTable),
 }));
 
-export const invitationRelations = relations(invitationTable, ({ one }) => ({
-  user: one(usersTable, {
-    fields: [invitationTable.userId],
-    references: [usersTable.id],
-  }),
-}));
+export const invitationRelations = relations(
+  invitationTable,
+  ({ one, many }) => ({
+    user: one(usersTable, {
+      fields: [invitationTable.userId],
+      references: [usersTable.id],
+    }),
+    invited: many(invitationUsers),
+  })
+);
+
+export const invitationUsersRelations = relations(
+  invitationUsers,
+  ({ one }) => ({
+    invitation: one(invitationTable, {
+      fields: [invitationUsers.invitationId], // or whatever your FK field is called
+      references: [invitationTable.id],
+    }),
+  })
+);
 
 export const guestUploadRelations = relations(guestUploadsTable, ({ one }) => ({
   user: one(usersTable, {

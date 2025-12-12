@@ -8,8 +8,9 @@ import {
   newsletterTable,
   pollsTable,
   pollOptionsTable,
+  invitationUsers,
 } from "@repo/db/schema";
-import { eq, desc, count } from "@repo/db";
+import { eq, desc, count, sql } from "@repo/db";
 import { errorResponse, successResponse } from "@/reponses";
 import { PollService } from "@/services/polls-service";
 
@@ -162,6 +163,7 @@ adminRouter.get("/invitations", async (c) => {
   const invitations = await db.query.invitationTable.findMany({
     with: {
       user: true,
+      invited: true,
     },
     orderBy: [desc(invitationTable.createdAt)],
   });
@@ -200,6 +202,47 @@ adminRouter.patch("/invitations/:id", async (c) => {
     .returning();
 
   return c.json({ success: true, data: updatedInvitation });
+});
+
+adminRouter.post("invitations/:id/guests", async (c) => {
+  const { id } = c.req.param();
+  const { userId, guests = [] } = await c.req.json();
+
+  await db
+    .delete(invitationUsers)
+    .where(eq(invitationUsers.invitationId, Number(id)));
+
+  const users = await db
+    .insert(usersTable)
+    .values(
+      guests.map(
+        (guest: { name: string; gender: "male" | "female" | "unknown" }) => ({
+          name: guest.name.trim(),
+          gender: guest.gender,
+        })
+      )
+    )
+    .onConflictDoUpdate({
+      target: [usersTable.name],
+      set: {
+        gender: sql`excluded.gender`,
+      },
+    })
+    .returning();
+
+  await db.insert(invitationUsers).values(
+    users.map((user) => ({
+      invitationId: Number(id),
+      userId,
+      invitedUserId: user.id,
+      createdAt: new Date(),
+    }))
+  );
+
+  return c.json({
+    success: true,
+    data: "ok",
+  });
 });
 
 // GUEST UPLOADS ROUTES

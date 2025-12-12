@@ -99,6 +99,11 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
     .map((name) => name.trim())
     .filter(Boolean);
 
+  const dearWord =
+    guest.gender === "female" && (invitation?.plusOneNames ?? []).length === 0
+      ? "Скъпа"
+      : "Скъпи";
+
   return (
     <div className="min-h-screen bg-cream-50">
       {/* Header */}
@@ -118,7 +123,7 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
             Поканени сте!
           </h1>
           <p className="text-xl text-sage-600">
-            Скъпи {invitationNameList.join(", ")},
+            {dearWord} {invitationNameList.join(", ")},
           </p>
           <p className="text-lg text-sage-700 leading-relaxed max-w-2xl mx-auto">
             Ще се чувстваме истински щастливи, ако споделите този момент с нас.
