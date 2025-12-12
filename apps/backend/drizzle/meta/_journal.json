@@ -225,6 +225,13 @@
       "when": 1765477041875,
       "tag": "0031_wealthy_slayback",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1765553938724,
+      "tag": "0032_deep_tusk",
+      "breakpoints": true
     }
   ]
 }
