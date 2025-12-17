@@ -251,6 +251,16 @@ export const pollAnswersTable = sqliteTable(
   ]
 );
 
+export const nearbyHotels = sqliteTable("hotels", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  name: text("name"),
+  distance: text("distance"),
+  websiteUrl: text("website_url"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
 export const userRoomsRelations = relations(userRooms, ({ one }) => ({
   user: one(usersTable, {
     fields: [userRooms.userId],

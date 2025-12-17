@@ -9,6 +9,7 @@ import {
   pollsTable,
   pollOptionsTable,
   invitationUsers,
+  nearbyHotels,
 } from "@repo/db/schema";
 import { eq, desc, count, sql } from "@repo/db";
 import { errorResponse, successResponse } from "@/reponses";
@@ -420,6 +421,51 @@ adminRouter.delete("/polls/:id/:option", async (c) => {
   const poll = pollService.findPollDetailed(pollId);
 
   return successResponse(c, poll);
+});
+
+// Routes for hotels
+adminRouter.get("/hotels", async (c) => {
+  const hotels = await db.query.nearbyHotels.findMany();
+
+  return c.json({ success: true, data: hotels });
+});
+
+adminRouter.post("/hotels", async (c) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id: _, ...body } = await c.req.json();
+
+  await db.insert(nearbyHotels).values(body);
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.put("/hotels/:id", async (c) => {
+  const { id } = c.req.param();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { createdAt: _, ...body } = await c.req.json();
+
+  const hotel = await db.query.nearbyHotels.findFirst({
+    where: (table, { eq }) => eq(table.id, Number(id)),
+  });
+
+  if (!hotel) {
+    return errorResponse(c, "Hotel not found", 404);
+  }
+
+  await db
+    .update(nearbyHotels)
+    .set(body)
+    .where(eq(nearbyHotels.id, Number(id)));
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.delete("/hotels/:id", async (c) => {
+  const { id } = c.req.param();
+
+  await db.delete(nearbyHotels).where(eq(nearbyHotels.id, Number(id)));
+
+  return successResponse(c, "ok");
 });
 
 export default adminRouter;

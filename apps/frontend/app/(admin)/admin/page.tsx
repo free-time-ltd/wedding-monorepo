@@ -142,6 +142,13 @@ type PollData = {
   }>;
 };
 
+type Hotel = {
+  id: number;
+  name: string;
+  distance: string;
+  websiteUrl: string;
+};
+
 type ExtraGuests = {
   invitation: number;
   userId: string;
@@ -166,6 +173,7 @@ export default function AdminPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editingPoll, setEditingPoll] = useState<Poll | null>(null);
   const [polls, setPolls] = useState<Poll[]>([]);
+  const [hotels, setHotels] = useState<Hotel[]>([]);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -186,6 +194,13 @@ export default function AdminPage() {
     validUntil: "2026-06-27",
     options: [],
   });
+  const [hotelForm, setHotelForm] = useState<Hotel>({
+    id: 0,
+    name: "",
+    distance: "0км",
+    websiteUrl: "",
+  });
+  const [hotelModalOpen, setHotelModalOpen] = useState(false);
   const [addGuestOpen, setAddGuestOpen] = useState(false);
   const [extraGuests, setExtraGuests] = useState<ExtraGuests>();
 
@@ -203,6 +218,7 @@ export default function AdminPage() {
         uploadsRes,
         newsletterRes,
         pollsRes,
+        hotelsRes,
       ] = await Promise.all([
         fetch(new URL(`/api/admin/users`, API_BASE), {
           credentials: "include",
@@ -222,6 +238,9 @@ export default function AdminPage() {
         fetch(new URL(`/api/admin/polls`, API_BASE), {
           credentials: "include",
         }),
+        fetch(new URL(`/api/admin/hotels`, API_BASE), {
+          credentials: "include",
+        }),
       ]);
 
       const usersData = await usersRes.json();
@@ -230,6 +249,7 @@ export default function AdminPage() {
       const uploadsData = await uploadsRes.json();
       const newsletterData = await newsletterRes.json();
       const pollsData = await pollsRes.json();
+      const hotelsData = await hotelsRes.json();
 
       if (usersData.success) setUsers(usersData.data);
       if (tablesData.success) setTables(tablesData.data);
@@ -237,6 +257,7 @@ export default function AdminPage() {
       if (uploadsData.success) setUploads(uploadsData.data);
       if (newsletterData.success) setNewsletter(newsletterData.data);
       if (pollsData.success) setPolls(pollsData.data);
+      if (hotelsData.success) setHotels(hotelsData.data);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -449,59 +470,60 @@ export default function AdminPage() {
     }
   };
 
-  const submitPollForm = async (e: React.FormEvent) => {
+  const submitHotelForm = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload = {
-      ...pollForm,
-      title: pollForm.title.trim(),
-      subtitle: pollForm.subtitle.trim(),
-      options: [...pollForm.options].filter((opt) => Boolean(opt.title.trim())),
-    };
+    await handleHotelEdit(hotelForm);
+    setHotelModalOpen(false);
+    setHotelForm({
+      id: 0,
+      name: "",
+      distance: "0км",
+      websiteUrl: "",
+    });
+  };
 
+  const openEditModal = async (hotel: Hotel) => {
+    setHotelForm({ ...hotel });
+    setHotelModalOpen(true);
+  };
+
+  const handleHotelEdit = async (hotel: Hotel) => {
     try {
-      if (editingPoll) {
-        await fetch(new URL(`/api/admin/polls/${editingPoll.id}`, API_BASE), {
-          credentials: "include",
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } else {
-        await fetch(new URL(`/api/admin/polls`, API_BASE), {
-          credentials: "include",
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      }
-      setIsPollModalOpen(false);
-      setEditingPoll(null);
-      await fetchAll();
+      const url =
+        hotel.id === 0 ? `/api/admin/hotels` : `/api/admin/hotels/${hotel.id}`;
+
+      await fetch(new URL(url, API_BASE), {
+        credentials: "include",
+        method: hotel.id > 0 ? "PUT" : "POST",
+        body: JSON.stringify(hotel),
+      });
     } catch (e) {
       console.error(e);
-      toast.error("Възникна грешка със запазването.");
+      toast.error("Something went wrong");
+    } finally {
+      setHotelForm({
+        id: 0,
+        name: "",
+        distance: "",
+        websiteUrl: "",
+      });
+      fetchAll();
     }
   };
 
-  const addNewFormVariant = () => {
-    setPollForm((prev) => ({
-      ...prev,
-      options: [
-        ...prev.options,
-        {
-          id: generateId(),
-          title: "",
-        },
-      ],
-    }));
-  };
-
-  const removeFormVariant = (id: string) => {
-    setPollForm((prev) => ({
-      ...prev,
-      options: prev.options.filter((option) => option.id !== id),
-    }));
+  const handleHotelDelete = async (hotel: Hotel) => {
+    try {
+      await fetch(new URL(`/api/admin/hotels/${hotel.id}`, API_BASE), {
+        credentials: "include",
+        method: "DELETE",
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("Something went wrong");
+    } finally {
+      fetchAll();
+    }
   };
 
   const handleOpenAddGuestModal = (inv: Invitation) => {
@@ -536,6 +558,7 @@ export default function AdminPage() {
             Бюлетин ({newsletter.length})
           </TabsTrigger>
           <TabsTrigger value="polls">Анкети ({polls.length})</TabsTrigger>
+          <TabsTrigger value="hotels">Хотели ({hotels.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -926,108 +949,118 @@ export default function AdminPage() {
             )}
           </div>
         </TabsContent>
+        <TabsContent value="hotels">
+          <div className="mt-4 border rounded-lg">
+            <div className="p-4 flex justify-between items-center">
+              <div className="font-medium">Списък с хотели</div>
+              <Button onClick={() => setHotelModalOpen(true)}>
+                Добави хотел
+              </Button>
+            </div>
+            {loading ? (
+              <p className="p-4">Loading...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Име</TableHead>
+                    <TableHead>Дистанция</TableHead>
+                    <TableHead>Сайт</TableHead>
+                    <TableHead>Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {hotels.map((hotel) => (
+                    <TableRow key={hotel.id}>
+                      <TableCell className="font-medium">
+                        {hotel.name}
+                      </TableCell>
+                      <TableCell>{hotel.distance || "-"}</TableCell>
+                      <TableCell>{hotel.websiteUrl}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2 shrink grow-0">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEditModal(hotel)}
+                          >
+                            Редактирай
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleHotelDelete(hotel)}
+                          >
+                            Изтрий
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
-      <Dialog open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
+      <Dialog open={hotelModalOpen} onOpenChange={setHotelModalOpen}>
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
             <DialogTitle className="font-serif">
-              {editingPoll ? "Редакция на анкета" : "Добавяне на анкета"}
+              {hotelForm.id > 0 ? "Редакция на хотел" : "Добавяне на хотел"}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={submitPollForm} className="space-y-4">
+          <form onSubmit={submitHotelForm} className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="p-title">Въпрос</Label>
+              <Label htmlFor="h-name">Име</Label>
               <Input
-                id="p.title"
-                value={pollForm?.title ?? ""}
+                id="h-name"
+                value={hotelForm?.name ?? ""}
                 onChange={(e) =>
-                  setPollForm((prev) => ({ ...prev, title: e.target.value }))
+                  setHotelForm((prev) => ({ ...prev, name: e.target.value }))
                 }
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="p-subtitle">Описание</Label>
+              <Label htmlFor="h-website">Уебсайт</Label>
               <Input
-                id="p-subtitle"
-                value={pollForm?.subtitle ?? ""}
+                id="h-website"
+                value={hotelForm?.websiteUrl ?? ""}
                 onChange={(e) =>
-                  setPollForm((prev) => ({ ...prev, subtitle: e.target.value }))
-                }
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="p-validuntil">Валидна до</Label>
-              <Input
-                id="p.validuntil"
-                type="date"
-                value={
-                  new Date(pollForm?.validUntil).toISOString().split("T")[0] ??
-                  "2026-06-27"
-                }
-                onChange={(e) =>
-                  setPollForm((prev) => ({
+                  setHotelForm((prev) => ({
                     ...prev,
-                    validUntil: e.target.value,
+                    websiteUrl: e.target.value,
                   }))
                 }
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label>Варианти</Label>
-              <div className="space-y-2">
-                {pollForm.options.map((option) => (
-                  <div className="flex gap-2 items-center" key={option.id}>
-                    <div className="flex-1 grid gap-2">
-                      <Input
-                        id="p.validuntil"
-                        type="text"
-                        value={option.title}
-                        onChange={(e) =>
-                          setPollForm((prev) => ({
-                            ...prev,
-                            options: [...prev.options].map((opt) =>
-                              opt.id !== option.id
-                                ? opt
-                                : { ...opt, title: e.target.value }
-                            ),
-                          }))
-                        }
-                        required
-                      />
-                    </div>
-                    {!editingPoll && (
-                      <div className="icons">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          className="text-destructive"
-                          onClick={() => removeFormVariant(option?.id ?? "")}
-                        >
-                          <CircleX />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {!editingPoll && (
-                  <Button onClick={addNewFormVariant}>
-                    Добави нов вариант
-                  </Button>
-                )}
-              </div>
+              <Label htmlFor="h-distance">Дистанция</Label>
+              <Input
+                id="h-distance"
+                value={hotelForm?.distance ?? ""}
+                onChange={(e) =>
+                  setHotelForm((prev) => ({
+                    ...prev,
+                    distance: e.target.value,
+                  }))
+                }
+                required
+              />
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsPollModalOpen(false)}
+                onClick={() => setHotelModalOpen(false)}
               >
                 Отказ
               </Button>
-              <Button type="submit">{editingPoll ? "Запази" : "Добави"}</Button>
+              <Button type="submit">
+                {hotelForm.id !== 0 ? "Запази" : "Добави"}
+              </Button>
             </div>
           </form>
         </DialogContent>

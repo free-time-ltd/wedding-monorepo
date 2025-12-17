@@ -1,5 +1,6 @@
 import { MapCard } from "@/components/map-card";
 import WeatherWidget from "@/components/weather-widget";
+import { fetchHotels } from "@/lib/data";
 import { Button } from "@repo/ui/components/ui/button";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@repo/ui/icons";
 import eventData from "@repo/utils/eventData";
 import { Metadata } from "next";
+import { use } from "react";
 
 export const metadata: Metadata = {
   title: "Локация на сватбата на Кристина и Лъчезар",
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default function VenuePage() {
+  const hotels = use(fetchHotels());
   const [lat, lng] = eventData.location.gps;
   const venue = {
     name: eventData.location.venue,
@@ -218,38 +221,28 @@ export default function VenuePage() {
               разположени в близост до мястото на събитието:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 border border-border rounded-lg">
-                <p className="font-medium text-foreground mb-1">
-                  Park & SPA Hotel Markovo
-                </p>
-                <p className="text-sm text-muted-foreground mb-2">
-                  7км от локацията
-                </p>
-                <Button variant="outline" size="sm" asChild>
-                  <a
-                    href="https://hotelmarkovo.bg/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Виж детайли
-                  </a>
-                </Button>
-              </div>
-              <div className="p-4 border border-border rounded-lg">
-                <p className="font-medium text-foreground mb-1">Urban Hotel</p>
-                <p className="text-sm text-muted-foreground mb-2">
-                  10км от локацията
-                </p>
-                <Button variant="outline" size="sm" asChild>
-                  <a
-                    href="https://www.urbanplovdiv.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Виж детайли
-                  </a>
-                </Button>
-              </div>
+              {hotels.map((hotel) => (
+                <div
+                  className="p-4 border border-border rounded-lg"
+                  key={`hotel-${hotel.id}`}
+                >
+                  <p className="font-medium text-foreground mb-1">
+                    {hotel.name}
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {hotel.distance} от локацията
+                  </p>
+                  <Button variant="outline" size="sm" asChild>
+                    <a
+                      href={hotel.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Виж детайли
+                    </a>
+                  </Button>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
