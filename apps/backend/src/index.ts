@@ -16,6 +16,7 @@ import authRouter from "./routes/auth";
 import restRouter from "./routes/restful";
 import handler from "./handler";
 import galleryRouter from "./routes/gallery";
+import hotelsRouter from "./routes/hotels";
 import adminRouter from "./routes/admin";
 import { requireAdminAuth } from "./middleware";
 import pollsRouter from "./routes/polls";
@@ -60,6 +61,7 @@ app.route("/api/images", imageRouter);
 app.route("/api/gallery", galleryRouter);
 app.route("/api/admin", adminRouter);
 app.route("/api/polls", pollsRouter);
+app.route("/api/hotels", hotelsRouter);
 app.route("/", restRouter);
 
 const server = serve(

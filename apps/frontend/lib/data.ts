@@ -167,3 +167,31 @@ export const fetchPolls = cache(async () => {
     console.error(e);
   }
 });
+
+type Hotel = {
+  id: number;
+  name: string;
+  websiteUrl: string;
+  distance: string;
+};
+
+export const fetchHotels = cache(async (): Promise<Hotel[]> => {
+  const url = new URL(`/api/hotels`, process.env.NEXT_PUBLIC_API_BASE_URL);
+
+  try {
+    const res = await fetch(url, {
+      credentials: "include",
+      next: { tags: ["hotels"] },
+    });
+    const json = (await res.json()) as ApiResponse<Hotel[]>;
+
+    if (json.success) {
+      return json.data;
+    }
+
+    return [];
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+});

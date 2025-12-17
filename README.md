@@ -7,7 +7,6 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
 - Tests for the backend?
 - Also fix the designs for the RSVP page. It needs to look more like a wedding invitation and less like a e-commerce form
-- Add user creation in the admin invitation dashboard
 
 ## Fixing turborepo
 
