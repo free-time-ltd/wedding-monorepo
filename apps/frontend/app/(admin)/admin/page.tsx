@@ -470,6 +470,61 @@ export default function AdminPage() {
     }
   };
 
+  const submitPollForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      ...pollForm,
+      title: pollForm.title.trim(),
+      subtitle: pollForm.subtitle.trim(),
+      options: [...pollForm.options].filter((opt) => Boolean(opt.title.trim())),
+    };
+
+    try {
+      if (editingPoll) {
+        await fetch(new URL(`/api/admin/polls/${editingPoll.id}`, API_BASE), {
+          credentials: "include",
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await fetch(new URL(`/api/admin/polls`, API_BASE), {
+          credentials: "include",
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+      setIsPollModalOpen(false);
+      setEditingPoll(null);
+      await fetchAll();
+    } catch (e) {
+      console.error(e);
+      toast.error("Възникна грешка със запазването.");
+    }
+  };
+
+  const addNewFormVariant = () => {
+    setPollForm((prev) => ({
+      ...prev,
+      options: [
+        ...prev.options,
+        {
+          id: generateId(),
+          title: "",
+        },
+      ],
+    }));
+  };
+
+  const removeFormVariant = (id: string) => {
+    setPollForm((prev) => ({
+      ...prev,
+      options: prev.options.filter((option) => option.id !== id),
+    }));
+  };
+
   const submitHotelForm = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -1003,6 +1058,111 @@ export default function AdminPage() {
           </div>
         </TabsContent>
       </Tabs>
+      <Dialog open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {editingPoll ? "Редакция на анкета" : "Добавяне на анкета"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitPollForm} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="p-title">Въпрос</Label>
+              <Input
+                id="p.title"
+                value={pollForm?.title ?? ""}
+                onChange={(e) =>
+                  setPollForm((prev) => ({ ...prev, title: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="p-subtitle">Описание</Label>
+              <Input
+                id="p-subtitle"
+                value={pollForm?.subtitle ?? ""}
+                onChange={(e) =>
+                  setPollForm((prev) => ({ ...prev, subtitle: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="p-validuntil">Валидна до</Label>
+              <Input
+                id="p.validuntil"
+                type="date"
+                value={
+                  new Date(pollForm?.validUntil).toISOString().split("T")[0] ??
+                  "2026-06-27"
+                }
+                onChange={(e) =>
+                  setPollForm((prev) => ({
+                    ...prev,
+                    validUntil: e.target.value,
+                  }))
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Варианти</Label>
+              <div className="space-y-2">
+                {pollForm.options.map((option) => (
+                  <div className="flex gap-2 items-center" key={option.id}>
+                    <div className="flex-1 grid gap-2">
+                      <Input
+                        id="p.validuntil"
+                        type="text"
+                        value={option.title}
+                        onChange={(e) =>
+                          setPollForm((prev) => ({
+                            ...prev,
+                            options: [...prev.options].map((opt) =>
+                              opt.id !== option.id
+                                ? opt
+                                : { ...opt, title: e.target.value }
+                            ),
+                          }))
+                        }
+                        required
+                      />
+                    </div>
+                    {!editingPoll && (
+                      <div className="icons">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="text-destructive"
+                          onClick={() => removeFormVariant(option?.id ?? "")}
+                        >
+                          <CircleX />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {!editingPoll && (
+                  <Button onClick={addNewFormVariant}>
+                    Добави нов вариант
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsPollModalOpen(false)}
+              >
+                Отказ
+              </Button>
+              <Button type="submit">{editingPoll ? "Запази" : "Добави"}</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
       <Dialog open={hotelModalOpen} onOpenChange={setHotelModalOpen}>
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>

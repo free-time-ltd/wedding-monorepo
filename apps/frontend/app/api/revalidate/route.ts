@@ -1,7 +1,13 @@
 import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
 
-const tagList = ["guests", "uploads", "polls", "current-user"] as const;
+const tagList = [
+  "guests",
+  "uploads",
+  "polls",
+  "hotels",
+  "current-user",
+] as const;
 
 export async function POST() {
   const headerList = await headers();
