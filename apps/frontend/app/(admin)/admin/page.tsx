@@ -708,7 +708,7 @@ export default function AdminPage() {
           <TabsTrigger value="polls">Анкети ({polls.length})</TabsTrigger>
           <TabsTrigger value="hotels">Хотели ({hotels.length})</TabsTrigger>
           <TabsTrigger value="guestbook">
-            Книга за гости ({guestbook.length})
+            Пожелания ({guestbook.length})
           </TabsTrigger>
         </TabsList>
 
@@ -1156,7 +1156,7 @@ export default function AdminPage() {
         <TabsContent value="guestbook">
           <div className="mt-4 border rounded-lg">
             <div className="p-4 flex justify-between items-center">
-              <div className="font-medium">Книга за гости</div>
+              <div className="font-medium">Пожелания</div>
             </div>
             {loading ? (
               <p className="p-4">Loading...</p>

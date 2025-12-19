@@ -1,5 +1,4 @@
 import { GuestbookSubmitForm } from "@/components/guestbook/form-card";
-import { GuestbookMessage } from "@/components/guestbook/message";
 import { MessageList } from "@/components/guestbook/message-list";
 import { fetchGuestbook } from "@/lib/data";
 import { fetchUser } from "@/lib/server-data";
@@ -9,7 +8,7 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Книга за гости",
+  title: "Пожелания",
   description:
     "Оставете своите сърдечни пожелания и поздравления за младоженците. Вашите думи ще се превърнат в скъпи спомени, които ще пазим завинаги.",
 };
@@ -31,7 +30,7 @@ export default async function GuestbookPage() {
             <Heart className="h-8 w-8 text-accent fill-accent" />
           </div>
           <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
-            Книга за гости
+            Пожелания
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Оставете своите сърдечни пожелания и поздравления за младоженците.
