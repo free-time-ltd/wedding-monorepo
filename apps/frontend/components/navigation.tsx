@@ -22,7 +22,7 @@ export function Navigation() {
     { href: "/gallery", label: "Галерия" },
     { href: "/live-feed", label: "Моменти на Живо" },
     { href: "/polls", label: "Познай!" },
-    { href: "/guestbook", label: "Книга за гости" },
+    { href: "/guestbook", label: "Пожелания" },
   ];
 
   return (
