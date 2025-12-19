@@ -1,11 +1,8 @@
 import { Card, CardContent } from "@repo/ui/components/ui/card";
-import { LucideProps } from "@repo/ui/icons";
-import { ForwardRefExoticComponent, RefAttributes } from "react";
+import { ElementType } from "react";
 
 interface Props {
-  icon: ForwardRefExoticComponent<
-    Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
-  >;
+  icon: ElementType;
   value: string;
   label: string;
 }
