@@ -7,6 +7,8 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Create a script that sets everything up - env variables, mostly, but also runs any necessary drizzle-kit commands
 - Tests for the backend?
 - Also fix the designs for the RSVP page. It needs to look more like a wedding invitation and less like a e-commerce form
+- Нека формуляра за книгата за гости да е модал и да е едно модалче. Така фокуса ще е за съобщенията от гостите
+- Трябва да видя как страницата да стане по - realtime че в момента гличва тежко. Мога да ползва анкетите като основа?
 
 ## Fixing turborepo
 
@@ -50,7 +52,7 @@ Since the project is using ShadCN UI Canary, we cannot copy & paste fom the offi
 
 ```bash
 cd packages/ui
-npm run ui [rest of shadcn command - e.g. install Skeleton]
+npm run ui [rest of shadcn command - e.g. add Skeleton]
 ```
 
 ## Pushing & Generating schema updates

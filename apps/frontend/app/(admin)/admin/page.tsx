@@ -15,7 +15,7 @@ import {
 } from "@repo/ui/components/ui/table";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -158,6 +158,18 @@ type ExtraGuests = {
   }>;
 };
 
+type GuestBook = {
+  id: number;
+  title: string;
+  message: string;
+  isApproved: boolean;
+  isPrivate: boolean;
+  user: {
+    id: string;
+    name: string;
+  };
+};
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
@@ -174,6 +186,7 @@ export default function AdminPage() {
   const [editingPoll, setEditingPoll] = useState<Poll | null>(null);
   const [polls, setPolls] = useState<Poll[]>([]);
   const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [guestbook, setGuestbook] = useState<GuestBook[]>([]);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -219,6 +232,7 @@ export default function AdminPage() {
         newsletterRes,
         pollsRes,
         hotelsRes,
+        guestbookRes,
       ] = await Promise.all([
         fetch(new URL(`/api/admin/users`, API_BASE), {
           credentials: "include",
@@ -241,6 +255,9 @@ export default function AdminPage() {
         fetch(new URL(`/api/admin/hotels`, API_BASE), {
           credentials: "include",
         }),
+        fetch(new URL(`/api/admin/guestbook`, API_BASE), {
+          credentials: "include",
+        }),
       ]);
 
       const usersData = await usersRes.json();
@@ -250,6 +267,7 @@ export default function AdminPage() {
       const newsletterData = await newsletterRes.json();
       const pollsData = await pollsRes.json();
       const hotelsData = await hotelsRes.json();
+      const guestbookData = await guestbookRes.json();
 
       if (usersData.success) setUsers(usersData.data);
       if (tablesData.success) setTables(tablesData.data);
@@ -258,6 +276,7 @@ export default function AdminPage() {
       if (newsletterData.success) setNewsletter(newsletterData.data);
       if (pollsData.success) setPolls(pollsData.data);
       if (hotelsData.success) setHotels(hotelsData.data);
+      if (guestbookData.success) setGuestbook(guestbookData.data);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -273,6 +292,7 @@ export default function AdminPage() {
       body: JSON.stringify({ status }),
     });
     fetchAll();
+    handleClearCache("uploads");
   };
 
   const openAddUser = () => {
@@ -564,6 +584,7 @@ export default function AdminPage() {
         websiteUrl: "",
       });
       fetchAll();
+      handleClearCache("hotels");
     }
   };
 
@@ -578,6 +599,7 @@ export default function AdminPage() {
       toast.error("Something went wrong");
     } finally {
       fetchAll();
+      handleClearCache("hotels");
     }
   };
 
@@ -588,6 +610,55 @@ export default function AdminPage() {
       userId: inv.userId,
       guests: (inv.plusOneNames ?? []).map((name) => ({ name })),
     });
+  };
+
+  const toggleGuestbook = async (entry: GuestBook) => {
+    try {
+      await fetch(new URL(`/api/admin/guestbook/${entry.id}`, API_BASE), {
+        credentials: "include",
+        method: "PATCH",
+        body: JSON.stringify({ isApproved: !entry.isApproved }),
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("Something went wrong");
+    } finally {
+      fetchAll();
+      handleClearCache("guestbook");
+    }
+  };
+
+  const deleteGuestbook = async (id: number) => {
+    try {
+      await fetch(new URL(`/api/admin/guestbook/${id}`, API_BASE), {
+        credentials: "include",
+        method: "DELETE",
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("Something went wrong");
+    } finally {
+      fetchAll();
+      handleClearCache("guestbook");
+    }
+  };
+
+  const handleClearCache = async (tag?: string) => {
+    const params = new URLSearchParams({ tag: tag ?? "" });
+    try {
+      await fetch(`/api/revalidate?${params.toString()}`, {
+        credentials: "include",
+        method: "POST",
+        headers: {
+          Authorization: `Bearer: ${process.env.REVALIDATE_KEY}`,
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("Something went wrong");
+    } finally {
+      fetchAll();
+    }
   };
 
   return (
@@ -614,6 +685,9 @@ export default function AdminPage() {
           </TabsTrigger>
           <TabsTrigger value="polls">Анкети ({polls.length})</TabsTrigger>
           <TabsTrigger value="hotels">Хотели ({hotels.length})</TabsTrigger>
+          <TabsTrigger value="guestbook">
+            Книга за гости ({guestbook.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -1045,6 +1119,60 @@ export default function AdminPage() {
                             size="sm"
                             variant="destructive"
                             onClick={() => handleHotelDelete(hotel)}
+                          >
+                            Изтрий
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </TabsContent>
+        <TabsContent value="guestbook">
+          <div className="mt-4 border rounded-lg">
+            <div className="p-4 flex justify-between items-center">
+              <div className="font-medium">Книга за гости</div>
+            </div>
+            {loading ? (
+              <p className="p-4">Loading...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Гост</TableHead>
+                    <TableHead>Заглавие</TableHead>
+                    <TableHead>Съобщение</TableHead>
+                    <TableHead>Скрито</TableHead>
+                    <TableHead>Одобрено</TableHead>
+                    <TableHead>Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {guestbook.map((row) => (
+                    <TableRow key={`guestbook-${row.id}`}>
+                      <TableCell className="font-medium">
+                        {row.user.name}
+                      </TableCell>
+                      <TableCell>{row.title || "-"}</TableCell>
+                      <TableCell className="truncate">{row.message}</TableCell>
+                      <TableCell>{row.isPrivate ? "Да" : "Не"}</TableCell>
+                      <TableCell>{row.isApproved ? "Да" : "Не"}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2 shrink grow-0">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toggleGuestbook(row)}
+                          >
+                            {row.isApproved ? "Отхвърли" : "Одобри"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deleteGuestbook(row.id)}
                           >
                             Изтрий
                           </Button>

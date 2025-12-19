@@ -62,3 +62,11 @@ export const pollBatchUpdate = z.object({
 });
 
 export type PollBatchUpdateInput = z.infer<typeof pollBatchUpdate>;
+
+export const guestbookInputSchema = z.object({
+  title: z.string().optional(),
+  message: z.string(),
+  private: z.coerce.boolean().default(false),
+});
+
+export type GuestbookInput = z.infer<typeof guestbookInputSchema>;

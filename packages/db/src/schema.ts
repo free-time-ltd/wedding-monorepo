@@ -261,6 +261,69 @@ export const nearbyHotels = sqliteTable("hotels", {
   ),
 });
 
+export const guestbookTable = sqliteTable(
+  "guest_book",
+  {
+    id: integer().primaryKey({ autoIncrement: true }),
+    userId: text("user_id")
+      .references(() => usersTable.id, { onDelete: "cascade" })
+      .notNull(),
+    title: text("title"),
+    message: text("message"),
+    isPrivate: integer("is_private", { mode: "boolean" }),
+    isApproved: integer("is_approved", { mode: "boolean" }).default(false),
+    likesCount: integer("likes").default(0),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+      () => new Date()
+    ),
+  },
+  (table) => [index("search_idx").on(table.isPrivate, table.isApproved)]
+);
+
+export const guestbookLikesTable = sqliteTable(
+  "guestbook_likes",
+  {
+    id: integer().primaryKey({ autoIncrement: true }),
+    guestbookId: integer("guestbook_id")
+      .references(() => guestbookTable.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    userId: text("user_id")
+      .references(() => usersTable.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+      () => new Date()
+    ),
+  },
+  (table) => [unique("vote").on(table.guestbookId, table.userId)]
+);
+
+export const guestbookRelations = relations(
+  guestbookTable,
+  ({ one, many }) => ({
+    user: one(usersTable, {
+      fields: [guestbookTable.userId],
+      references: [usersTable.id],
+    }),
+    likes: many(guestbookLikesTable),
+  })
+);
+
+export const guestbookLikeRelations = relations(
+  guestbookLikesTable,
+  ({ one }) => ({
+    user: one(usersTable, {
+      fields: [guestbookLikesTable.userId],
+      references: [usersTable.id],
+    }),
+    guestbook: one(guestbookTable, {
+      fields: [guestbookLikesTable.guestbookId],
+      references: [guestbookTable.id],
+    }),
+  })
+);
+
 export const userRoomsRelations = relations(userRooms, ({ one }) => ({
   user: one(usersTable, {
     fields: [userRooms.userId],
