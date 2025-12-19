@@ -10,6 +10,7 @@ import {
   pollOptionsTable,
   invitationUsers,
   nearbyHotels,
+  guestbookTable,
 } from "@repo/db/schema";
 import { eq, desc, count, sql } from "@repo/db";
 import { errorResponse, successResponse } from "@/reponses";
@@ -464,6 +465,46 @@ adminRouter.delete("/hotels/:id", async (c) => {
   const { id } = c.req.param();
 
   await db.delete(nearbyHotels).where(eq(nearbyHotels.id, Number(id)));
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.get("/guestbook", async (c) => {
+  const messages = await db.query.guestbookTable.findMany({
+    with: { user: true },
+    orderBy: (table, { desc }) => desc(table.id),
+  });
+
+  return successResponse(c, messages);
+});
+
+adminRouter.patch("/guestbook/:id", async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json();
+
+  const message = await db.query.guestbookTable.findFirst({
+    where: (table, { eq }) => eq(table.id, Number(id)),
+  });
+
+  if (!message) {
+    return errorResponse(c, "Message not found", 404);
+  }
+
+  await db
+    .update(guestbookTable)
+    .set({
+      isApproved: "isApproved" in body ? body.isApproved : message.isApproved,
+      isPrivate: "isPrivate" in body ? body.isPrivate : message.isPrivate,
+    })
+    .where(eq(guestbookTable.id, Number(id)));
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.delete("/guestbook/:id", async (c) => {
+  const { id } = c.req.param();
+
+  await db.delete(guestbookTable).where(eq(guestbookTable.id, Number(id)));
 
   return successResponse(c, "ok");
 });

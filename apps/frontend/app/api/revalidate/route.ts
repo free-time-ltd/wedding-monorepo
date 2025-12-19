@@ -1,35 +1,23 @@
 import { revalidateTag } from "next/cache";
-import { headers } from "next/headers";
+import { NextRequest } from "next/server";
 
 const tagList = [
   "guests",
   "uploads",
   "polls",
   "hotels",
+  "guestbook",
   "current-user",
 ] as const;
 
-export async function POST() {
-  const headerList = await headers();
-  const authHeader = headerList.get("Authorization");
+type RevalidateTag = (typeof tagList)[number];
 
-  if (!authHeader) {
-    return Response.json(
-      { revalidated: false, error: "No auth header" },
-      { status: 403 }
-    );
-  }
+export async function POST(req: NextRequest) {
+  const tagParam = req.nextUrl.searchParams.get("tag");
 
-  const token = authHeader.toLowerCase().startsWith("bearer")
-    ? authHeader.substring(6).trim()
-    : authHeader.trim();
-
-  // eslint-disable-next-line turbo/no-undeclared-env-vars
-  if (!token || token !== process.env.REVALIDATE_KEY) {
-    return Response.json(
-      { revalidated: false, error: "Invalid key" },
-      { status: 403 }
-    );
+  if (!!tagParam && tagList.includes(tagParam as RevalidateTag)) {
+    revalidateTag(tagParam as RevalidateTag, "max");
+    return Response.json({ revalidated: true, tag: tagParam });
   }
 
   for (const tag of tagList) {

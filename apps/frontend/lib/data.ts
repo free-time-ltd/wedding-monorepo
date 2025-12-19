@@ -195,3 +195,37 @@ export const fetchHotels = cache(async (): Promise<Hotel[]> => {
     return [];
   }
 });
+
+export type GuestbookEntry = {
+  id: number;
+  title: string;
+  message: string;
+  createdAt: Date;
+  likesCount: number;
+  user: {
+    id: string;
+    name: string;
+  };
+  likes: string[];
+};
+
+export const fetchGuestbook = cache(async (): Promise<GuestbookEntry[]> => {
+  const url = new URL(`/api/guestbook`, process.env.NEXT_PUBLIC_API_BASE_URL);
+
+  try {
+    const res = await fetch(url, {
+      credentials: "include",
+      next: { tags: ["guestbook"] },
+    });
+    const json = (await res.json()) as ApiResponse<GuestbookEntry[]>;
+
+    if (json.success) {
+      return json.data;
+    }
+
+    return [];
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+});
