@@ -206,7 +206,7 @@ export type GuestbookEntry = {
     id: string;
     name: string;
   };
-  likes: Array<{ userId: string }>;
+  likes: string[];
 };
 
 export const fetchGuestbook = cache(async (): Promise<GuestbookEntry[]> => {

@@ -24,7 +24,13 @@ guestbookRouter.get("/", async (c) => {
     },
   });
 
-  return successResponse(c, approvedMessages);
+  return successResponse(
+    c,
+    approvedMessages.map((message) => ({
+      ...message,
+      likes: message.likes.map((like) => like.userId),
+    }))
+  );
 });
 
 guestbookRouter.post("/", requireAuth, async (c: SimpleAuthContext) => {

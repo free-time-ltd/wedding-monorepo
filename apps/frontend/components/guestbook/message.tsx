@@ -9,32 +9,15 @@ import { useEffect, useRef, useState } from "react";
 
 interface Props {
   message: GuestbookEntry;
+  onClick?: (id: number) => void;
   liked: boolean;
 }
 
-export function GuestbookMessage({ message, liked }: Props) {
-  const [isLiked, setIsLiked] = useState(() => liked);
-  const [animationKey, setAnimationKey] = useState(0);
+export function GuestbookMessage({ message, liked, onClick }: Props) {
   const isInitialRender = useRef(true);
 
-  const handleLikeClick = async () => {
-    const res = await fetch(
-      new URL(
-        `/api/guestbook/${message.id}/like`,
-        process.env.NEXT_PUBLIC_API_BASE_URL
-      ),
-      {
-        credentials: "include",
-        method: "post",
-      }
-    );
-
-    const json = await res.json();
-
-    if (json.success) {
-      setIsLiked(json.data.liked);
-      setAnimationKey((prev) => prev + 1); // Trigger animation
-    }
+  const handleLikeClick = () => {
+    onClick?.(message.id);
   };
 
   useEffect(() => {
@@ -56,16 +39,16 @@ export function GuestbookMessage({ message, liked }: Props) {
           onClick={handleLikeClick}
         >
           <Heart
-            key={animationKey}
+            key={message.id}
             className={`h-4 w-4 ${
-              isLiked ? "fill-accent text-accent-foreground" : ""
+              liked ? "fill-accent text-accent-foreground" : ""
             } ${!isInitialRender.current ? "animate-[scale-pop_0.3s_ease-out]" : ""}`}
           />
           <span className="text-xs">{message.likesCount}</span>
 
-          {isLiked && !isInitialRender.current && (
+          {liked && !isInitialRender.current && (
             <div
-              key={`hearts-${animationKey}`}
+              key={`hearts-${message.id}`}
               className="absolute inset-0 pointer-events-none"
             >
               {[...Array(3)].map((_, i) => (

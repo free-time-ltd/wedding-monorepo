@@ -27,6 +27,12 @@ import {
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverAnchor,
+} from "@repo/ui/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -628,6 +634,22 @@ export default function AdminPage() {
     }
   };
 
+  const toggleGuestbookVisibility = async (entry: GuestBook) => {
+    try {
+      await fetch(new URL(`/api/admin/guestbook/${entry.id}`, API_BASE), {
+        credentials: "include",
+        method: "PATCH",
+        body: JSON.stringify({ isPrivate: !entry.isPrivate }),
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("Something went wrong");
+    } finally {
+      fetchAll();
+      handleClearCache("guestbook");
+    }
+  };
+
   const deleteGuestbook = async (id: number) => {
     try {
       await fetch(new URL(`/api/admin/guestbook/${id}`, API_BASE), {
@@ -1158,7 +1180,44 @@ export default function AdminPage() {
                       </TableCell>
                       <TableCell>{row.title || "-"}</TableCell>
                       <TableCell className="truncate">{row.message}</TableCell>
-                      <TableCell>{row.isPrivate ? "Да" : "Не"}</TableCell>
+                      <TableCell>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="link"
+                              className="cursor-pointer"
+                            >
+                              {row.isPrivate ? "Да" : "Не"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            className="w-96 relative"
+                            side="bottom"
+                            align="center"
+                          >
+                            <div className="space-y-4">
+                              <h4 className="font-serif font-semibold text-center">
+                                Смени видимостта на съобщение
+                              </h4>
+                              <div className="flex justify-center items-center">
+                                <Button
+                                  type="button"
+                                  variant={
+                                    row.isPrivate ? "default" : "destructive"
+                                  }
+                                  onClick={() => toggleGuestbookVisibility(row)}
+                                >
+                                  {row.isPrivate
+                                    ? "Направи видимо за всички"
+                                    : "Направи скрито за всички"}
+                                </Button>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </TableCell>
                       <TableCell>{row.isApproved ? "Да" : "Не"}</TableCell>
                       <TableCell>
                         <div className="flex gap-2 shrink grow-0">

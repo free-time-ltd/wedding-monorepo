@@ -1,5 +1,6 @@
 import { GuestbookSubmitForm } from "@/components/guestbook/form-card";
 import { GuestbookMessage } from "@/components/guestbook/message";
+import { MessageList } from "@/components/guestbook/message-list";
 import { fetchGuestbook } from "@/lib/data";
 import { fetchUser } from "@/lib/server-data";
 import { Heart } from "@repo/ui/icons";
@@ -19,14 +20,7 @@ export default async function GuestbookPage() {
     redirect(`/guest-select?redirectTo=${encodeURIComponent("/guestbook")}`);
   }
 
-  const likedMessages = new Set<number>();
   const approvedMessages = await fetchGuestbook();
-
-  for (const message of approvedMessages) {
-    if (message.likes.some((entry) => entry.userId === user.id)) {
-      likedMessages.add(message.id);
-    }
-  }
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-16">
@@ -62,16 +56,10 @@ export default async function GuestbookPage() {
           </span>
         </div>
 
-        {/* Messages Masonry Grid */}
-        <div className="columns-1 md:columns-2 gap-6 space-y-6">
-          {approvedMessages.map((entry) => (
-            <GuestbookMessage
-              key={entry.id}
-              message={entry}
-              liked={likedMessages.has(entry.id)}
-            />
-          ))}
-        </div>
+        <MessageList
+          initialMessages={approvedMessages}
+          currentUserId={user.id}
+        />
       </div>
     </div>
   );
