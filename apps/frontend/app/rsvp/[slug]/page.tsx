@@ -23,15 +23,16 @@ export async function generateMetadata({
   const data: RsvpResponse = await fetchRsvp(guestId);
 
   return {
-    title: `Покана за сватба за ${data.guest.name} | Криси и Лъчо 27.06.2026`,
+    title: data?.guest?.name
+      ? `Покана за сватба за ${data?.guest?.name} | Криси и Лъчо 27.06.2026`
+      : "Покана за сватба",
   };
 }
 
 export default async function RSVPPage({ params }: PageProps<"/rsvp/[slug]">) {
   const { slug: guestId } = await params;
-  const { guest, invitation, invitedBy } = (await fetchRsvp(
-    guestId
-  )) as RsvpResponse;
+  const { guest, invitation, invitedBy } =
+    ((await fetchRsvp(guestId)) as RsvpResponse) ?? {};
 
   if (invitedBy) {
     return redirect(`/rsvp/${invitedBy}`);
