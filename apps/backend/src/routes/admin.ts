@@ -11,6 +11,7 @@ import {
   invitationUsers,
   nearbyHotels,
   guestbookTable,
+  urlShortenerTable,
 } from "@repo/db/schema";
 import { eq, desc, count, sql } from "@repo/db";
 import { errorResponse, successResponse } from "@/reponses";
@@ -505,6 +506,44 @@ adminRouter.delete("/guestbook/:id", async (c) => {
   const { id } = c.req.param();
 
   await db.delete(guestbookTable).where(eq(guestbookTable.id, Number(id)));
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.get("/url-shortener", async (c) => {
+  const urls = await db.query.urlShortenerTable.findMany({
+    with: { user: true },
+  });
+
+  return successResponse(c, urls);
+});
+
+adminRouter.post("/url-shortener", async (c) => {
+  const body = await c.req.json();
+
+  await db.insert(urlShortenerTable).values(body);
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.delete("/url-shortener/:id", async (c) => {
+  const { id } = c.req.param();
+
+  await db
+    .delete(urlShortenerTable)
+    .where(eq(urlShortenerTable.id, Number(id)));
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.patch("/url-shortener/:id", async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json();
+
+  await db
+    .update(urlShortenerTable)
+    .set(body)
+    .where(eq(urlShortenerTable.id, Number(id)));
 
   return successResponse(c, "ok");
 });

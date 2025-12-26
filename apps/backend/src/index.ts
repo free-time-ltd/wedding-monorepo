@@ -19,6 +19,7 @@ import galleryRouter from "./routes/gallery";
 import hotelsRouter from "./routes/hotels";
 import guestbookRouter from "./routes/guestbook";
 import adminRouter from "./routes/admin";
+import urlShortenerRouter from "./routes/shortener";
 import { requireAdminAuth } from "./middleware";
 import pollsRouter from "./routes/polls";
 
@@ -64,6 +65,7 @@ app.route("/api/admin", adminRouter);
 app.route("/api/polls", pollsRouter);
 app.route("/api/hotels", hotelsRouter);
 app.route("/api/guestbook", guestbookRouter);
+app.route("/api/urls", urlShortenerRouter);
 app.route("/", restRouter);
 
 const server = serve(

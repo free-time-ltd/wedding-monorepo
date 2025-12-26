@@ -299,6 +299,32 @@ export const guestbookLikesTable = sqliteTable(
   (table) => [unique("vote").on(table.guestbookId, table.userId)]
 );
 
+export const urlShortenerTable = sqliteTable("url_shortener", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
+  slug: text("slug"),
+  url: text("url"),
+  views: integer("views").default(0),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+    () => new Date()
+  ),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
+export const urlShortenerRelations = relations(
+  urlShortenerTable,
+  ({ one }) => ({
+    user: one(usersTable, {
+      fields: [urlShortenerTable.userId],
+      references: [usersTable.id],
+    }),
+  })
+);
+
 export const guestbookRelations = relations(
   guestbookTable,
   ({ one, many }) => ({

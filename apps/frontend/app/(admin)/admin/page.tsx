@@ -41,7 +41,7 @@ import {
 } from "@repo/ui/components/ui/select";
 import Link from "next/link";
 import { toast } from "@repo/ui";
-import { CircleX, UserPlus2, X } from "@repo/ui/icons";
+import { CircleX, Copy, ExternalLink, UserPlus2, X } from "@repo/ui/icons";
 import { generateId } from "@repo/utils/generateId";
 
 type User = {
@@ -176,10 +176,39 @@ type GuestBook = {
   };
 };
 
+type UrlShort = {
+  id: number;
+  slug: string;
+  url: string;
+  views: number;
+  updatedAt: string;
+  user?: {
+    id: string;
+    name: string;
+  };
+};
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 export default function AdminPage() {
+  const handleDeleteUrl = async (id: number) => {
+    if (!confirm("Сигурни ли сте, че искате да изтриете този URL?")) return;
+    try {
+      const res = await fetch(
+        new URL(`/api/admin/url-shortener/${id}`, API_BASE),
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+      if (!res.ok) throw new Error("Failed to delete URL");
+      fetchAll();
+      toast.success("URL изтрит!");
+    } catch (err) {
+      toast.error("Грешка при изтриване на URL");
+    }
+  };
   const [users, setUsers] = useState<User[]>([]);
   const [tables, setTables] = useState<TableData[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
@@ -187,12 +216,69 @@ export default function AdminPage() {
   const [newsletter, setNewsletter] = useState<Newsletter[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
+  const [editingUrl, setEditingUrl] = useState<UrlShort | null>(null);
+  const [urlForm, setUrlForm] = useState<Partial<UrlShort>>({
+    slug: "",
+    url: "",
+    user: undefined,
+  });
+
+  const openAddUrl = () => {
+    setEditingUrl(null);
+    setUrlForm({ slug: "", url: "", user: undefined });
+    setIsUrlModalOpen(true);
+  };
+
+  const openEditUrl = (url: UrlShort) => {
+    setEditingUrl(url);
+    setUrlForm({
+      id: url.id,
+      slug: url.slug,
+      url: url.url,
+      user: url.user,
+    });
+    setIsUrlModalOpen(true);
+  };
+
+  const handleUrlFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUrlForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const submitUrlForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const method = editingUrl ? "PATCH" : "POST";
+      const endpoint = editingUrl
+        ? `/api/admin/url-shortener/${editingUrl.id}`
+        : "/api/admin/url-shortener";
+      const res = await fetch(new URL(endpoint, API_BASE), {
+        method,
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: urlForm.slug,
+          url: urlForm.url,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save URL");
+      fetchAll();
+      setIsUrlModalOpen(false);
+      setEditingUrl(null);
+      setUrlForm({ slug: "", url: "", user: undefined });
+      toast.success(editingUrl ? "URL редактиран!" : "URL добавен!");
+    } catch (err) {
+      toast.error("Грешка при запис на URL");
+    }
+  };
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editingPoll, setEditingPoll] = useState<Poll | null>(null);
   const [polls, setPolls] = useState<Poll[]>([]);
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [guestbook, setGuestbook] = useState<GuestBook[]>([]);
+  const [urlShorts, setUrlShorts] = useState<UrlShort[]>([]);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -239,6 +325,7 @@ export default function AdminPage() {
         pollsRes,
         hotelsRes,
         guestbookRes,
+        urlShortRes,
       ] = await Promise.all([
         fetch(new URL(`/api/admin/users`, API_BASE), {
           credentials: "include",
@@ -264,6 +351,9 @@ export default function AdminPage() {
         fetch(new URL(`/api/admin/guestbook`, API_BASE), {
           credentials: "include",
         }),
+        fetch(new URL(`/api/admin/url-shortener`, API_BASE), {
+          credentials: "include",
+        }),
       ]);
 
       const usersData = await usersRes.json();
@@ -274,6 +364,7 @@ export default function AdminPage() {
       const pollsData = await pollsRes.json();
       const hotelsData = await hotelsRes.json();
       const guestbookData = await guestbookRes.json();
+      const urlShortData = await urlShortRes.json();
 
       if (usersData.success) setUsers(usersData.data);
       if (tablesData.success) setTables(tablesData.data);
@@ -283,6 +374,7 @@ export default function AdminPage() {
       if (pollsData.success) setPolls(pollsData.data);
       if (hotelsData.success) setHotels(hotelsData.data);
       if (guestbookData.success) setGuestbook(guestbookData.data);
+      if (urlShortData.success) setUrlShorts(urlShortData.data);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -710,6 +802,9 @@ export default function AdminPage() {
           <TabsTrigger value="guestbook">
             Пожелания ({guestbook.length})
           </TabsTrigger>
+          <TabsTrigger value="urls">
+            Кратки URL-и ({urlShorts.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -778,6 +873,114 @@ export default function AdminPage() {
             )}
           </div>
         </TabsContent>
+
+        <TabsContent value="urls">
+          <div className="mt-4 border rounded-lg">
+            <div className="p-4 flex justify-between items-center">
+              <div className="font-medium">Списък с кратки URL-и</div>
+              <Button onClick={openAddUrl}>Добави URL</Button>
+            </div>
+            {loading ? (
+              <p className="p-4">Loading...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Slug</TableHead>
+                    <TableHead>URL</TableHead>
+                    <TableHead>Views</TableHead>
+                    <TableHead>Последен клик</TableHead>
+                    <TableHead>Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {urlShorts.map((url) => (
+                    <TableRow key={url.id}>
+                      <TableCell>{url.id}</TableCell>
+                      <TableCell className="font-mono">
+                        <div className="flex items-center gap-1">
+                          {url.slug}
+                          <Button asChild variant="ghost" size="icon-sm">
+                            <Link href={`/s/${url.slug}`} target="_blank">
+                              <ExternalLink />
+                            </Link>
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>{url.url}</TableCell>
+                      <TableCell>{url.views}</TableCell>
+                      <TableCell>
+                        {new Date(url.updatedAt).toLocaleDateString()}{" "}
+                        {new Date(url.updatedAt).toLocaleTimeString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEditUrl(url)}
+                          >
+                            Редактирай
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteUrl(url.id)}
+                          >
+                            Изтрий
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </TabsContent>
+
+        <Dialog open={isUrlModalOpen} onOpenChange={setIsUrlModalOpen}>
+          <DialogContent className="sm:max-w-120">
+            <DialogHeader>
+              <DialogTitle className="font-serif">
+                {editingUrl ? "Редакция на URL" : "Добавяне на URL"}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={submitUrlForm} className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="url-slug">Slug</Label>
+                <Input
+                  id="url-slug"
+                  name="slug"
+                  value={urlForm.slug || ""}
+                  onChange={handleUrlFormChange}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="url-url">URL</Label>
+                <Input
+                  id="url-url"
+                  name="url"
+                  value={urlForm.url || ""}
+                  onChange={handleUrlFormChange}
+                  required
+                />
+              </div>
+              <DialogFooter>
+                <Button type="submit">
+                  {editingUrl ? "Запази" : "Добави"}
+                </Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">
+                    Затвори
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         <TabsContent value="tables">
           <div className="mt-4 border rounded-lg">
@@ -1246,7 +1449,7 @@ export default function AdminPage() {
         </TabsContent>
       </Tabs>
       <Dialog open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-120">
           <DialogHeader>
             <DialogTitle className="font-serif">
               {editingPoll ? "Редакция на анкета" : "Добавяне на анкета"}
@@ -1351,7 +1554,7 @@ export default function AdminPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={hotelModalOpen} onOpenChange={setHotelModalOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-120">
           <DialogHeader>
             <DialogTitle className="font-serif">
               {hotelForm.id > 0 ? "Редакция на хотел" : "Добавяне на хотел"}
@@ -1413,7 +1616,7 @@ export default function AdminPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={isTableModalOpen} onOpenChange={setIsTableModalOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-120">
           <DialogHeader>
             <DialogTitle className="font-serif">
               {editingTable ? "Редакция на маса" : "Добавяне на маса"}
@@ -1458,7 +1661,7 @@ export default function AdminPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={isUserModalOpen} onOpenChange={setIsUserModalOpen}>
-        <DialogContent className="sm:max-w-[520px]">
+        <DialogContent className="sm:max-w-130">
           <DialogHeader>
             <DialogTitle className="font-serif">
               {editingUser ? "Редакция на гост" : "Добавяне на гост"}
