@@ -80,7 +80,7 @@ export function WeddingGallerySignup() {
             </CardTitle>
             <CardDescription>
               Оставете своя имейл, за да получите известие, когато снимките от
-              сватбата са готови.
+              професионалния фотограф са готови
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -97,7 +97,7 @@ export function WeddingGallerySignup() {
               </Button>
             </form>
             <p className="text-sm text-muted-foreground mt-3">
-              Ще получите потвърждение по имейл, че сте се абонирали.
+              Ще получите потвърждение по имейл, че сте се записали.
             </p>
           </CardContent>
         </>

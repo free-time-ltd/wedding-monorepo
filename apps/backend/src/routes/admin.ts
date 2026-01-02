@@ -12,6 +12,7 @@ import {
   nearbyHotels,
   guestbookTable,
   urlShortenerTable,
+  familyTable,
 } from "@repo/db/schema";
 import { eq, desc, count, sql } from "@repo/db";
 import { errorResponse, successResponse } from "@/reponses";
@@ -26,6 +27,7 @@ adminRouter.get("/users", async (c) => {
       table: true,
       invitation: true,
       uploads: true,
+      family: true,
     },
   });
 
@@ -56,7 +58,7 @@ adminRouter.get("/users/:id", async (c) => {
 
 adminRouter.post("/users", async (c) => {
   const body = await c.req.json();
-  const { name, extras, email, phone, tableId, gender } = body;
+  const { name, extras, email, phone, tableId, familyId, gender } = body;
 
   const [newUser] = await db
     .insert(usersTable)
@@ -67,6 +69,7 @@ adminRouter.post("/users", async (c) => {
       phone: phone ?? null,
       gender: gender ?? "unknown",
       tableId: tableId ?? null,
+      familyId: familyId ?? null,
     })
     .returning();
 
@@ -544,6 +547,41 @@ adminRouter.patch("/url-shortener/:id", async (c) => {
     .update(urlShortenerTable)
     .set(body)
     .where(eq(urlShortenerTable.id, Number(id)));
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.get("/families", async (c) => {
+  const res = await db.query.familyTable.findMany({ with: { members: true } });
+
+  return successResponse(c, res);
+});
+
+adminRouter.post("/families", async (c) => {
+  const body = await c.req.json();
+
+  await db.insert(familyTable).values(body);
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.patch("/families/:id", async (c) => {
+  const { id } = c.req.param();
+
+  const body = await c.req.json();
+
+  await db
+    .update(familyTable)
+    .set(body)
+    .where(eq(familyTable.id, Number(id)));
+
+  return successResponse(c, "ok");
+});
+
+adminRouter.delete("/families/:id", async (c) => {
+  const { id } = c.req.param();
+
+  await db.delete(familyTable).where(eq(familyTable.id, Number(id)));
 
   return successResponse(c, "ok");
 });

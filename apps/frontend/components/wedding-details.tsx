@@ -7,8 +7,11 @@ import {
   Users,
   MessageCircle,
   Camera,
+  Keyboard,
+  Mouse,
 } from "@repo/ui/icons";
 import Link from "next/link";
+import { BattleNetIcon } from "./icons";
 
 export function WeddingDetails() {
   const details = [
@@ -133,6 +136,25 @@ export function WeddingDetails() {
               </p>
             </CardContent>
           </Card>
+        </div>
+        <div className="pt-4 pb-2 challenge-us flex justify-center gap-4 items-center">
+          <Button className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30">
+            <BattleNetIcon className="h-5 w-5" />
+            Challenge Sk1ppeR#2796
+          </Button>
+
+          <Button
+            variant="secondary"
+            className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30"
+          >
+            <BattleNetIcon className="h-5 w-5" />
+            Challenge Parabola#21599
+          </Button>
+        </div>
+        <div className="flex  justify-center ">
+          <Keyboard className="size-10" />
+          <Mouse className="size-10" />
+          {/* <Gamepad2 className="size-12" /> */}
         </div>
       </div>
     </section>

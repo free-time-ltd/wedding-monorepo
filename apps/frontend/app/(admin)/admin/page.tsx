@@ -9,6 +9,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -30,19 +31,21 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  PopoverAnchor,
 } from "@repo/ui/components/ui/popover";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import Link from "next/link";
 import { toast } from "@repo/ui";
-import { CircleX, Copy, ExternalLink, UserPlus2, X } from "@repo/ui/icons";
+import { CircleX, ExternalLink, UserPlus2, X } from "@repo/ui/icons";
 import { generateId } from "@repo/utils/generateId";
+import { Checkbox } from "@repo/ui/components/ui/checkbox";
+import { FamilySelector } from "@/components/family-selector";
 
 type User = {
   id: string;
@@ -51,6 +54,11 @@ type User = {
   email: string | null;
   phone: string | null;
   tableId: number | null;
+  familyId: number | null;
+  family?: {
+    id: number;
+    name: string;
+  };
   gender: "male" | "female" | "unknown";
   table: { id: number; name: string; label: string | null } | null;
   invitation: {
@@ -66,6 +74,16 @@ type User = {
   } | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   uploads: any[];
+};
+
+type UserForm = {
+  name: string;
+  email: string;
+  phone: string;
+  gender: string | "male" | "female" | "unknown";
+  familyId: string | null;
+  extras: string | number;
+  tableId: string | number | null;
 };
 
 type TableData = {
@@ -188,6 +206,13 @@ type UrlShort = {
   };
 };
 
+type Family = {
+  id: number;
+  name: string;
+  createdAt: string;
+  members: Pick<User, "id" | "name" | "gender">[];
+};
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
@@ -205,11 +230,13 @@ export default function AdminPage() {
       if (!res.ok) throw new Error("Failed to delete URL");
       fetchAll();
       toast.success("URL изтрит!");
-    } catch (err) {
+    } catch {
       toast.error("Грешка при изтриване на URL");
     }
   };
   const [users, setUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [groupFamily, setGroupFamily] = useState<number | null>(null);
   const [tables, setTables] = useState<TableData[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [uploads, setUploads] = useState<Upload[]>([]);
@@ -223,11 +250,29 @@ export default function AdminPage() {
     url: "",
     user: undefined,
   });
+  const [familyModalOpen, setFamilyModalOpen] = useState(false);
+  const [familyForm, setFamilyForm] = useState<{
+    id: number | null;
+    name: string;
+  }>({
+    id: null,
+    name: "",
+  });
 
   const openAddUrl = () => {
     setEditingUrl(null);
     setUrlForm({ slug: "", url: "", user: undefined });
     setIsUrlModalOpen(true);
+  };
+
+  const openAddFamily = () => {
+    setFamilyForm({ id: null, name: "" });
+    setFamilyModalOpen(true);
+  };
+
+  const openEditFamily = (family: Family) => {
+    setFamilyForm({ id: family.id, name: family.name });
+    setFamilyModalOpen(true);
   };
 
   const openEditUrl = (url: UrlShort) => {
@@ -239,6 +284,77 @@ export default function AdminPage() {
       user: url.user,
     });
     setIsUrlModalOpen(true);
+  };
+
+  const deleteFamily = async (family: Family) => {
+    if (
+      !confirm(
+        `Сигурни ли сте, че искате да изтриете семейството "${family.name}"?`
+      )
+    )
+      return;
+    try {
+      await fetch(new URL(`/api/admin/families/${family.id}`, API_BASE), {
+        credentials: "include",
+        method: "DELETE",
+      });
+      fetchAll();
+      toast.success("Семейството е изтрито!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Грешка при изтриване на семейството");
+    }
+  };
+
+  const handleMultiFamilyChange = () => {
+    const promises = selectedUsers.map((userId) =>
+      fetch(new URL(`/api/admin/users/${userId}`, API_BASE), {
+        method: "PATCH",
+        credentials: "include",
+        body: JSON.stringify({ familyId: groupFamily }),
+      })
+    );
+
+    Promise.all(promises).then(() => {
+      setGroupFamily(null);
+      setSelectedUsers([]);
+      fetchAll();
+      toast.success("Хората бяха ъпдейтнати");
+    });
+  };
+
+  const submitFamilyForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const body = {
+      name: familyForm.name.trim(),
+    };
+
+    try {
+      if (familyForm.id) {
+        await fetch(new URL(`/api/admin/families/${familyForm.id}`, API_BASE), {
+          credentials: "include",
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } else {
+        await fetch(new URL(`/api/admin/families`, API_BASE), {
+          credentials: "include",
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      }
+      setFamilyModalOpen(false);
+      setFamilyForm({ id: null, name: "" });
+      await fetchAll();
+      toast.success(
+        familyForm.id ? "Семейството е редактирано!" : "Семейството е добавено!"
+      );
+    } catch (err) {
+      console.error("Failed to submit family form", err);
+      toast.error("Грешка при запис на семейството");
+    }
   };
 
   const handleUrlFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -268,7 +384,7 @@ export default function AdminPage() {
       setEditingUrl(null);
       setUrlForm({ slug: "", url: "", user: undefined });
       toast.success(editingUrl ? "URL редактиран!" : "URL добавен!");
-    } catch (err) {
+    } catch {
       toast.error("Грешка при запис на URL");
     }
   };
@@ -279,11 +395,13 @@ export default function AdminPage() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [guestbook, setGuestbook] = useState<GuestBook[]>([]);
   const [urlShorts, setUrlShorts] = useState<UrlShort[]>([]);
-  const [form, setForm] = useState({
+  const [familyData, setFamilyData] = useState<Family[]>([]);
+  const [form, setForm] = useState<UserForm>({
     name: "",
     email: "",
     phone: "",
     gender: "unknown",
+    familyId: "" as string | "",
     extras: 0 as number,
     tableId: "" as string | "",
   });
@@ -326,6 +444,7 @@ export default function AdminPage() {
         hotelsRes,
         guestbookRes,
         urlShortRes,
+        familyRes,
       ] = await Promise.all([
         fetch(new URL(`/api/admin/users`, API_BASE), {
           credentials: "include",
@@ -354,6 +473,9 @@ export default function AdminPage() {
         fetch(new URL(`/api/admin/url-shortener`, API_BASE), {
           credentials: "include",
         }),
+        fetch(new URL(`/api/admin/families`, API_BASE), {
+          credentials: "include",
+        }),
       ]);
 
       const usersData = await usersRes.json();
@@ -365,6 +487,7 @@ export default function AdminPage() {
       const hotelsData = await hotelsRes.json();
       const guestbookData = await guestbookRes.json();
       const urlShortData = await urlShortRes.json();
+      const familyData = await familyRes.json();
 
       if (usersData.success) setUsers(usersData.data);
       if (tablesData.success) setTables(tablesData.data);
@@ -375,6 +498,7 @@ export default function AdminPage() {
       if (hotelsData.success) setHotels(hotelsData.data);
       if (guestbookData.success) setGuestbook(guestbookData.data);
       if (urlShortData.success) setUrlShorts(urlShortData.data);
+      if (familyData) setFamilyData(familyData.data);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -400,6 +524,7 @@ export default function AdminPage() {
       email: "",
       phone: "",
       extras: 0,
+      familyId: null,
       gender: "unknown",
       tableId: "",
     });
@@ -414,6 +539,7 @@ export default function AdminPage() {
       phone: user.phone || "",
       extras: user.extras ?? 0,
       gender: user.gender ?? "unknown",
+      familyId: user.familyId ? String(user.familyId) : null,
       tableId: user.tableId ? String(user.tableId) : "",
     });
     setIsUserModalOpen(true);
@@ -430,6 +556,28 @@ export default function AdminPage() {
     setIsPollModalOpen(true);
   };
 
+  const deleteUser = async (user: User) => {
+    if (
+      !confirm(
+        "Are you sure you wish to delete this user? There is no going back!"
+      )
+    )
+      return;
+
+    try {
+      await fetch(new URL(`/api/admin/users/${user.id}`, API_BASE), {
+        credentials: "include",
+        method: "DELETE",
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("Something went wrong");
+    } finally {
+      await handleClearCache("guests");
+      fetchAll();
+    }
+  };
+
   const submitUserForm = async (e: React.FormEvent) => {
     e.preventDefault();
     const body = {
@@ -438,6 +586,10 @@ export default function AdminPage() {
       phone: form.phone.trim() || null,
       extras: Number.isNaN(Number(form.extras)) ? 0 : Number(form.extras),
       gender: form.gender || "unknown",
+      familyId:
+        form.familyId === "" || form.familyId === null
+          ? null
+          : Number(form.familyId),
       tableId:
         form.tableId === "" || form.tableId === null
           ? null
@@ -805,12 +957,29 @@ export default function AdminPage() {
           <TabsTrigger value="urls">
             Кратки URL-и ({urlShorts.length})
           </TabsTrigger>
+          <TabsTrigger value="families">
+            Семейства ({familyData.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
           <div className="mt-4 border rounded-lg">
             <div className="p-4 flex justify-between items-center">
               <div className="font-medium">Списък с гости</div>
+              {selectedUsers.length > 1 && (
+                <div className="flex gap-2">
+                  <FamilySelector
+                    value={groupFamily ? String(groupFamily) : ""}
+                    onValueChange={(val) =>
+                      setGroupFamily(Number(val) > 0 ? Number(val) : null)
+                    }
+                    showClear={(groupFamily ?? 0) > 0}
+                    onClear={() => setGroupFamily(null)}
+                    families={familyData}
+                  />
+                  <Button onClick={handleMultiFamilyChange}>Запази</Button>
+                </div>
+              )}
               <Button onClick={openAddUser}>Добави гост</Button>
             </div>
             {loading ? (
@@ -819,10 +988,13 @@ export default function AdminPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>
+                      <p className="text-center">-</p>
+                    </TableHead>
                     <TableHead>Име</TableHead>
                     <TableHead>Пол</TableHead>
                     <TableHead>Имейл</TableHead>
-                    <TableHead>Телефон</TableHead>
+                    <TableHead>Семейство</TableHead>
                     <TableHead>Придружители</TableHead>
                     <TableHead>Маса</TableHead>
                     <TableHead>Отговор на поканата</TableHead>
@@ -833,10 +1005,33 @@ export default function AdminPage() {
                 <TableBody>
                   {users.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell>
+                        <Checkbox
+                          id={`select-user-${user.id}`}
+                          name="selected-users"
+                          value={user.id}
+                          onCheckedChange={(checked) =>
+                            setSelectedUsers((prev) => {
+                              if (checked === true) {
+                                return [...prev, user.id];
+                              }
+
+                              return prev.filter((id) => id !== user.id);
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Label
+                          htmlFor={`select-user-${user.id}`}
+                          className="font-medium"
+                        >
+                          {user.name}
+                        </Label>
+                      </TableCell>
                       <TableCell>{user.gender || "unknown"}</TableCell>
                       <TableCell>{user.email || "-"}</TableCell>
-                      <TableCell>{user.phone || "-"}</TableCell>
+                      <TableCell>{user.family?.name || "-"}</TableCell>
                       <TableCell>{user.extras}</TableCell>
                       <TableCell>
                         {user.table?.label || user.table?.name || "-"}
@@ -858,13 +1053,22 @@ export default function AdminPage() {
                       </TableCell>
                       <TableCell>{user.uploads.length}</TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openEditUser(user)}
-                        >
-                          Редактирай
-                        </Button>
+                        <div className="flex items-center gap-2 justify-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEditUser(user)}
+                          >
+                            Редактирай
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deleteUser(user)}
+                          >
+                            Изтрий
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -1447,7 +1651,104 @@ export default function AdminPage() {
             )}
           </div>
         </TabsContent>
+        <TabsContent value="families">
+          <div className="mt-4 border rounded-lg">
+            <div className="p-4 flex justify-between items-center">
+              <div className="font-medium">Семейства</div>
+              <Button type="button" onClick={openAddFamily}>
+                Добави семейство
+              </Button>
+            </div>
+            {loading ? (
+              <p className="p-4">Loading...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Име</TableHead>
+                    <TableHead>Членове</TableHead>
+                    <TableHead>Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {familyData.map((family) => (
+                    <TableRow key={`family-${family.id}`}>
+                      <TableCell>{family.name}</TableCell>
+                      <TableCell>{family.members.length}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => openEditFamily(family)}
+                          >
+                            Редактирай
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => deleteFamily(family)}
+                          >
+                            Изтрий
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                {familyData.length === 0 && (
+                  <TableFooter>
+                    <TableRow>
+                      <TableCell colSpan={3}>
+                        <p className="text-center">Не сте създали семейства</p>
+                      </TableCell>
+                    </TableRow>
+                  </TableFooter>
+                )}
+              </Table>
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
+      <Dialog open={familyModalOpen} onOpenChange={setFamilyModalOpen}>
+        <DialogContent className="sm:max-w-120">
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              {(familyForm?.id ?? 0) > 0
+                ? "Редакция на семейство"
+                : "Добавяне на семейство"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={submitFamilyForm} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="f-title">Име</Label>
+              <Input
+                id="f-title"
+                value={familyForm?.name ?? ""}
+                onChange={(e) =>
+                  setFamilyForm((prev) => ({ ...prev, name: e.target.value }))
+                }
+                required
+              />
+              <small className="text-xs text-muted-foreground">
+                (Името е само за нас. Никой друг няма да го вижда)
+              </small>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setFamilyModalOpen(false)}
+              >
+                Отказ
+              </Button>
+              <Button type="submit">
+                {familyForm.id ? "Запази" : "Добави"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
       <Dialog open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
         <DialogContent className="sm:max-w-120">
           <DialogHeader>
@@ -1701,6 +2002,51 @@ export default function AdminPage() {
               />
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="familyId">Семейство</Label>
+              <div className="flex gap-2">
+                <Select
+                  name="familyId"
+                  value={form.familyId === null ? "" : String(form.familyId)}
+                  onValueChange={(val) =>
+                    setForm((prev) => ({ ...prev, familyId: val }))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Изберете семейство" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {familyData.map((family) => (
+                      <SelectGroup key={`user-family-${family.id}`}>
+                        <SelectItem value={String(family.id)}>
+                          {family.name}
+                        </SelectItem>
+                        {family.members.map((member) => (
+                          <div
+                            className="pl-6 py-1 text-xs text-muted-foreground"
+                            key={`family-member-${member.id}`}
+                          >
+                            {member.name}
+                          </div>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.familyId && form.familyId?.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="icon-sm"
+                    onClick={() =>
+                      setForm((prev) => ({ ...prev, familyId: "" }))
+                    }
+                  >
+                    <CircleX />
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="extras">Придружители</Label>
               <Input
                 id="extras"
@@ -1713,7 +2059,7 @@ export default function AdminPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="gender">Придружители</Label>
+              <Label htmlFor="gender">Пол</Label>
               <Select
                 value={form.gender}
                 onValueChange={(newVal) =>

@@ -41,9 +41,10 @@ export default function VenuePage() {
 
   const schedule = [
     {
-      time: "18:00",
-      event: "Пристигане на гостите",
-      description: "Моля, елате по-рано, за да намерите местата си",
+      time: "18:30",
+      event: "Пристигане на гостите - welcome drink",
+      description:
+        "Моля, елате по-рано, за да намерите местата си. Очаква ви малък welcome drink.",
     },
     {
       time: "19:00",
@@ -52,13 +53,14 @@ export default function VenuePage() {
     },
     {
       time: "19:30",
-      event: "Коктейл",
-      description: "Насладете се на напитки и предястия",
+      event: "Коктейл & Тържество",
+      description:
+        "Насладете се на напитки и предястия, вечеря, танци и празненство",
     },
     {
-      time: "20:30",
-      event: "Тържество",
-      description: "Вечеря, танци и празненство",
+      time: "22:30",
+      event: "Wedding Cake Moment",
+      description: "Разрязване на сватбената торта",
     },
   ];
 
@@ -191,7 +193,7 @@ export default function VenuePage() {
                   key={index}
                   className="flex gap-4 pb-4 border-b border-border last:border-0 last:pb-0"
                 >
-                  <div className="flex-shrink-0 w-24">
+                  <div className="shrink-0 w-24">
                     <p className="text-sm font-medium text-accent">
                       {item.time}
                     </p>

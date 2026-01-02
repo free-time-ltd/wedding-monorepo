@@ -6,6 +6,14 @@ export interface Guest {
   extras?: number;
   tableId: number;
   gender: "male" | "female" | "unknown";
+  family: {
+    id: number;
+    name: string;
+    members: Array<{
+      id: string;
+      name: string;
+    }>;
+  };
   table: {
     id: number;
     name: string;

@@ -9,6 +9,9 @@ This is a project for my wedding and website. Senior developers can't build simp
 - Also fix the designs for the RSVP page. It needs to look more like a wedding invitation and less like a e-commerce form
 - Нека формуляра за книгата за гости да е модал и да е едно модалче. Така фокуса ще е за съобщенията от гостите
 - Трябва да видя как страницата да стане по - realtime че в момента гличва тежко. Мога да ползва анкетите като основа?
+- В админа с поканите да се вижда винаги кой е поканения човек
+- В пожеланията има бъг, когато пожеланията с 3
+- Challenge to 1v1 in battle.net? :D
 
 ## Fixing turborepo
 
