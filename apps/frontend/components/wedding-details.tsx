@@ -7,11 +7,11 @@ import {
   Users,
   MessageCircle,
   Camera,
-  Keyboard,
-  Mouse,
+  Crown,
+  BicepsFlexed,
 } from "@repo/ui/icons";
 import Link from "next/link";
-import { BattleNetIcon } from "./icons";
+import { BattleNetLogo } from "./battlenet-logo";
 
 export function WeddingDetails() {
   const details = [
@@ -137,24 +137,42 @@ export function WeddingDetails() {
             </CardContent>
           </Card>
         </div>
-        <div className="pt-4 pb-2 challenge-us flex justify-center gap-4 items-center">
-          <Button className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30">
-            <BattleNetIcon className="h-5 w-5" />
-            Challenge Sk1ppeR#2796
-          </Button>
+        <div className="space-y-2">
+          <div className="pt-4 pb-2 challenge-us flex justify-center gap-4 items-center">
+            <Button
+              className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30"
+              asChild
+            >
+              <Link
+                href="https://tracker.gg/bf6/profile/3187201157/overview"
+                target="_blank"
+                rel="nofollow"
+              >
+                <BattleNetLogo className="size-8" />
+                Challenge Sk1ppeR#2796
+              </Link>
+            </Button>
 
-          <Button
-            variant="secondary"
-            className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30"
-          >
-            <BattleNetIcon className="h-5 w-5" />
-            Challenge Parabola#21599
-          </Button>
-        </div>
-        <div className="flex  justify-center ">
-          <Keyboard className="size-10" />
-          <Mouse className="size-10" />
-          {/* <Gamepad2 className="size-12" /> */}
+            <Button
+              variant="secondary"
+              className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30"
+              asChild
+            >
+              <Link
+                href="https://overwatch.blizzard.com/en-us/career/c25fbe8bb17e97aca4a226a5dd08%7Cb9a73e321c5fd1444e499e43f47b5ba8/"
+                target="_blank"
+                rel="nofollow"
+              >
+                <BattleNetLogo className="size-8" />
+                Challenge Parabola#21599
+              </Link>
+            </Button>
+          </div>
+          <div className="flex gap-4 justify-center">
+            <BicepsFlexed className="size-8" />
+            <Crown className="size-8" />
+            <BicepsFlexed className="size-8 transform -scale-x-100" />
+          </div>
         </div>
       </div>
     </section>
