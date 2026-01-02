@@ -5,7 +5,7 @@ import { getTimeAgo } from "@/lib/date";
 import { Button } from "@repo/ui/components/ui/button";
 import { Card } from "@repo/ui/components/ui/card";
 import { Heart } from "@repo/ui/icons";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface Props {
   message: GuestbookEntry;

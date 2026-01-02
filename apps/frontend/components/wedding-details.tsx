@@ -7,7 +7,6 @@ import {
   Users,
   MessageCircle,
   Camera,
-  Gamepad2,
   Keyboard,
   Mouse,
 } from "@repo/ui/icons";

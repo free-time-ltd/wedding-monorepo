@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormValues, RsvpForm } from "./form";
 import { serializeFormValues } from "./utils";
-import { toast } from "@repo/ui";
+import { unique } from "@repo/ui/lib/utils";
 
 interface Props {
   guestId: string;
@@ -95,7 +95,10 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
     );
   }
 
-  const invitationNameList = [guest.name, ...(invitation?.plusOneNames ?? [])]
+  const invitationNameList = unique([
+    guest.name,
+    ...(guest.family?.members ?? []).map((member) => member.name),
+  ])
     .map((name) => name.trim())
     .filter(Boolean);
 

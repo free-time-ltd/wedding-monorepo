@@ -31,7 +31,6 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  PopoverAnchor,
 } from "@repo/ui/components/ui/popover";
 import {
   Select,
@@ -43,8 +42,10 @@ import {
 } from "@repo/ui/components/ui/select";
 import Link from "next/link";
 import { toast } from "@repo/ui";
-import { CircleX, Copy, ExternalLink, UserPlus2, X } from "@repo/ui/icons";
+import { CircleX, ExternalLink, UserPlus2, X } from "@repo/ui/icons";
 import { generateId } from "@repo/utils/generateId";
+import { Checkbox } from "@repo/ui/components/ui/checkbox";
+import { FamilySelector } from "@/components/family-selector";
 
 type User = {
   id: string;
@@ -54,6 +55,10 @@ type User = {
   phone: string | null;
   tableId: number | null;
   familyId: number | null;
+  family?: {
+    id: number;
+    name: string;
+  };
   gender: "male" | "female" | "unknown";
   table: { id: number; name: string; label: string | null } | null;
   invitation: {
@@ -69,6 +74,16 @@ type User = {
   } | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   uploads: any[];
+};
+
+type UserForm = {
+  name: string;
+  email: string;
+  phone: string;
+  gender: string | "male" | "female" | "unknown";
+  familyId: string | null;
+  extras: string | number;
+  tableId: string | number | null;
 };
 
 type TableData = {
@@ -215,11 +230,13 @@ export default function AdminPage() {
       if (!res.ok) throw new Error("Failed to delete URL");
       fetchAll();
       toast.success("URL изтрит!");
-    } catch (err) {
+    } catch {
       toast.error("Грешка при изтриване на URL");
     }
   };
   const [users, setUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [groupFamily, setGroupFamily] = useState<number | null>(null);
   const [tables, setTables] = useState<TableData[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [uploads, setUploads] = useState<Upload[]>([]);
@@ -289,6 +306,23 @@ export default function AdminPage() {
     }
   };
 
+  const handleMultiFamilyChange = () => {
+    const promises = selectedUsers.map((userId) =>
+      fetch(new URL(`/api/admin/users/${userId}`, API_BASE), {
+        method: "PATCH",
+        credentials: "include",
+        body: JSON.stringify({ familyId: groupFamily }),
+      })
+    );
+
+    Promise.all(promises).then(() => {
+      setGroupFamily(null);
+      setSelectedUsers([]);
+      fetchAll();
+      toast.success("Хората бяха ъпдейтнати");
+    });
+  };
+
   const submitFamilyForm = async (e: React.FormEvent) => {
     e.preventDefault();
     const body = {
@@ -350,7 +384,7 @@ export default function AdminPage() {
       setEditingUrl(null);
       setUrlForm({ slug: "", url: "", user: undefined });
       toast.success(editingUrl ? "URL редактиран!" : "URL добавен!");
-    } catch (err) {
+    } catch {
       toast.error("Грешка при запис на URL");
     }
   };
@@ -362,7 +396,7 @@ export default function AdminPage() {
   const [guestbook, setGuestbook] = useState<GuestBook[]>([]);
   const [urlShorts, setUrlShorts] = useState<UrlShort[]>([]);
   const [familyData, setFamilyData] = useState<Family[]>([]);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<UserForm>({
     name: "",
     email: "",
     phone: "",
@@ -932,6 +966,20 @@ export default function AdminPage() {
           <div className="mt-4 border rounded-lg">
             <div className="p-4 flex justify-between items-center">
               <div className="font-medium">Списък с гости</div>
+              {selectedUsers.length > 1 && (
+                <div className="flex gap-2">
+                  <FamilySelector
+                    value={groupFamily ? String(groupFamily) : ""}
+                    onValueChange={(val) =>
+                      setGroupFamily(Number(val) > 0 ? Number(val) : null)
+                    }
+                    showClear={(groupFamily ?? 0) > 0}
+                    onClear={() => setGroupFamily(null)}
+                    families={familyData}
+                  />
+                  <Button onClick={handleMultiFamilyChange}>Запази</Button>
+                </div>
+              )}
               <Button onClick={openAddUser}>Добави гост</Button>
             </div>
             {loading ? (
@@ -940,6 +988,9 @@ export default function AdminPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>
+                      <p className="text-center">-</p>
+                    </TableHead>
                     <TableHead>Име</TableHead>
                     <TableHead>Пол</TableHead>
                     <TableHead>Имейл</TableHead>
@@ -954,7 +1005,30 @@ export default function AdminPage() {
                 <TableBody>
                   {users.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell>
+                        <Checkbox
+                          id={`select-user-${user.id}`}
+                          name="selected-users"
+                          value={user.id}
+                          onCheckedChange={(checked) =>
+                            setSelectedUsers((prev) => {
+                              if (checked === true) {
+                                return [...prev, user.id];
+                              }
+
+                              return prev.filter((id) => id !== user.id);
+                            })
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Label
+                          htmlFor={`select-user-${user.id}`}
+                          className="font-medium"
+                        >
+                          {user.name}
+                        </Label>
+                      </TableCell>
                       <TableCell>{user.gender || "unknown"}</TableCell>
                       <TableCell>{user.email || "-"}</TableCell>
                       <TableCell>{user.family?.name || "-"}</TableCell>
@@ -1669,7 +1743,7 @@ export default function AdminPage() {
                 Отказ
               </Button>
               <Button type="submit">
-                {!!familyForm.id ? "Запази" : "Добави"}
+                {familyForm.id ? "Запази" : "Добави"}
               </Button>
             </div>
           </form>
@@ -1928,35 +2002,49 @@ export default function AdminPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="family">Семейство {form.familyId}</Label>
-              <Select
-                name="familyId"
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, familyId: String(val) }))
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Изберете семейство" />
-                </SelectTrigger>
+              <Label htmlFor="familyId">Семейство</Label>
+              <div className="flex gap-2">
+                <Select
+                  name="familyId"
+                  value={form.familyId === null ? "" : String(form.familyId)}
+                  onValueChange={(val) =>
+                    setForm((prev) => ({ ...prev, familyId: val }))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Изберете семейство" />
+                  </SelectTrigger>
 
-                <SelectContent>
-                  {familyData.map((family) => (
-                    <SelectGroup key={`user-family-${family.id}`}>
-                      <SelectItem value={String(family.id)}>
-                        {family.name}
-                      </SelectItem>
-                      {family.members.map((member) => (
-                        <div
-                          className="pl-6 py-1 text-xs text-muted-foreground"
-                          key={`family-member-${member.id}`}
-                        >
-                          {member.name}
-                        </div>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    {familyData.map((family) => (
+                      <SelectGroup key={`user-family-${family.id}`}>
+                        <SelectItem value={String(family.id)}>
+                          {family.name}
+                        </SelectItem>
+                        {family.members.map((member) => (
+                          <div
+                            className="pl-6 py-1 text-xs text-muted-foreground"
+                            key={`family-member-${member.id}`}
+                          >
+                            {member.name}
+                          </div>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.familyId && form.familyId?.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="icon-sm"
+                    onClick={() =>
+                      setForm((prev) => ({ ...prev, familyId: "" }))
+                    }
+                  >
+                    <CircleX />
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="extras">Придружители</Label>
