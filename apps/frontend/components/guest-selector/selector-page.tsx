@@ -81,7 +81,9 @@ export function SelectorPage({ guests }: Props) {
             />
           </div>
           <div className="guest-list">
-            <label>Изберете вашето име</label>
+            <Label className="font-medium pb-2">
+              Изберете вашето име от списъка:
+            </Label>
             <div className="border border-border rounded-lg max-h-96 overflow-y-auto">
               {filteredGuests.length === 0 ? (
                 <div className="p-8">

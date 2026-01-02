@@ -16,7 +16,7 @@ export default function GuestSelect() {
   return (
     <div className="min-h-screen pt-8">
       <div className="container px-4 sm:px-0 mx-auto max-w-3xl">
-        <div className="text-center mb-4 space-y-4">
+        <div className="text-center mb-4 space-y-2">
           <div className="flex justify-center mb-4">
             <div className="p-3 rounded-full bg-accent/10">
               <Heart className="h-8 w-8 text-destructive fill-destructive" />
@@ -26,7 +26,11 @@ export default function GuestSelect() {
             Добре дошли на нашата сватба!
           </h1>
           <p className="text-lg text-muted-foreground text-pretty">
-            Моле изберете вашето име от списъка с гости за да достъпите чата
+            Моля изберете вашето име от списъка с гости за да достъпите чата
+          </p>
+          <p className="text-sm text-muted-foreground text-pretty">
+            (Молим Ви да изберете правилното име, за да няма грешки в чата и
+            галерията)
           </p>
         </div>
         <Suspense>

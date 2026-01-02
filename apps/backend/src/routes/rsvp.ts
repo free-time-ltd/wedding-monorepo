@@ -18,6 +18,17 @@ rsvpRouter.get("/:id", async (c) => {
     with: {
       table: true,
       invitation: true,
+      family: {
+        with: {
+          members: {
+            columns: {
+              id: true,
+              name: true,
+              gender: true,
+            },
+          },
+        },
+      },
     },
   });
 

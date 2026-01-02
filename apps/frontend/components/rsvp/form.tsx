@@ -12,7 +12,6 @@ const fieldConfig = {
     options: [
       { value: "true", label: "Да, ще бъда там!" },
       { value: "false", label: "За жалост няма да мога да дойда" },
-      { value: null, label: "Не съм сигурен" },
     ],
   },
   plusOne: {
@@ -33,9 +32,8 @@ const fieldConfig = {
   menuChoice: {
     label: "Предпочитания за меню?",
     options: [
-      { value: "vegan", label: "Веган" },
       { value: "regular", label: "Месно" },
-      { value: "fish", label: "Риба" },
+      { value: "vegan", label: "Веган" },
     ],
   },
   transportation: {
@@ -153,7 +151,7 @@ export function RsvpForm({
                             onChange={(e) =>
                               fieldState.handleChange(e.target.value)
                             }
-                            className="min-h-[100px] resize-none"
+                            className="min-h-25 resize-none"
                           />
                           {field.notes && (
                             <p className="text-sm text-sage-600">
@@ -229,7 +227,7 @@ export function RsvpForm({
                       placeholder={field.placeholder}
                       value={fieldState.state.value ?? ""}
                       onChange={(e) => fieldState.handleChange(e.target.value)}
-                      className="min-h-[100px] resize-none"
+                      className="min-h-25 resize-none"
                     />
                     {field.notes && (
                       <p className="text-sm text-sage-600">{field.notes}</p>

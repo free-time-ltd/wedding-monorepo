@@ -8,6 +8,14 @@ import {
   index,
 } from "drizzle-orm/sqlite-core";
 
+export const familyTable = sqliteTable("families", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
 export const usersTable = sqliteTable(
   "users",
   {
@@ -22,6 +30,9 @@ export const usersTable = sqliteTable(
       "unknown"
     ),
     tableId: integer("table_id").references(() => tablesTable.id, {
+      onDelete: "set null",
+    }),
+    familyId: integer("family_id").references(() => familyTable.id, {
       onDelete: "set null",
     }),
   },
@@ -373,6 +384,10 @@ export const userRelations = relations(usersTable, ({ one, many }) => ({
   }),
   uploads: many(guestUploadsTable),
   pollAnswers: many(pollAnswersTable),
+  family: one(familyTable, {
+    fields: [usersTable.familyId],
+    references: [familyTable.id],
+  }),
 }));
 
 export const tableRelations = relations(tablesTable, ({ many }) => ({
@@ -448,4 +463,8 @@ export const pollOptionRelations = relations(pollOptionsTable, ({ one }) => ({
     fields: [pollOptionsTable.pollId],
     references: [pollsTable.id],
   }),
+}));
+
+export const familyRelations = relations(familyTable, ({ many }) => ({
+  members: many(usersTable),
 }));
