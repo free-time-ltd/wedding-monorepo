@@ -7,8 +7,6 @@ import {
   Users,
   MessageCircle,
   Camera,
-  Crown,
-  BicepsFlexed,
 } from "@repo/ui/icons";
 import Link from "next/link";
 import { BattleNetLogo } from "./battlenet-logo";
@@ -167,11 +165,6 @@ export function WeddingDetails() {
                 Challenge Parabola#21599
               </Link>
             </Button>
-          </div>
-          <div className="flex gap-4 justify-center">
-            <BicepsFlexed className="size-8" />
-            <Crown className="size-8" />
-            <BicepsFlexed className="size-8 transform -scale-x-100" />
           </div>
         </div>
       </div>
