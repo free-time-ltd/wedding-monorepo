@@ -84,7 +84,7 @@ export function SelectorPage({ guests }: Props) {
             <Label className="font-medium pb-2">
               Изберете вашето име от списъка:
             </Label>
-            <div className="border border-border rounded-lg max-h-96 overflow-y-auto">
+            <div className="rounded-lg max-h-80 overflow-y-auto">
               {filteredGuests.length === 0 ? (
                 <div className="p-8">
                   <div className="flex items-center justify-center gap-2">
@@ -96,12 +96,12 @@ export function SelectorPage({ guests }: Props) {
                   </div>
                 </div>
               ) : (
-                <div className="divide-y divide-border">
+                <div className="divide-y divide-border grid md:grid-cols-3 gap-4 grid-cols-1">
                   {filteredGuests.map((guest) => (
                     <button
                       key={guest.id}
                       onClick={() => handleGuestSelect(guest.id)}
-                      className={`w-full p-4 flex items-center gap-4 hover:bg-accent/5 transition-colors ${
+                      className={`w-full p-4 flex items-center gap-4 hover:bg-accent/5 transition-colors border rounded-lg relative ${
                         selectedGuest === guest.id ? "bg-accent/10" : ""
                       }`}
                       disabled={isLoading}
@@ -122,7 +122,7 @@ export function SelectorPage({ guests }: Props) {
                         </p>
                       </div>
                       {selectedGuest === guest.id && (
-                        <div className="h-5 w-5 rounded-full bg-accent flex items-center justify-center">
+                        <div className="absolute right-2 h-5 w-5 rounded-full bg-accent flex items-center justify-center">
                           <svg
                             className="h-3 w-3 text-background"
                             fill="none"

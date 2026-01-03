@@ -10,53 +10,71 @@ import {
 } from "@repo/ui/icons";
 import Link from "next/link";
 import { BattleNetLogo } from "./battlenet-logo";
+import { ReactNode } from "react";
+
+const details = [
+  {
+    icon: Calendar,
+    title: "Запази датата!",
+    description: "Юни 27, 2026",
+    detail: "Отбележете в календарите си нашия специален ден",
+    download: {
+      label: "Запази в календара",
+      filename: "svatba-krisi-lacho.ics",
+      url: "/calendar.ics",
+    },
+  },
+  {
+    icon: Clock,
+    title: "Начало на Церемонията",
+    description: "19:00",
+    detail: "Следва коктейлен час и прием",
+    href: "/venue",
+  },
+  {
+    icon: MapPin,
+    title: "Място",
+    description: "Colibri Pool Plovdiv",
+    detail:
+      "Околовръстен път, на 2 км от кв. Коматево в посока София, Plovdiv, Bulgaria",
+    href: "/venue",
+  },
+  {
+    icon: Users,
+    title: "Списък с гости",
+    description: "Само с покана",
+    detail: "Проверете списъка с гости, за да видите кой ще присъства",
+    href: "/guests",
+  },
+  {
+    icon: MessageCircle,
+    title: "Поддържайте връзка",
+    description: "Чат за гости",
+    detail: "Споделете вълнението с другите гости още преди големия ден",
+    href: "/chat",
+  },
+  {
+    icon: Camera,
+    title: "Спомени от Сватбата",
+    description: "Споделете снимки и видео",
+    detail: "Помогнете ни да съберем всички красиви моменти от вечерта!",
+    href: "/live-feed",
+  },
+];
+
+export type WeddingDetail = (typeof details)[number];
+
+function MaybeLink({ href, children }: { href?: string; children: ReactNode }) {
+  if (!href) return <>{children}</>;
+
+  return (
+    <Link href={href} className="block h-full">
+      {children}
+    </Link>
+  );
+}
 
 export function WeddingDetails() {
-  const details = [
-    {
-      icon: Calendar,
-      title: "Запази датата!",
-      description: "Юни 27, 2026",
-      detail: "Отбележете в календарите си нашия специален ден",
-      download: {
-        label: "Запази в календара",
-        filename: "svatba-krisi-lacho.ics",
-        url: "/calendar.ics",
-      },
-    },
-    {
-      icon: Clock,
-      title: "Начало на Церемонията",
-      description: "19:00",
-      detail: "Следва коктейлен час и прием",
-    },
-    {
-      icon: MapPin,
-      title: "Място",
-      description: "Colibri Pool Plovdiv",
-      detail:
-        "Околовръстен път, на 2 км от кв. Коматево в посока София, Plovdiv, Bulgaria",
-    },
-    {
-      icon: Users,
-      title: "Списък с гости",
-      description: "Само с покана",
-      detail: "Проверете списъка с гости, за да видите кой ще присъства",
-    },
-    {
-      icon: MessageCircle,
-      title: "Поддържайте връзка",
-      description: "Чат за гости",
-      detail: "Споделете вълнението с другите гости още преди големия ден",
-    },
-    {
-      icon: Camera,
-      title: "Спомени от Сватбата",
-      description: "Споделете снимки и видео",
-      detail: "Помогнете ни да съберем всички красиви моменти от вечерта!",
-    },
-  ];
-
   return (
     <section className="py-20 px-4">
       <div className="container mx-auto max-w-6xl">
@@ -72,41 +90,40 @@ export function WeddingDetails() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {details.map((item) => (
-            <Card
-              key={item.title}
-              className="border-border hover:shadow-lg transition-shadow"
-            >
-              <CardContent className="p-6 pt-0 space-y-4 relative">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-accent/10">
-                    <item.icon className="h-6 w-6 text-accent" />
-                  </div>
-                  <h3 className="font-serif text-xl text-foreground">
-                    {item.title}
-                  </h3>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-lg font-medium text-foreground">
-                    {item.description}
-                  </p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.detail}
-                  </p>
-                  {!!item.download && (
-                    <div className="absolute -bottom-2 left-0 right-0 text-center">
-                      <Button variant="link" asChild>
-                        <Link
-                          href={item.download.url}
-                          download={item.download.filename}
-                        >
-                          {item.download.label}
-                        </Link>
-                      </Button>
+            <MaybeLink href={item.href} key={item.title}>
+              <Card className="border-border hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 pt-0 space-y-4 relative">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-accent/10">
+                      <item.icon className="h-6 w-6 text-accent" />
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    <h3 className="font-serif text-xl text-foreground">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-lg font-medium text-foreground">
+                      {item.description}
+                    </p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {item.detail}
+                    </p>
+                    {!!item.download && (
+                      <div className="absolute -bottom-2 left-0 right-0 text-center">
+                        <Button variant="link" asChild>
+                          <Link
+                            href={item.download.url}
+                            download={item.download.filename}
+                          >
+                            {item.download.label}
+                          </Link>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </MaybeLink>
           ))}
         </div>
 
@@ -136,7 +153,7 @@ export function WeddingDetails() {
           </Card>
         </div>
         <div className="space-y-2">
-          <div className="pt-4 pb-2 challenge-us flex justify-center gap-4 items-center">
+          <div className="pt-4 pb-2 challenge-us flex justify-center gap-4 items-center flex-col md:flex-row">
             <Button
               className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30"
               asChild
