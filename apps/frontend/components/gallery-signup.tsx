@@ -71,12 +71,12 @@ export function WeddingGallerySignup() {
   };
 
   return (
-    <Card className="max-w-md mx-auto text-center p-4">
+    <Card>
       {!isSubscribed ? (
         <>
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">
-              Абонирайте се за сватбената галерия 💍
+            <CardTitle className="text-xl font-semibold text-center">
+              Абонирайте се за сватбената галерия
             </CardTitle>
             <CardDescription>
               Оставете своя имейл, за да получите известие, когато снимките от
