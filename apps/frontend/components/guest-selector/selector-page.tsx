@@ -1,14 +1,19 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getInitials } from "@/components/guest-selector/utils";
-import { Users } from "@repo/ui/icons";
+import { ArrowDown, Users } from "@repo/ui/icons";
 import { Label } from "@repo/ui/components/ui/label";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
 import { Guest } from "@/store/chatStore";
 import { useSocket } from "@/context/SocketContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/ui/tooltip";
 
 interface Props {
   guests: Guest[];
@@ -23,6 +28,8 @@ export function SelectorPage({ guests }: Props) {
   const redirectTo = searchParams.get("redirectTo");
   const shouldRedirect = !!redirectTo && redirectTo.startsWith("/");
   const { isConnected, reconnect } = useSocket();
+  const [scrollIconHidden, setScrollIconHidden] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const filteredGuests = guests.filter((guest) =>
     guest.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -64,6 +71,27 @@ export function SelectorPage({ guests }: Props) {
     }
   };
 
+  useEffect(() => {
+    const el = scrollAreaRef.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+
+      setScrollIconHidden(atBottom);
+    };
+
+    el.addEventListener("scroll", onScroll);
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const handleScrollClick = () => {
+    const el = scrollAreaRef.current;
+    if (!el) return;
+
+    el.scrollTop += 60;
+  };
+
   return (
     <div className="card space-y-6 mb-20 md:mb-0">
       <div className="card-body space-y-4">
@@ -80,11 +108,16 @@ export function SelectorPage({ guests }: Props) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="guest-list">
-            <Label className="font-medium pb-2">
-              Изберете вашето име от списъка:
-            </Label>
-            <div className="rounded-lg max-h-80 overflow-y-auto">
+          <div className="guest-list relative">
+            {filteredGuests.length > 0 && (
+              <Label className="font-medium pb-2">
+                Изберете вашето име от списъка:
+              </Label>
+            )}
+            <div
+              className="rounded-lg max-h-80 overflow-y-auto"
+              ref={scrollAreaRef}
+            >
               {filteredGuests.length === 0 ? (
                 <div className="p-8">
                   <div className="flex items-center justify-center gap-2">
@@ -141,6 +174,28 @@ export function SelectorPage({ guests }: Props) {
                 </div>
               )}
             </div>
+            {filteredGuests.length > 6 && (
+              <div
+                className="absolute bottom-0 left-1/2 -translate-1/2"
+                hidden={scrollIconHidden}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      className="rounded-full shadow-md cursor-pointer animate-bounce delay-200"
+                      onClick={handleScrollClick}
+                    >
+                      <ArrowDown />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Скролни надолу</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </div>
         </div>
         <div className="fixed -bottom-4 left-0 right-0 p-4 bg-background md:static">
