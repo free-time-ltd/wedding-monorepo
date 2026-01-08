@@ -36,7 +36,7 @@ const fetchRoomById = async (
 export function ChatPage({ user, guests, initialChatroom }: ChatProps) {
   const router = useRouter();
   const { isConnected, connect, socket } = useSocket();
-  const { sendGetMessages, createRoom, sendChatMessage } =
+  const { sendGetMessages, refetchUnreads, createRoom, sendChatMessage } =
     useChatSocket(socket);
   const chatrooms = useChatStore((state) => state.chatrooms);
   const addChatroom = useChatStore((state) => state.addChatroom);
@@ -92,11 +92,12 @@ export function ChatPage({ user, guests, initialChatroom }: ChatProps) {
         );
 
         sendGetMessages(roomId, chatrooms[roomId]?.lastMessage?.id);
+        refetchUnreads();
       } catch (e) {
         console.error(e);
       }
     },
-    [addGuestToChatroom, chatrooms, sendGetMessages]
+    [addGuestToChatroom, chatrooms, sendGetMessages, refetchUnreads]
   );
 
   const handleRoomSelect = useCallback(

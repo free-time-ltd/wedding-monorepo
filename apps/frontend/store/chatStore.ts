@@ -41,11 +41,14 @@ export interface Chatroom {
 export interface ChatStore {
   chatrooms: Record<string, Chatroom>;
   guests: Guest[];
+  unreadMessages: Record<string, number>;
   addChatroom: (chatroom: Chatroom) => void;
   addMessage: (chatroomId: string, message: Message) => void;
   addGuestToChatroom: (chatroomId: string, guest: Guest) => void;
   removeGuest: (chatroomId: string, guestId: string) => void;
   setGuests: (guestList: Guest[]) => void;
+  setUnreadMessages: (messages: Record<string, number>) => void;
+  getChatroom: (roomId: string) => Chatroom | undefined;
 }
 
 export interface Invitation {
@@ -67,9 +70,10 @@ export interface RsvpResponse {
   invitedBy: string | null;
 }
 
-export const useChatStore = create<ChatStore>((set) => ({
+export const useChatStore = create<ChatStore>((set, get) => ({
   guests: [],
   chatrooms: {},
+  unreadMessages: {},
   addChatroom: (chatroom) =>
     set((state) => ({
       chatrooms: { ...state.chatrooms, [chatroom.id]: chatroom },
@@ -145,4 +149,17 @@ export const useChatStore = create<ChatStore>((set) => ({
     set(() => ({
       guests,
     })),
+  setUnreadMessages: (res: Record<string, number>) =>
+    set((state) => ({
+      unreadMessages: {
+        ...state.unreadMessages,
+        ...res,
+      },
+    })),
+  getChatroom: (roomId) => get().chatrooms?.[roomId],
 }));
+
+export const useTotalUnread = () =>
+  useChatStore((state) =>
+    Object.values(state.unreadMessages).reduce((sum, count) => sum + count, 0)
+  );

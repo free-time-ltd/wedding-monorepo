@@ -14,6 +14,7 @@ import {
   SocketOptions,
 } from "@repo/socket/client";
 import type { Transport } from "engine.io-client";
+import { useChatStore } from "@/store/chatStore";
 
 interface SocketContextValue {
   socket: Socket | null;
@@ -36,12 +37,21 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const lastConnectProps = useRef<ConnectProps | undefined>(undefined);
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
+  const { setUnreadMessages } = useChatStore();
 
   const onConnect = useCallback(() => {
     setIsConnected(true);
     setTransport(socketRef.current?.io.engine.transport.name ?? "N/A");
 
     socketRef.current?.io.engine.on("upgrade", onUpgrade);
+    socketRef.current?.emit("get-unreads", function (unreads) {
+      setUnreadMessages(
+        Object.fromEntries(
+          unreads.map((record) => [record.roomId, record.unreadCount])
+        )
+      );
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onDisconnect = () => {

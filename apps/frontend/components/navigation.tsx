@@ -7,16 +7,19 @@ import { Button } from "@repo/ui/components/ui/button";
 import { cn } from "@repo/ui/lib/utils";
 import { usePathname } from "next/navigation";
 import { useAdminRedirect } from "@/hooks/useAdminRedirect";
+import { useTotalUnread } from "@/store/chatStore";
+import { Badge } from "@repo/ui/components/ui/badge";
 
 export function Navigation() {
   useAdminRedirect();
   const pathname = usePathname();
+  const totalUnreadCount = useTotalUnread();
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
     { href: "/", label: "Начало" },
     { href: "/guest-select", label: "Портал за Гости" },
-    { href: "/chat", label: "Чат" },
+    { href: "/chat", label: "Чат", chat: true },
     { href: "/venue", label: "Локация" },
     { href: "/guests", label: "Списък Гости" },
     { href: "/gallery", label: "Галерия" },
@@ -49,13 +52,21 @@ export function Navigation() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "text-sm transition-colors",
+                    "text-sm transition-colors relative",
                     isActive
                       ? "text-foreground font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {item.label}
+                  {!!item.chat && totalUnreadCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute rounded-full -top-1/2 -right-full"
+                    >
+                      {totalUnreadCount}
+                    </Badge>
+                  )}
                 </Link>
               );
             })}

@@ -3,6 +3,12 @@ import type { RoomApiType } from "@repo/db/utils";
 import { Server as IOServer, type Socket } from "socket.io";
 
 type MessageModel = typeof messagesTable.$inferSelect;
+type UnreadMessagesModel = {
+  roomId: string | null;
+  joinedAt: Date | null;
+  lastReadMessageId: number | null;
+  unreadCount: number;
+};
 
 export type UserModel = {
   id: string;
@@ -46,6 +52,7 @@ export interface ClientToServerEvents {
   "invite-room": (props: { roomId: string; userId: string }) => void;
   "change-user": (props: { userId: string }, callback?: () => void) => void;
   ping: (callback?: () => void) => void;
+  "get-unreads": (cb?: (roomList: UnreadMessagesModel[]) => void) => void;
 }
 
 export interface InterServerEvents {

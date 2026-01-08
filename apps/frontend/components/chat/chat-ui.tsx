@@ -50,6 +50,7 @@ export function ChatUI({
 }: Props) {
   const { isConnected } = useSocket();
   const chatrooms = useChatStore((state) => state.chatrooms);
+  const unreadMessages = useChatStore((state) => state.unreadMessages);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
   const [isChatAtBottom, setIsChatAtBottom] = useState(true);
@@ -91,6 +92,7 @@ export function ChatUI({
           <ChatSidebar
             guests={guests}
             roomList={filteredRooms}
+            unreadMessages={unreadMessages}
             user={user}
             selectedRoom={selectedRoom}
             onRoomChange={handleRoomChange}
