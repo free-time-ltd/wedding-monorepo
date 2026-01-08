@@ -1,14 +1,22 @@
 import { Chatroom } from "@/store/chatStore";
+import { Badge } from "@repo/ui/components/ui/badge";
 import { Users, Lock } from "@repo/ui/icons";
 
 interface Props {
   room: Chatroom;
   selected?: boolean;
   disabled?: boolean;
+  unreadMessages?: number;
   onClick?: () => void;
 }
 
-export function RoomButton({ room, onClick, selected, disabled }: Props) {
+export function RoomButton({
+  room,
+  onClick,
+  selected,
+  unreadMessages,
+  disabled,
+}: Props) {
   return (
     <button
       onClick={onClick}
@@ -29,10 +37,10 @@ export function RoomButton({ room, onClick, selected, disabled }: Props) {
           <p className="font-medium text-sm text-foreground truncate">
             {room.name}
           </p>
-          {room.isPrivate && (
-            <span className="text-xs text-muted-foreground">
-              {room.guests.length}
-            </span>
+          {!!unreadMessages && (
+            <Badge variant="destructive" className="rounded-full">
+              {unreadMessages}
+            </Badge>
           )}
         </div>
 

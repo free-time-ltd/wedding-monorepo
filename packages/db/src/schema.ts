@@ -69,8 +69,15 @@ export const userRooms = sqliteTable(
       onDelete: "cascade",
     }),
     joinedAt: integer("created_at", { mode: "timestamp_ms" }),
+    lastReadMessageId: integer("last_read_message_id").references(
+      () => messagesTable.id,
+      { onDelete: "set null" }
+    ),
   },
-  (table) => [unique("unique_user_room").on(table.userId, table.roomId)]
+  (table) => [
+    unique("unique_user_room").on(table.userId, table.roomId),
+    index("last_msg_idx").on(table.lastReadMessageId),
+  ]
 );
 
 export const messagesTable = sqliteTable(

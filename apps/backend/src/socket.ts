@@ -4,6 +4,7 @@ import { db } from "@repo/db/client";
 import { authorizedSocket } from "./authorized-socket";
 import { Server } from "@repo/socket";
 import { findRoom, transformRoom } from "@repo/db/utils";
+import { ChatMessagesService } from "./services/messages-service";
 
 export function defineSocketServer(io: Server) {
   io.use(authorizedSocket);
@@ -137,6 +138,13 @@ export function defineSocketServer(io: Server) {
         const messages = hasMore ? fetched.slice(0, 100) : fetched;
 
         socket.emit("messages", { roomId, messages, hasMore });
+
+        const cms = new ChatMessagesService(db);
+        cms.markRoomAsRead(
+          socket.data.user.id,
+          roomId,
+          messages.at(-1)?.id ?? lastMessageId
+        );
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
@@ -145,5 +153,40 @@ export function defineSocketServer(io: Server) {
     socket.on("ping", (callback) => {
       callback?.();
     });
+
+    socket.on("get-unreads", async (callback) => {
+      if (!callback) return;
+
+      const unreads = await getUserRoomsWithUnreadThrottled(
+        socket.data.user.id
+      );
+
+      callback(unreads);
+    });
   });
+}
+
+const THROTTLE_INTERVAL_MS = 1000;
+type UserWithUnreadRoomsResult = Awaited<
+  ReturnType<ChatMessagesService["getUserRoomsWithUnread"]>
+>[number];
+type CacheTuple = [number, UserWithUnreadRoomsResult[] | null];
+
+const throttleMap = new Map<string, CacheTuple>();
+
+async function getUserRoomsWithUnreadThrottled(userId: string) {
+  const now = Date.now();
+  const [last, data] = throttleMap.get(userId) ?? [0, null];
+
+  if (now - last < THROTTLE_INTERVAL_MS) {
+    return Promise.resolve(data ?? []);
+  }
+
+  const service = new ChatMessagesService(db);
+
+  const unreads = await service.getUserRoomsWithUnread(userId);
+
+  throttleMap.set(userId, [now, unreads]);
+
+  return unreads;
 }

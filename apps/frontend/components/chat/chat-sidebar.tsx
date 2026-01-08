@@ -19,6 +19,7 @@ interface Props {
   user: UserApiType;
   guests: Guest[];
   roomList: Chatroom[];
+  unreadMessages: Record<string, number>;
   selectedRoom?: Chatroom | null;
   onRoomChange?: (room: string | null) => void;
   onRoomCreate?: (
@@ -34,6 +35,7 @@ export function ChatSidebar({
   guests,
   selectedRoom,
   roomList,
+  unreadMessages,
   onRoomChange,
   onRoomCreate,
   hidden,
@@ -99,6 +101,7 @@ export function ChatSidebar({
             <RoomButton
               room={room}
               onClick={() => onRoomChange?.(room.id)}
+              unreadMessages={unreadMessages[room.id]}
               selected={selectedRoom?.id === room.id}
               key={room.id}
             />

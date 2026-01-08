@@ -9,6 +9,7 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
   const router = useRouter();
   const addMessage = useChatStore((state) => state.addMessage);
   const addChatroom = useChatStore((state) => state.addChatroom);
+  const { setUnreadMessages, getChatroom } = useChatStore();
 
   const sendGetMessages = useCallback(
     (roomId: string, lastMessageId?: number) => {
@@ -43,6 +44,16 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
     [socket]
   );
 
+  const refetchUnreads = useCallback(() => {
+    socket?.emit("get-unreads", function (unreads) {
+      setUnreadMessages(
+        Object.fromEntries(
+          unreads.map((record) => [record.roomId, record.unreadCount])
+        )
+      );
+    });
+  }, [setUnreadMessages, socket]);
+
   useEffect(() => {
     if (!socket || !socket.connected) return;
 
@@ -60,7 +71,10 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
       );
 
       if (hasMore) {
-        sendGetMessages(roomId);
+        sendGetMessages(
+          roomId,
+          getChatroom(roomId)?.lastMessage?.id ?? undefined
+        );
       }
     };
 
@@ -93,7 +107,7 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
       socket.off("chat-message", handleNewChatMessage);
       socket.off("joined-room", handleRoomJoin);
     };
-  }, [socket, addMessage, sendGetMessages, router, addChatroom]);
+  }, [socket, addMessage, sendGetMessages, router, addChatroom, getChatroom]);
 
-  return { sendGetMessages, createRoom, sendChatMessage };
+  return { sendGetMessages, refetchUnreads, createRoom, sendChatMessage };
 }
