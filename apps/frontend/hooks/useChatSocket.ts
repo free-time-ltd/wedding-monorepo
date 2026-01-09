@@ -2,11 +2,12 @@ import { Chatroom, useChatStore } from "@/store/chatStore";
 import { useCallback, useEffect } from "react";
 import type { ServerToClientEvents } from "@repo/socket";
 import type { TypedClientSocket } from "@repo/socket/client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "@repo/ui";
 
 export function useChatSocket(socket: TypedClientSocket | undefined | null) {
   const router = useRouter();
+  const pathname = usePathname();
   const addMessage = useChatStore((state) => state.addMessage);
   const addChatroom = useChatStore((state) => state.addChatroom);
   const { setUnreadMessages, getChatroom } = useChatStore();
@@ -91,9 +92,9 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
         content: message.message,
       });
 
-      // Fetch unreads if chat is not focused
-      // Bit of a caveman approach but seems to be working
-      // @todo check for route
+      if (!pathname.startsWith("/chat")) {
+        refetchUnreads();
+      }
     };
 
     const handleRoomJoin: ServerToClientEvents["joined-room"] = ({ room }) => {
@@ -111,7 +112,16 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
       socket.off("chat-message", handleNewChatMessage);
       socket.off("joined-room", handleRoomJoin);
     };
-  }, [socket, addMessage, sendGetMessages, router, addChatroom, getChatroom]);
+  }, [
+    socket,
+    addMessage,
+    sendGetMessages,
+    router,
+    addChatroom,
+    getChatroom,
+    pathname,
+    refetchUnreads,
+  ]);
 
   return { sendGetMessages, refetchUnreads, createRoom, sendChatMessage };
 }
