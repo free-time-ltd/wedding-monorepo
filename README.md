@@ -4,8 +4,7 @@ This is a project for my wedding and website. Senior developers can't build simp
 
 ## ToDos
 
-- В админа с поканите да се вижда винаги кой е поканения човек
-- Довърши маркирането на прочетени съобщения и когато пристига ново съобщение
+- Huh o.O
 
 ## Fixing turborepo
 
