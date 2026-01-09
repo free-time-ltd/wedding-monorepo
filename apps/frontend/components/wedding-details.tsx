@@ -128,7 +128,7 @@ export function WeddingDetails() {
           ))}
         </div>
       </div>
-      <div className="mt-20 md:py-32 px-6 md:px-12 bg-sage-light/30">
+      <div className="mt-20 md:py-32 py-12 px-6 md:px-12 bg-sage-light/30">
         <h3 className="font-serif text-4xl md:text-5xl text-balance text-primary text-center">
           Нашата история
         </h3>

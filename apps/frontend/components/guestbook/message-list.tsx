@@ -38,14 +38,15 @@ export function MessageList({ currentUserId, initialMessages }: Props) {
   };
 
   return (
-    <div className="columns-1 md:columns-2 gap-6 space-y-6">
+    <div className="columns-1 md:columns-2 gap-6">
       {messages.map((entry) => (
-        <GuestbookMessage
-          key={entry.id}
-          message={entry}
-          onClick={handleLikeClick}
-          liked={!!currentUserId && entry.likes.includes(currentUserId)}
-        />
+        <div className="break-inside-avoid mb-6" key={entry.id}>
+          <GuestbookMessage
+            message={entry}
+            onClick={handleLikeClick}
+            liked={!!currentUserId && entry.likes.includes(currentUserId)}
+          />
+        </div>
       ))}
     </div>
   );
