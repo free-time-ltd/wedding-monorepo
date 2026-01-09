@@ -6,6 +6,7 @@ This is a project for my wedding and website. Senior developers can't build simp
 
 - В админа с поканите да се вижда винаги кой е поканения човек
 - В пожеланията има бъг, когато пожеланията с 3
+- Селектора на пожеланията трябва да събира всички одобрен пожелания + пожеланията добавени от _currentUser_
 
 ## Fixing turborepo
 

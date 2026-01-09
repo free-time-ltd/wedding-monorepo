@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { Button } from "@repo/ui/components/ui/button";
 import { Calendar, MapPin } from "@repo/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/ui/tooltip";
 
 export function Hero() {
   return (
@@ -10,9 +15,9 @@ export function Hero() {
         <img
           src="/hero-bg.jpg"
           alt="Wedding venue"
-          className="w-full h-full object-cover opacity-20"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
+        <div className="absolute inset-0 bg-linear-to-b from-background/50 via-background/80 to-background" />
       </div>
 
       <div className="max-w-4xl mx-auto text-center space-y-8">
@@ -58,6 +63,27 @@ export function Hero() {
             <Link href="/venue">Вижте Локация</Link>
           </Button>
         </div>
+      </div>
+      <div
+        className={`absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-1000 delay-1000`}
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link
+              href={
+                new Date("2026-06-27T19:00:00").getTime() < Date.now()
+                  ? "#wedding-details"
+                  : "#wedding-date"
+              }
+              className="w-6 h-10 border-2 border-primary/40 rounded-full flex justify-center cursor-pointer"
+            >
+              <div className="w-1.5 h-3 bg-primary/60 rounded-full mt-2 animate-bounce" />
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Виж повече</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </section>
   );

@@ -90,6 +90,10 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
         ...message,
         content: message.message,
       });
+
+      // Fetch unreads if chat is not focused
+      // Bit of a caveman approach but seems to be working
+      // @todo check for route
     };
 
     const handleRoomJoin: ServerToClientEvents["joined-room"] = ({ room }) => {

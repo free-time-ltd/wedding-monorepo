@@ -50,6 +50,16 @@
   --sidebar-ring: var(--ring);
 
   --radius: 0.625rem;
+
+  --sage: 150 25% 45%;
+  --sage-light: 150 20% 88%;
+  --blush: 15 60% 85%;
+  --blush-dark: 15 45% 70%;
+  --cream: 40 33% 98%;
+  --cream-dark: 40 25% 92%;
+  --gold: 38 70% 55%;
+  --gold-light: 38 60% 75%;
+
 }
 
 
@@ -94,6 +104,17 @@
   --color-rose-gold-500: oklch(0.68 0.15 35);
   --color-rose-gold-600: oklch(0.62 0.16 35);
 
+  --color-sage: hsl(var(--sage));
+  --color-sage-light: hsl(var(--sage-light));
+  --color-blush: hsl(var(--blush));
+  --color-blush-dark: hsl(var(--blush-dark));
+  --color-cream: hsl(var(--cream));
+  --color-cream-dark: hsl(var(--cream-dark));
+  --color-gold: hsl(var(--gold));
+  --color-gold-light: hsl(var(--gold-light));
+
+
+
   --font-sans: var(--font-notosans);
   /* --font-mono: var(--font-geist-mono);  */
 
@@ -135,6 +156,9 @@
 }
 
 @layer base {
+  html {
+    @apply scroll-smooth;
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -146,5 +170,21 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg;
+    box-shadow: var(--shadow-card);
+  }
+  .divider-ornament {
+    @apply flex items-center justify-center gap-4;
+  }
+
+  .divider-ornament::before,
+  .divider-ornament::after {
+    content: '';
+    @apply h-px w-16 bg-primary/30;
   }
 }
