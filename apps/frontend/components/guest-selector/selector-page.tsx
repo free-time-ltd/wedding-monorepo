@@ -89,12 +89,15 @@ export function SelectorPage({ guests }: Props) {
     const el = scrollAreaRef.current;
     if (!el) return;
 
-    el.scrollTop += 60;
+    el.scrollBy({
+      top: 120,
+      behavior: "smooth",
+    });
   };
 
   return (
     <div className="card space-y-6 mb-20 md:mb-0">
-      <div className="card-body space-y-4">
+      <div className="card-body space-y-4 relative">
         <div className="space-y-6">
           <div className="search-field flex flex-col gap-2">
             <Label htmlFor="guest-search" className="font-medium">
@@ -183,7 +186,7 @@ export function SelectorPage({ guests }: Props) {
                   <TooltipTrigger asChild>
                     <button
                       type="button"
-                      className="w-6 h-10 border-2 border-primary/40 rounded-full flex justify-center cursor-pointer"
+                      className="w-6 h-10 border-2 border-primary/40 rounded-full flex justify-center cursor-pointer bg-background"
                       onClick={handleScrollClick}
                     >
                       <div className="w-1.5 h-3 bg-primary/60 rounded-full mt-2 animate-bounce" />
@@ -197,7 +200,8 @@ export function SelectorPage({ guests }: Props) {
             )}
           </div>
         </div>
-        <div className="fixed -bottom-8 left-0 right-0 p-4 bg-background md:static">
+
+        <div className="sticky bottom-0 left-0 right-0 p-4 -mx-4 bg-background md:static">
           <Button
             type="button"
             onClick={selectGuest}
