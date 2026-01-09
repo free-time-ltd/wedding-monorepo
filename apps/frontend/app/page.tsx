@@ -16,7 +16,7 @@ export default function Home() {
       <Navigation />
       <Hero />
       <section
-        className="py-20"
+        className="py-20 px-4"
         id="wedding-date"
         hidden={new Date("2026-06-27T19:00:00").getTime() < Date.now()}
       >

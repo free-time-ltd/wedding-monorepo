@@ -14,7 +14,7 @@ export function Footer() {
           <span className="text-body">for our special day</span>
         </div>
         <p className="text-label text-muted-foreground/60 mt-8">
-          #LachezarAndKristina2026
+          #LachoAndKrisi2026
         </p>
       </div>
     </footer>

@@ -1289,7 +1289,7 @@ export default function AdminPage() {
                                   className="cursor-pointer"
                                   onClick={() => handleOpenAddGuestModal(inv)}
                                 >
-                                  виж поканени
+                                  виж ({inv.plusOneNames?.join(",")})
                                 </Button>
                               );
                             }
