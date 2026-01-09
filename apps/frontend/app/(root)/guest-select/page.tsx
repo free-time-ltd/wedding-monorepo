@@ -18,8 +18,12 @@ export default function GuestSelect() {
       <div className="container px-4 sm:px-0 mx-auto max-w-3xl">
         <div className="text-center mb-4 space-y-2">
           <div className="flex justify-center mb-4">
-            <div className="p-3 rounded-full bg-accent/10">
-              <Heart className="h-8 w-8 text-destructive fill-destructive" />
+            <div
+              className={`divider-ornament text-accent transition-all duration-700 delay-200`}
+            >
+              <div className="p-3 rounded-full bg-accent/10">
+                <Heart className="h-8 w-8 text-destructive fill-destructive" />
+              </div>
             </div>
           </div>
           <h1 className="font-serif text-4xl md:text-5xl text-balance text-foreground">

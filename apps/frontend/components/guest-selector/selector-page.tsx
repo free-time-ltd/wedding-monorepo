@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getInitials } from "@/components/guest-selector/utils";
-import { ArrowDown, Users } from "@repo/ui/icons";
+import { Users } from "@repo/ui/icons";
 import { Label } from "@repo/ui/components/ui/label";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
@@ -176,19 +176,18 @@ export function SelectorPage({ guests }: Props) {
             </div>
             {filteredGuests.length > 6 && (
               <div
-                className="absolute bottom-0 left-1/2 -translate-1/2"
+                className={`absolute -bottom-4 left-1/2 -translate-x-1/2 transition-all duration-1000 delay-1000`}
                 hidden={scrollIconHidden}
               >
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon-sm"
-                      className="rounded-full shadow-md cursor-pointer animate-bounce delay-200"
+                    <button
+                      type="button"
+                      className="w-6 h-10 border-2 border-primary/40 rounded-full flex justify-center cursor-pointer"
                       onClick={handleScrollClick}
                     >
-                      <ArrowDown />
-                    </Button>
+                      <div className="w-1.5 h-3 bg-primary/60 rounded-full mt-2 animate-bounce" />
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Скролни надолу</p>
@@ -198,7 +197,7 @@ export function SelectorPage({ guests }: Props) {
             )}
           </div>
         </div>
-        <div className="fixed -bottom-4 left-0 right-0 p-4 bg-background md:static">
+        <div className="fixed -bottom-8 left-0 right-0 p-4 bg-background md:static">
           <Button
             type="button"
             onClick={selectGuest}

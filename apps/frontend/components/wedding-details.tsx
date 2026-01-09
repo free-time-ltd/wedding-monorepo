@@ -7,6 +7,7 @@ import {
   Users,
   MessageCircle,
   Camera,
+  Heart,
 } from "@repo/ui/icons";
 import Link from "next/link";
 import { BattleNetLogo } from "./battlenet-logo";
@@ -76,10 +77,10 @@ function MaybeLink({ href, children }: { href?: string; children: ReactNode }) {
 
 export function WeddingDetails() {
   return (
-    <section className="py-20 px-4">
+    <section className="px-4">
       <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-16 space-y-4">
-          <h2 className="font-serif text-4xl md:text-5xl text-balance text-foreground">
+        <div className="text-center mb-16 space-y-4" id="wedding-details">
+          <h2 className="font-serif text-4xl md:text-5xl text-balance text-primary">
             Детайли за Сватбата!
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
@@ -126,63 +127,66 @@ export function WeddingDetails() {
             </MaybeLink>
           ))}
         </div>
-
-        <div className="mt-16 text-center">
-          <Card className="border-accent/20 bg-accent/5">
-            <CardContent className="p-8 space-y-4">
-              <h3 className="font-serif text-2xl text-foreground">
-                Нашата история
-              </h3>
-              <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-pretty">
-                Всичко започна в един виртуален свят —{" "}
-                <strong>Overwatch</strong>. Случайно се заговорихме, после
-                започнахме да играем все по-често, а разговорите ни станаха
-                по-важни от самите игри.
-              </p>
-              <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-pretty">
-                След няколко месеца решихме да се видим на живо — просто защото
-                сме от един град. Срещнахме се, харесахме се… и оттогава не сме
-                се разделяли.
-              </p>
-              <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-pretty">
-                Осем години по-късно сме готови за следващата глава от нашата
-                история — тази, в която сме отбор не само в игрите, а и в
-                живота.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="space-y-2">
-          <div className="pt-4 pb-2 challenge-us flex justify-center gap-4 items-center flex-col md:flex-row">
-            <Button
-              className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30"
-              asChild
-            >
-              <Link
-                href="https://tracker.gg/bf6/profile/3187201157/overview"
-                target="_blank"
-                rel="nofollow"
-              >
-                <BattleNetLogo className="size-8" />
-                Challenge Sk1ppeR#2796
-              </Link>
-            </Button>
-
-            <Button
-              variant="secondary"
-              className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30"
-              asChild
-            >
-              <Link
-                href="https://overwatch.blizzard.com/en-us/career/c25fbe8bb17e97aca4a226a5dd08%7Cb9a73e321c5fd1444e499e43f47b5ba8/"
-                target="_blank"
-                rel="nofollow"
-              >
-                <BattleNetLogo className="size-8" />
-                Challenge Parabola#21599
-              </Link>
-            </Button>
+      </div>
+      <div className="mt-20 md:py-32 px-6 md:px-12 bg-sage-light/30">
+        <h3 className="font-serif text-4xl md:text-5xl text-balance text-primary text-center">
+          Нашата история
+        </h3>
+        <div className="py-8">
+          <div
+            className={`divider-ornament text-accent transition-all duration-700 delay-200`}
+          >
+            <Heart className="w-4 h-4 fill-accent" />
           </div>
+        </div>
+        <Card className="border-primary/20 bg-transparent bg-none border-none shadow-none m-0">
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-pretty">
+              Всичко започна в един виртуален свят — <strong>Overwatch</strong>.
+              Случайно се заговорихме, после започнахме да играем все по-често,
+              а разговорите ни станаха по-важни от самите игри.
+            </p>
+            <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-pretty">
+              След няколко месеца решихме да се видим на живо — просто защото
+              сме от един град. Срещнахме се, харесахме се… и оттогава не сме се
+              разделяли.
+            </p>
+            <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-pretty">
+              Осем години по-късно сме готови за следващата глава от нашата
+              история — тази, в която сме отбор не само в игрите, а и в живота.
+            </p>
+          </CardContent>
+        </Card>
+
+        <div className="pt-4 pb-2 challenge-us flex justify-center gap-4 items-center flex-col md:flex-row">
+          <Button
+            className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30"
+            asChild
+          >
+            <Link
+              href="https://tracker.gg/bf6/profile/3187201157/overview"
+              target="_blank"
+              rel="nofollow"
+            >
+              <BattleNetLogo className="size-8" />
+              Challenge Sk1ppeR#2796
+            </Link>
+          </Button>
+
+          <Button
+            variant="secondary"
+            className="flex items-center gap-3 px-6 py-5 text-base bg-[#148EFF] hover:bg-[#0f6fd1] text-white shadow-lg shadow-blue-500/30"
+            asChild
+          >
+            <Link
+              href="https://overwatch.blizzard.com/en-us/career/c25fbe8bb17e97aca4a226a5dd08%7Cb9a73e321c5fd1444e499e43f47b5ba8/"
+              target="_blank"
+              rel="nofollow"
+            >
+              <BattleNetLogo className="size-8" />
+              Challenge Parabola#21599
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

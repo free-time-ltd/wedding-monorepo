@@ -26,8 +26,12 @@ export default async function GuestbookPage() {
       <div className="container mx-auto px-4 max-w-4xl space-y-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-4">
-            <Heart className="h-8 w-8 text-accent fill-accent" />
+          <div
+            className={`divider-ornament text-accent transition-all duration-700 delay-200`}
+          >
+            <div className="p-3 rounded-full bg-accent/10">
+              <Heart className="h-8 w-8 text-destructive fill-destructive" />
+            </div>
           </div>
           <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
             Пожелания
