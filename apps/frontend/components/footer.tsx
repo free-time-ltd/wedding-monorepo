@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="py-12 px-6 bg-cream-dark/30 text-center">
       <div className="max-w-4xl mx-auto">
         <h3 className="font-serif text-3xl text-primary mb-4">
-          Lachezar & Kristina
+          Kristina &amp; Lachezar
         </h3>
         <p className="text-subheading text-muted-foreground mb-6">27.06.2026</p>
         <div className="flex items-center justify-center gap-2 text-muted-foreground">
@@ -14,7 +14,7 @@ export function Footer() {
           <span className="text-body">for our special day</span>
         </div>
         <p className="text-label text-muted-foreground/60 mt-8">
-          #LachoAndKrisi2026
+          #KrisiAndLacho2026
         </p>
       </div>
     </footer>

@@ -1,7 +1,6 @@
 import { GuestbookSubmitForm } from "@/components/guestbook/form-card";
 import { MessageList } from "@/components/guestbook/message-list";
-import { fetchGuestbook } from "@/lib/data";
-import { fetchUser } from "@/lib/server-data";
+import { fetchGuestbookServer, fetchUser } from "@/lib/server-data";
 import { Heart } from "@repo/ui/icons";
 import { pluralizeWithCount } from "@repo/utils/pluralize";
 import { Metadata } from "next";
@@ -13,13 +12,15 @@ export const metadata: Metadata = {
     "Оставете своите сърдечни пожелания и поздравления за младоженците. Вашите думи ще се превърнат в скъпи спомени, които ще пазим завинаги.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function GuestbookPage() {
   const user = await fetchUser();
   if (!user) {
     redirect(`/guest-select?redirectTo=${encodeURIComponent("/guestbook")}`);
   }
 
-  const approvedMessages = await fetchGuestbook();
+  const approvedMessages = await fetchGuestbookServer();
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-16">

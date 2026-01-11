@@ -2,7 +2,7 @@
 
 import type { UserApiType } from "@repo/db/utils";
 import { cookies } from "next/headers";
-import { PollsResponse } from "./data";
+import { ApiResponse, GuestbookEntry, PollsResponse } from "./data";
 
 export const fetchUser = async (): Promise<UserApiType | null> => {
   try {
@@ -48,5 +48,28 @@ export const fetchPollsServer = async () => {
     };
   } catch (e) {
     console.error(e);
+  }
+};
+
+export const fetchGuestbookServer = async () => {
+  try {
+    const cookieStore = await cookies();
+    const url = new URL("/api/guestbook", process.env.NEXT_PUBLIC_API_BASE_URL);
+    const res = await fetch(url, {
+      headers: { Cookie: cookieStore.toString() },
+      cache: "no-cache",
+      next: { tags: ["guestbook"] },
+    });
+
+    const json = (await res.json()) as ApiResponse<GuestbookEntry[]>;
+
+    if (json.success) {
+      return json.data;
+    }
+
+    return [];
+  } catch (e) {
+    console.error(e);
+    return [];
   }
 };

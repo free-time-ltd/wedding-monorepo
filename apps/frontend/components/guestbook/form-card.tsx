@@ -50,7 +50,7 @@ export function GuestbookSubmitForm() {
         Добави свое съобщение
       </Button>
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-120">
           <DialogTitle className="sr-only">
             Споделете вашите пожелания
           </DialogTitle>
@@ -61,7 +61,7 @@ export function GuestbookSubmitForm() {
 
             {submitted ? (
               <div className="flex items-center gap-3 p-4 bg-accent/10 rounded-lg text-accent">
-                <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+                <CheckCircle2 className="h-5 w-5 shrink-0" />
                 <p className="text-sm">
                   Благодарим ви за съобщението! То очаква одобрение и скоро ще
                   бъде публикувано.

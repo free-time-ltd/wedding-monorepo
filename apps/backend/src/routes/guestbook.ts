@@ -1,6 +1,7 @@
 import { requireAuth } from "@/middleware";
 import { errorResponse, successResponse } from "@/reponses";
 import { guestbookInputSchema, SimpleAuthContext } from "@/types";
+import { getUserId } from "@/utils";
 import { and, eq, sql } from "@repo/db";
 import { db } from "@repo/db/client";
 import { guestbookLikesTable, guestbookTable } from "@repo/db/schema";
@@ -10,9 +11,20 @@ import z from "zod";
 const guestbookRouter = new Hono();
 
 guestbookRouter.get("/", async (c) => {
+  const userId = await getUserId(c);
   const approvedMessages = await db.query.guestbookTable.findMany({
-    where: (table, { and, eq }) =>
-      and(eq(table.isApproved, true), eq(table.isPrivate, false)),
+    where: (table, { and, eq, or }) => {
+      const conditions = [
+        and(eq(table.isApproved, true), eq(table.isPrivate, false)),
+      ];
+
+      if (userId) {
+        conditions.push(eq(table.userId, userId));
+      }
+
+      return or(...conditions);
+    },
+    orderBy: (table, { desc }) => desc(table.id),
     with: {
       user: true,
       likes: {
