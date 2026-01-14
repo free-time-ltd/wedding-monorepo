@@ -81,7 +81,7 @@ export default function VenuePage() {
           <MapCard {...venue} mapsUrl={venue.directionUrl} />
 
           {/* Venue Info Card */}
-          <Card>
+          <Card className="border border-border/50 rounded-lg shadow-none">
             <CardContent className="p-6 space-y-6">
               <div>
                 <h3 className="font-serif text-xl text-foreground mb-4">
@@ -151,7 +151,7 @@ export default function VenuePage() {
         </div>
 
         {/* About Venue */}
-        <Card className="mb-6">
+        <Card className="mb-6 border border-border/50 rounded-lg shadow-none">
           <CardContent className="p-6 space-y-4">
             <h3 className="font-serif text-2xl text-foreground">
               За локацията
@@ -179,7 +179,7 @@ export default function VenuePage() {
         <WeatherWidget />
 
         {/* Schedule */}
-        <Card className="mt-6">
+        <Card className="mt-6 border border-border/50 rounded-lg shadow-none">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-6">
               <Clock className="h-6 w-6 text-accent" />
@@ -213,7 +213,7 @@ export default function VenuePage() {
         </Card>
 
         {/* Accommodation Suggestions */}
-        <Card className="mt-6">
+        <Card className="mt-6 border border-border/50 rounded-lg shadow-none">
           <CardContent className="p-6">
             <h3 className="font-serif text-2xl text-foreground mb-4">
               Настаняване наблизо

@@ -14,7 +14,7 @@ interface Props {
 
 export function MapCard({ name, address, iframeUrl, mapsUrl }: Props) {
   return (
-    <Card className="lg:col-span-2 overflow-hidden p-0">
+    <Card className="lg:col-span-2 overflow-hidden p-0 border border-border/50 rounded-lg shadow-none">
       <CardContent className="p-0">
         <div className="relative h-96 bg-muted">
           <iframe

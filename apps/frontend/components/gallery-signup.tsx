@@ -71,7 +71,7 @@ export function WeddingGallerySignup() {
   };
 
   return (
-    <Card>
+    <Card className="border border-border/50 rounded-lg shadow-none">
       {!isSubscribed ? (
         <>
           <CardHeader>

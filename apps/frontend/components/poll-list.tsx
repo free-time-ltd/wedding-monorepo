@@ -97,7 +97,10 @@ export function PollList({ polls: initialPolls }: Props) {
 
         const leadingOption = getLeadingOption(poll);
         return (
-          <Card key={poll.id} className="overflow-hidden">
+          <Card
+            key={poll.id}
+            className="overflow-hidden border border-border/50 rounded-lg shadow-none"
+          >
             <CardHeader>
               <CardTitle className="text-xl font-serif">{poll.title}</CardTitle>
               <CardDescription>{poll.subtitle}</CardDescription>

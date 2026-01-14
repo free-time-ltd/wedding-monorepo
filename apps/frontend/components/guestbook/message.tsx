@@ -25,7 +25,7 @@ export function GuestbookMessage({ message, liked, onClick }: Props) {
   }, []);
 
   return (
-    <Card className="break-inside-avoid p-6 bg-card border-border hover:shadow-lg transition-shadow">
+    <Card className="break-inside-avoid p-6 bg-card hover:shadow-lg transition-shadow border border-border/50 rounded-lg shadow-none">
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="font-serif font-semibold text-foreground">

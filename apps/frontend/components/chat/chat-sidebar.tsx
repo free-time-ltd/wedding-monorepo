@@ -54,7 +54,7 @@ export function ChatSidebar({
   return (
     <>
       <Card
-        className="md:col-span-1 flex flex-col h-full min-h-0 py-2 md:py-6 gap-0"
+        className="md:col-span-1 flex flex-col h-full min-h-0 py-2 md:py-6 gap-0 border border-border/50 rounded-lg shadow-none"
         hidden={hidden}
       >
         <div className="px-4 py-0 pb-4 md:py-4 border-b border-border">
