@@ -43,7 +43,7 @@ export function WeatherWidget() {
   };
 
   return (
-    <Card>
+    <Card className="border border-border/50 rounded-lg shadow-none">
       <CardContent className="p-6">
         <div className="flex items-center gap-3 mb-6">
           <Wind className="h-6 w-6 text-accent" />

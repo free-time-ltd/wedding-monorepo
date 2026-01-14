@@ -92,7 +92,7 @@ export function WeddingDetails() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {details.map((item) => (
             <MaybeLink href={item.href} key={item.title}>
-              <Card className="border-border hover:shadow-lg transition-shadow h-full">
+              <Card className="hover:shadow-lg transition-shadow h-full border border-border/50 rounded-lg shadow-none">
                 <CardContent className="p-6 pt-0 space-y-4 relative">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-accent/10">

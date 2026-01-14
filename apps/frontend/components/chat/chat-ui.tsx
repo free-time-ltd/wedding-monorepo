@@ -102,7 +102,7 @@ export function ChatUI({
 
           {/* Chat Area */}
           <Card
-            className="md:col-span-2 flex flex-col h-full min-h-0 relative py-2 md:py-6"
+            className="md:col-span-2 flex flex-col h-full min-h-0 relative py-2 md:py-6 border border-border/50 rounded-lg shadow-none"
             hidden={isMobile && selectedRoom === null}
           >
             {selectedRoom ? (

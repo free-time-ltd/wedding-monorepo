@@ -43,7 +43,7 @@ export function GuestInfo({ guests }: Props) {
   return (
     <div className="space-y-6">
       {/* Search */}
-      <Card className="mb-8">
+      <Card className="mb-8 border border-border/50 rounded-lg shadow-none">
         <CardContent className="p-0 px-4 md:p-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -63,7 +63,10 @@ export function GuestInfo({ guests }: Props) {
         {Object.keys(guestsByTable)
           .sort()
           .map((tableName) => (
-            <Card key={tableName}>
+            <Card
+              key={tableName}
+              className="border border-border/50 rounded-lg shadow-none"
+            >
               <CardHeader>
                 <CardTitle className="font-serif text-2xl flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-accent/10">

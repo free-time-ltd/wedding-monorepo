@@ -9,7 +9,7 @@ interface Props {
 
 export function StaticCard({ icon: CardIcon, value, label }: Props) {
   return (
-    <Card>
+    <Card className="border border-border/50 rounded-lg shadow-none">
       <CardContent className="flex-col md:flex-row items-center justify-center md:justify-start md:p-4 flex gap-4">
         <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
           <CardIcon className="h-6 w-6 text-accent" />
