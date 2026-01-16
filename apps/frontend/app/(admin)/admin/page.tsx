@@ -16,7 +16,7 @@ import {
 } from "@repo/ui/components/ui/table";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -46,6 +46,7 @@ import { CircleX, ExternalLink, UserPlus2, X } from "@repo/ui/icons";
 import { generateId } from "@repo/utils/generateId";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { FamilySelector } from "@/components/family-selector";
+import { CSVLink } from "react-csv";
 
 type User = {
   id: string;
@@ -927,6 +928,18 @@ export default function AdminPage() {
     }
   };
 
+  const csvData = useMemo(() => {
+    return [
+      ["Име", "Пол", "Семейство", "Маса"],
+      ...users.map((user) => [
+        user.name,
+        user.gender,
+        user.family?.name ?? "-",
+        user.table?.name ?? "-",
+      ]),
+    ];
+  }, [users]);
+
   return (
     <div className="container mx-auto p-2 md:p-6">
       <div className="mb-6">
@@ -980,7 +993,16 @@ export default function AdminPage() {
                   <Button onClick={handleMultiFamilyChange}>Запази</Button>
                 </div>
               )}
-              <Button onClick={openAddUser}>Добави гост</Button>
+              <div className="flex gap-2">
+                <Button onClick={openAddUser}>Добави гост</Button>
+                <CSVLink
+                  data={csvData}
+                  filename="guest-list.csv"
+                  target="_blank"
+                >
+                  <Button variant="outline">Export CSV</Button>
+                </CSVLink>
+              </div>
             </div>
             {loading ? (
               <p className="p-4">Loading...</p>
