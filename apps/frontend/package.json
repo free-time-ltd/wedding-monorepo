@@ -20,6 +20,7 @@
     "next": "^16.0.8",
     "next-qrcode": "^2.5.1",
     "react": "19.2.3",
+    "react-csv": "^2.2.2",
     "react-dom": "19.2.3",
     "zod": "^4.1.12",
     "zustand": "^5.0.8"
@@ -28,6 +29,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "19.2.7",
+    "@types/react-csv": "^1.1.10",
     "@types/react-dom": "19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "cross-env": "^10.1.0",

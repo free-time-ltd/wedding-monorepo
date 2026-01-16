@@ -4,7 +4,8 @@ This is a project for my wedding and website. Senior developers can't build simp
 
 ## ToDos
 
-- Huh o.O
+- Export users as CSV
+-
 
 ## Fixing turborepo
 
