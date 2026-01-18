@@ -27,8 +27,8 @@ const details = [
   },
   {
     icon: Clock,
-    title: "Начало на Церемонията",
-    description: "19:00",
+    title: "Начало на събитието",
+    description: "18:30",
     detail: "Следва коктейлен час и прием",
     href: "/venue",
   },

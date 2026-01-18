@@ -32,7 +32,7 @@ export function Navigation() {
     { href: "/guest-select", label: "Портал за Гости" },
     { href: "/chat", label: "Чат", chat: true },
     { href: "/venue", label: "Локация" },
-    { href: "/guests", label: "Списък Гости" },
+    // { href: "/guests", label: "Списък Гости" },
     { href: "/gallery", label: "Галерия" },
     { href: "/live-feed", label: "Моменти на Живо" },
     { href: "/polls", label: "Познай!" },
@@ -67,7 +67,7 @@ export function Navigation() {
                       "text-sm transition-colors relative",
                       isActive
                         ? "text-foreground font-semibold"
-                        : "text-muted-foreground hover:text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
                     )}
                   >
                     {item.label}
@@ -107,7 +107,7 @@ export function Navigation() {
           "fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300",
           isOpen
             ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+            : "opacity-0 pointer-events-none",
         )}
         onClick={() => setIsOpen(false)}
       />
@@ -118,7 +118,7 @@ export function Navigation() {
           "fixed top-0 right-0 bottom-0 w-70 bg-background z-50 lg:hidden",
           "transform transition-transform duration-300 ease-in-out",
           "border-l border-border shadow-2xl",
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
         <div className="flex flex-col h-full">
@@ -155,7 +155,7 @@ export function Navigation() {
                     "transform transition-all duration-300",
                     isActive
                       ? "text-foreground font-semibold bg-accent/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent/5"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/5",
                   )}
                   style={{
                     transitionDelay: isOpen ? `${index * 50}ms` : "0ms",

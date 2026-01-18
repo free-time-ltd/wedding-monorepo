@@ -42,6 +42,8 @@ export class ChatMessagesService {
   }
 
   async markRoomAsRead(userId: string, roomId: string, lastMessageId: number) {
+    if (lastMessageId < 1) return;
+
     await this.db
       .update(userRooms)
       .set({
@@ -62,14 +64,14 @@ export class ChatMessagesService {
         userRooms,
         and(
           eq(userRooms.roomId, messagesTable.roomId),
-          eq(userRooms.userId, userId)
-        )
+          eq(userRooms.userId, userId),
+        ),
       )
       .where(
         sql`
         ${messagesTable.roomId} = ${roomId}
         AND ${messagesTable.id} > COALESCE(${userRooms.lastReadMessageId}, 0)
-      `
+      `,
       );
 
     return result[0]?.unread ?? 0;
