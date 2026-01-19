@@ -10,11 +10,11 @@ import {
   CardTitle,
 } from "@repo/ui/components/ui/card";
 import { ArrowLeft, Heart } from "@repo/ui/icons";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormValues, RsvpForm } from "./form";
 import { serializeFormValues } from "./utils";
 import { unique } from "@repo/ui/lib/utils";
+import Link from "next/link";
 
 interface Props {
   guestId: string;
@@ -23,13 +23,12 @@ interface Props {
 }
 
 export function RsvpPage({ guestId, guest, invitation }: Props) {
-  const router = useRouter();
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (data: FormData) => {
     const url = new URL(
       `/api/rsvps/${guestId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL
+      process.env.NEXT_PUBLIC_API_BASE_URL,
     );
 
     const payload = Object.fromEntries(data.entries());
@@ -37,7 +36,7 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
     fetch(url, {
       method: "POST",
       body: JSON.stringify(
-        serializeFormValues(payload as Record<string, string>)
+        serializeFormValues(payload as Record<string, string>),
       ),
       headers: {
         "Content-Type": "application/json",
@@ -83,11 +82,8 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button
-              onClick={() => router.push("/")}
-              className="bg-rose-gold-500 hover:bg-rose-gold-600"
-            >
-              Към началната страница
+            <Button className="bg-rose-gold-500 hover:bg-rose-gold-600" asChild>
+              <Link href="/">Към началната страница</Link>
             </Button>
           </CardContent>
         </Card>
@@ -112,9 +108,11 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
       {/* Header */}
       <header className="border-b border-sage-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <Button variant="ghost" onClick={() => router.push("/")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Към началната страница
+          <Button variant="ghost" asChild>
+            <Link href="/">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Виж детайлна информация
+            </Link>
           </Button>
         </div>
       </header>
@@ -133,6 +131,13 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
             Моля, потвърдете присъствието си, за да можем да се подготвим и да
             ви посрещнем както подобава.
           </p>
+          <div className="text-center">
+            <Button asChild variant="link">
+              <Link href="/" target="_blank">
+                &raquo; Вижте детайлна информация за събитието
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <Card className="border-sage-200">
