@@ -34,7 +34,7 @@ const fieldConfig = {
     label: "Предпочитано меню",
     options: [
       { value: "regular", label: "Месно" },
-      { value: "vegan", label: "Веган" },
+      { value: "vegan", label: "Вегетарианско" },
     ],
   },
   transportation: {
