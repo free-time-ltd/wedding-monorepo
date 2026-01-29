@@ -108,7 +108,12 @@ type Invitation = {
   createdAt: Date;
   plusOneNames: string[] | null;
   invited: string[];
-  user: { id: string; name: string; email: string | null };
+  user: {
+    id: string;
+    name: string;
+    email: string | null;
+    familyId: number | null;
+  };
 };
 
 type Upload = {
