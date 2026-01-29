@@ -31,14 +31,40 @@ export function SelectorPage({ guests }: Props) {
   const [scrollIconHidden, setScrollIconHidden] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const filteredGuests = guests.filter((guest) =>
-    guest.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredGuests = useMemo(
+    () =>
+      guests.filter((guest) =>
+        guest.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [guests, searchQuery],
   );
 
   const userGuest = useMemo(
     () => guests.find((guest) => guest.id === selectedGuest),
-    [guests, selectedGuest]
+    [guests, selectedGuest],
   );
+
+  const sortedGuests = useMemo(() => {
+    const collator = new Intl.Collator("bg", { sensitivity: "base" });
+
+    return filteredGuests.toSorted((a, b) => collator.compare(a.name, b.name));
+  }, [filteredGuests]);
+
+  const groupedGuests = useMemo(() => {
+    const grouped = new Map<string, Guest[]>();
+
+    sortedGuests.forEach((guest) => {
+      const letter = guest.name.charAt(0).toLocaleUpperCase("bg");
+
+      if (!grouped.has(letter)) {
+        grouped.set(letter, []);
+      }
+
+      grouped.get(letter)!.push(guest);
+    });
+
+    return grouped;
+  }, [sortedGuests]);
 
   const handleGuestSelect = (user: string) => {
     setSelectedGuest(user);
@@ -132,49 +158,57 @@ export function SelectorPage({ guests }: Props) {
                   </div>
                 </div>
               ) : (
-                <div className="divide-y divide-border grid md:grid-cols-3 gap-4 grid-cols-1">
-                  {filteredGuests.map((guest) => (
-                    <button
-                      key={guest.id}
-                      onClick={() => handleGuestSelect(guest.id)}
-                      className={`w-full p-4 flex items-center gap-4 hover:bg-accent/5 transition-colors border rounded-lg relative ${
-                        selectedGuest === guest.id ? "bg-accent/10" : ""
-                      }`}
-                      disabled={isLoading}
-                    >
-                      <div className="avatar">
-                        <div className="rounded-full border size-10 bg-accent/20 text-accent font-medium flex items-center justify-center">
-                          {getInitials(guest.name)}
-                        </div>
-                      </div>
+                groupedGuests.size > 0 &&
+                Array.from(groupedGuests).map(([letter, guests]) => (
+                  <div className="group letter" key={`letter-${letter}`}>
+                    <div className="border-b mb-2 mx-1">
+                      <p className="font-bold text-lg">{letter}</p>
+                    </div>
+                    <div className="divide-y divide-border grid md:grid-cols-3 gap-4 grid-cols-1">
+                      {guests.map((guest) => (
+                        <button
+                          key={guest.id}
+                          onClick={() => handleGuestSelect(guest.id)}
+                          className={`w-full p-4 flex items-center gap-4 hover:bg-accent/5 transition-colors border rounded-lg relative ${
+                            selectedGuest === guest.id ? "bg-accent/10" : ""
+                          }`}
+                          disabled={isLoading}
+                        >
+                          <div className="avatar">
+                            <div className="rounded-full border size-10 bg-accent/20 text-accent font-medium flex items-center justify-center">
+                              {getInitials(guest.name)}
+                            </div>
+                          </div>
 
-                      <div className="flex-1 text-left">
-                        <p className="font-medium text-foreground">
-                          {guest.name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {guest.table.label}
-                          {!!guest.extras && " • Plus One Invited"}
-                        </p>
-                      </div>
-                      {selectedGuest === guest.id && (
-                        <div className="absolute right-2 h-5 w-5 rounded-full bg-accent flex items-center justify-center">
-                          <svg
-                            className="h-3 w-3 text-background"
-                            fill="none"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
+                          <div className="flex-1 text-left">
+                            <p className="font-medium text-foreground">
+                              {guest.name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {guest.table.label}
+                              {!!guest.extras && " • Plus One Invited"}
+                            </p>
+                          </div>
+                          {selectedGuest === guest.id && (
+                            <div className="absolute right-2 h-5 w-5 rounded-full bg-accent flex items-center justify-center">
+                              <svg
+                                className="h-3 w-3 text-background"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))
               )}
             </div>
             {filteredGuests.length > 6 && (

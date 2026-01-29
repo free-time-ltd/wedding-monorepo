@@ -30,11 +30,11 @@ export function GuestList({
     keys: ["name", "table.label"],
   });
   const [genderFilter, setGenderFilter] = useState<Guest["gender"] | "all">(
-    "all"
+    "all",
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGuests, setSelectedGuests] = useState<Set<string>>(
-    new Set(defaultSelected)
+    new Set(defaultSelected),
   );
 
   const filteredGuests = searchable ? search(searchQuery) : guests;
@@ -51,16 +51,16 @@ export function GuestList({
         gender,
         toArray(users).reduce(
           (aggr, user) => (selectedGuests.has(user.id) ? ++aggr : aggr),
-          0
+          0,
         ),
       ];
-    })
+    }),
   );
 
   if (selectable) {
     filteredGuests.sort(
       (a, b) =>
-        Number(selectedGuests.has(b.id)) - Number(selectedGuests.has(a.id))
+        Number(selectedGuests.has(b.id)) - Number(selectedGuests.has(a.id)),
     );
   }
 

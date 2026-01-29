@@ -226,7 +226,7 @@ export default function AdminPage() {
         {
           method: "DELETE",
           credentials: "include",
-        }
+        },
       );
       if (!res.ok) throw new Error("Failed to delete URL");
       fetchAll();
@@ -290,7 +290,7 @@ export default function AdminPage() {
   const deleteFamily = async (family: Family) => {
     if (
       !confirm(
-        `Сигурни ли сте, че искате да изтриете семейството "${family.name}"?`
+        `Сигурни ли сте, че искате да изтриете семейството "${family.name}"?`,
       )
     )
       return;
@@ -313,7 +313,7 @@ export default function AdminPage() {
         method: "PATCH",
         credentials: "include",
         body: JSON.stringify({ familyId: groupFamily }),
-      })
+      }),
     );
 
     Promise.all(promises).then(() => {
@@ -350,7 +350,9 @@ export default function AdminPage() {
       setFamilyForm({ id: null, name: "" });
       await fetchAll();
       toast.success(
-        familyForm.id ? "Семейството е редактирано!" : "Семейството е добавено!"
+        familyForm.id
+          ? "Семейството е редактирано!"
+          : "Семейството е добавено!",
       );
     } catch (err) {
       console.error("Failed to submit family form", err);
@@ -560,7 +562,7 @@ export default function AdminPage() {
   const deleteUser = async (user: User) => {
     if (
       !confirm(
-        "Are you sure you wish to delete this user? There is no going back!"
+        "Are you sure you wish to delete this user? There is no going back!",
       )
     )
       return;
@@ -635,14 +637,14 @@ export default function AdminPage() {
       await fetch(
         new URL(
           `/api/admin/invitations/${extraGuests.invitation}/guests`,
-          API_BASE
+          API_BASE,
         ),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
           credentials: "include",
-        }
+        },
       );
 
       fetchAll();
@@ -940,6 +942,36 @@ export default function AdminPage() {
     ];
   }, [users]);
 
+  const usersWithInvites = useMemo(() => {
+    return users.map((user) => {
+      let attending = false;
+
+      if (user.invitation?.attending) {
+        attending = true;
+      } else if (user.invitation === null && user.family) {
+        // is there a family invitation
+        const familyInvite = invitations.find(
+          (invite) => invite.user.familyId === user.familyId,
+        );
+        if (familyInvite) {
+          attending = Boolean(familyInvite.attending);
+        }
+      }
+
+      if (!attending) {
+        // last ditch effort
+        const inviteeInvite = invitations.find((invite) =>
+          invite.invited.includes(user.name),
+        );
+        if (inviteeInvite) {
+          attending = Boolean(inviteeInvite.attending);
+        }
+      }
+
+      return { ...user, attending };
+    });
+  }, [users, invitations]);
+
   return (
     <div className="container mx-auto p-2 md:p-6">
       <div className="mb-6">
@@ -1025,75 +1057,73 @@ export default function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <Checkbox
-                          id={`select-user-${user.id}`}
-                          name="selected-users"
-                          value={user.id}
-                          onCheckedChange={(checked) =>
-                            setSelectedUsers((prev) => {
-                              if (checked === true) {
-                                return [...prev, user.id];
-                              }
+                  {usersWithInvites
+                    .toSorted((a, b) => a.name.localeCompare(b.name, "bg"))
+                    .map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <Checkbox
+                            id={`select-user-${user.id}`}
+                            name="selected-users"
+                            value={user.id}
+                            onCheckedChange={(checked) =>
+                              setSelectedUsers((prev) => {
+                                if (checked === true) {
+                                  return [...prev, user.id];
+                                }
 
-                              return prev.filter((id) => id !== user.id);
-                            })
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Label
-                          htmlFor={`select-user-${user.id}`}
-                          className="font-medium"
-                        >
-                          {user.name}
-                        </Label>
-                      </TableCell>
-                      <TableCell>{user.gender || "unknown"}</TableCell>
-                      <TableCell>{user.email || "-"}</TableCell>
-                      <TableCell>{user.family?.name || "-"}</TableCell>
-                      <TableCell>{user.extras}</TableCell>
-                      <TableCell>
-                        {user.table?.label || user.table?.name || "-"}
-                      </TableCell>
-                      <TableCell>
-                        {user.invitation?.attending === null ? (
-                          "-"
-                        ) : (
-                          <Badge
-                            variant={
-                              user.invitation?.attending
-                                ? "default"
-                                : "secondary"
+                                return prev.filter((id) => id !== user.id);
+                              })
                             }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Label
+                            htmlFor={`select-user-${user.id}`}
+                            className="font-medium"
                           >
-                            {user.invitation?.attending ? "Да" : "Не"}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{user.uploads.length}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 justify-center">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openEditUser(user)}
-                          >
-                            Редактирай
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => deleteUser(user)}
-                          >
-                            Изтрий
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            {user.name}
+                          </Label>
+                        </TableCell>
+                        <TableCell>{user.gender || "unknown"}</TableCell>
+                        <TableCell>{user.email || "-"}</TableCell>
+                        <TableCell>{user.family?.name || "-"}</TableCell>
+                        <TableCell>{user.extras}</TableCell>
+                        <TableCell>
+                          {user.table?.label || user.table?.name || "-"}
+                        </TableCell>
+                        <TableCell>
+                          {user.invitation?.attending === null ? (
+                            "-"
+                          ) : (
+                            <Badge
+                              variant={user.attending ? "default" : "secondary"}
+                            >
+                              {user.attending ? "Да" : "Не"}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>{user.uploads.length}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 justify-center">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openEditUser(user)}
+                            >
+                              Редактирай
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => deleteUser(user)}
+                            >
+                              Изтрий
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             )}
@@ -1492,7 +1522,7 @@ export default function AdminPage() {
                               {option.title} (
                               {
                                 poll.answers.filter(
-                                  (answer) => answer.answer.id === option.id
+                                  (answer) => answer.answer.id === option.id,
                                 ).length
                               }
                               )
@@ -1835,7 +1865,7 @@ export default function AdminPage() {
                             options: [...prev.options].map((opt) =>
                               opt.id !== option.id
                                 ? opt
-                                : { ...opt, title: e.target.value }
+                                : { ...opt, title: e.target.value },
                             ),
                           }))
                         }
@@ -2202,7 +2232,7 @@ export default function AdminPage() {
                                       gender:
                                         val as ExtraGuests["guests"][number]["gender"],
                                     }
-                                  : guest
+                                  : guest,
                               ),
                             };
                           })
@@ -2228,7 +2258,7 @@ export default function AdminPage() {
                             return {
                               ...prev,
                               guests: prev.guests.filter(
-                                (_, index) => i !== index
+                                (_, index) => i !== index,
                               ),
                             };
                           })
