@@ -19,6 +19,8 @@ interface Props {
   guests: Guest[];
 }
 
+const bgAlphabet = [..."АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯ"] as const;
+
 export function SelectorPage({ guests }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -30,6 +32,7 @@ export function SelectorPage({ guests }: Props) {
   const { isConnected, reconnect } = useSocket();
   const [scrollIconHidden, setScrollIconHidden] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const alphabetRef = useRef<HTMLDivElement>(null);
 
   const filteredGuests = useMemo(
     () =>
@@ -65,6 +68,17 @@ export function SelectorPage({ guests }: Props) {
 
     return grouped;
   }, [sortedGuests]);
+
+  const alphabet = useMemo(() => {
+    const existingLetters = Array.from(groupedGuests.keys());
+
+    const bgStatus = bgAlphabet.map((letter) => ({
+      char: letter,
+      isActive: existingLetters.includes(letter),
+    }));
+
+    return [...bgStatus];
+  }, [groupedGuests]);
 
   const handleGuestSelect = (user: string) => {
     setSelectedGuest(user);
@@ -121,10 +135,90 @@ export function SelectorPage({ guests }: Props) {
     });
   };
 
+  const scrollToLetter = (
+    letter: (typeof alphabet)[number],
+    behavior: ScrollBehavior = "smooth",
+  ) => {
+    if (!scrollAreaRef.current || !letter.isActive) return;
+
+    const container = scrollAreaRef.current;
+    const searchIndex = `letter-${letter.char.charCodeAt(0)}`;
+    const element = document.getElementById(searchIndex);
+
+    if (container && element) {
+      const targetPosition = element.offsetTop;
+
+      container.scrollTo({
+        top: targetPosition,
+        behavior,
+      });
+    }
+  };
+
+  const handleAlphabetInteraction = (
+    e: React.MouseEvent | React.TouchEvent | React.PointerEvent,
+    behavior: ScrollBehavior = "auto",
+  ) => {
+    let clientX: number;
+    let clientY: number;
+
+    if ("touches" in e) {
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      clientX = touch.clientX;
+      clientY = touch.clientY;
+    } else {
+      clientX = (e as React.MouseEvent).clientX;
+      clientY = (e as React.MouseEvent).clientY;
+    }
+
+    const target = document.elementFromPoint(
+      clientX,
+      clientY,
+    ) as HTMLElement | null;
+
+    const letter = target?.getAttribute("data-letter");
+
+    if (letter) {
+      const charCode = letter.charCodeAt(0);
+      const element = document.getElementById(`letter-${charCode}`);
+
+      if (element) {
+        element.scrollIntoView({
+          behavior,
+          block: "start",
+        });
+      }
+    }
+  };
+
   return (
     <div className="card space-y-6 mb-20 md:mb-0">
       <div className="card-body space-y-4 relative">
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+          {alphabet.length > 0 && (
+            <div
+              ref={alphabetRef}
+              className="group/alphabet absolute sm:hidden -right-4 top-0 bottom-0 z-20 overflow-y-auto no-scrollbar pt-3 -mb-3 touch-none"
+              onTouchMove={(e) => handleAlphabetInteraction(e, "instant")}
+            >
+              <div className="grid grid-cols-1">
+                {alphabet.map((letter) => (
+                  <button
+                    key={`quick-letterl-${letter.char}`}
+                    disabled={!letter.isActive}
+                    onClick={() => scrollToLetter(letter)}
+                    className="cursor-pointer m-0 py-0 text-xs border border-transparent hover:border-primary hover:no-underline text-primary"
+                    title={`Виж имена започващи с буквата "${letter.char}"`}
+                    data-letter={letter.char}
+                  >
+                    {letter.char}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="search-field flex flex-col gap-2">
             <Label htmlFor="guest-search" className="font-medium">
               Търсене по име:
@@ -144,7 +238,7 @@ export function SelectorPage({ guests }: Props) {
               </Label>
             )}
             <div
-              className="rounded-lg max-h-80 overflow-y-auto"
+              className="rounded-lg max-h-80 overflow-y-auto relative"
               ref={scrollAreaRef}
             >
               {filteredGuests.length === 0 ? (
@@ -162,7 +256,12 @@ export function SelectorPage({ guests }: Props) {
                 Array.from(groupedGuests).map(([letter, guests]) => (
                   <div className="group letter" key={`letter-${letter}`}>
                     <div className="border-b mb-2 mx-1">
-                      <p className="font-bold text-lg">{letter}</p>
+                      <p
+                        className="font-bold text-lg"
+                        id={`letter-${letter.charCodeAt(0)}`}
+                      >
+                        {letter}
+                      </p>
                     </div>
                     <div className="divide-y divide-border grid md:grid-cols-3 gap-4 grid-cols-1">
                       {guests.map((guest) => (
