@@ -32,7 +32,6 @@ export function SelectorPage({ guests }: Props) {
   const { isConnected, reconnect } = useSocket();
   const [scrollIconHidden, setScrollIconHidden] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const alphabetRef = useRef<HTMLDivElement>(null);
 
   const filteredGuests = useMemo(
     () =>
@@ -155,54 +154,12 @@ export function SelectorPage({ guests }: Props) {
     }
   };
 
-  const handleAlphabetInteraction = (
-    e: React.MouseEvent | React.TouchEvent | React.PointerEvent,
-    behavior: ScrollBehavior = "auto",
-  ) => {
-    let clientX: number;
-    let clientY: number;
-
-    if ("touches" in e) {
-      const touch = e.touches[0];
-      if (!touch) return;
-
-      clientX = touch.clientX;
-      clientY = touch.clientY;
-    } else {
-      clientX = (e as React.MouseEvent).clientX;
-      clientY = (e as React.MouseEvent).clientY;
-    }
-
-    const target = document.elementFromPoint(
-      clientX,
-      clientY,
-    ) as HTMLElement | null;
-
-    const letter = target?.getAttribute("data-letter");
-
-    if (letter) {
-      const charCode = letter.charCodeAt(0);
-      const element = document.getElementById(`letter-${charCode}`);
-
-      if (element) {
-        element.scrollIntoView({
-          behavior,
-          block: "start",
-        });
-      }
-    }
-  };
-
   return (
     <div className="card space-y-6 mb-20 md:mb-0">
       <div className="card-body space-y-4 relative">
         <div className="space-y-6 relative">
           {alphabet.length > 0 && (
-            <div
-              ref={alphabetRef}
-              className="group/alphabet absolute sm:hidden -right-4 top-0 bottom-0 z-20 overflow-y-auto no-scrollbar pt-3 -mb-3 touch-none"
-              onTouchMove={(e) => handleAlphabetInteraction(e, "instant")}
-            >
+            <div className="group/alphabet absolute sm:hidden -right-4 top-0 bottom-0 z-20 overflow-y-auto no-scrollbar pt-3 -mb-">
               <div className="grid grid-cols-1">
                 {alphabet.map((letter) => (
                   <button
