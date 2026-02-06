@@ -23,7 +23,7 @@ export const rsvpSchema = z
     menuChoice: z.enum(menuTypes),
     attending: z.boolean(),
     plusOne: z.boolean(),
-    extraGuests: z.string().optional(),
+    extraGuests: z.union([z.string(), z.boolean()]).optional(),
     accommodation: z.boolean(),
     transportation: z.enum(transportTypes),
     notes: z.string().optional(),
@@ -39,7 +39,7 @@ export const rsvpSchema = z
     {
       message: "Plus one name is required when bringing a guest.",
       path: ["plusOneName"],
-    }
+    },
   );
 
 export type RsvpInput = z.infer<typeof rsvpSchema>;

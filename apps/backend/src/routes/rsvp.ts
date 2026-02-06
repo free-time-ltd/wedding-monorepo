@@ -73,7 +73,7 @@ rsvpRouter.post("/:id", async (c) => {
   if (!parsed.success) {
     return c.json(
       { success: false, error: z.treeifyError(parsed.error) },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -89,6 +89,7 @@ rsvpRouter.post("/:id", async (c) => {
 
   const plusOneNames =
     !!extraGuests &&
+    typeof extraGuests === "string" &&
     extraGuests
       .split(",")
       .map((str) => str.trim())

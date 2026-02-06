@@ -15,6 +15,7 @@ import { FormValues, RsvpForm } from "./form";
 import { serializeFormValues } from "./utils";
 import { unique } from "@repo/ui/lib/utils";
 import Link from "next/link";
+import { toast } from "@repo/ui";
 
 interface Props {
   guestId: string;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function RsvpPage({ guestId, guest, invitation }: Props) {
+  const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (data: FormData) => {
@@ -33,6 +35,8 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
 
     const payload = Object.fromEntries(data.entries());
 
+    setIsLoading(true);
+
     fetch(url, {
       method: "POST",
       body: JSON.stringify(
@@ -41,9 +45,38 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
       headers: {
         "Content-Type": "application/json",
       },
-    }).finally(() => {
-      setSubmitted(true);
-    });
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Error processing RSVP", { cause: res });
+        }
+
+        setSubmitted(true);
+      })
+      .catch(async (e) => {
+        if (!Error.isError(e)) {
+          toast.error(
+            "Възникна грешка при обработката на поканата! Моля опитайте отново или се свържете младоженците за да уточните вашия отговор",
+          );
+          return;
+        }
+
+        const { cause, message } = e;
+
+        let errMsg: string;
+
+        if (cause && cause instanceof Response) {
+          const data = await cause.json();
+          const errors = flattenZodTreeV4(data.error);
+          errMsg = Object.values(errors).join(". ");
+        } else {
+          errMsg = message;
+        }
+
+        toast.error(errMsg);
+        console.error(e);
+      })
+      .finally(() => setIsLoading(false));
   };
 
   if (!guest) {
@@ -153,6 +186,7 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
           <CardContent>
             <RsvpForm
               name="rsvp-form"
+              loading={isLoading}
               defaultValues={
                 {
                   ...invitation,
@@ -174,4 +208,28 @@ export function RsvpPage({ guestId, guest, invitation }: Props) {
       </div>
     </div>
   );
+}
+
+type ZodTree = {
+  errors?: string[];
+  properties?: Record<string, ZodTree>;
+};
+
+function flattenZodTreeV4(tree: ZodTree, path = ""): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+
+  // Collect errors at current node
+  if (tree.errors?.length) {
+    out[path || "form"] = tree.errors;
+  }
+
+  // Recurse into properties
+  if (tree.properties) {
+    for (const [key, child] of Object.entries(tree.properties)) {
+      const next = path ? `${path}.${key}` : key;
+      Object.assign(out, flattenZodTreeV4(child, next));
+    }
+  }
+
+  return out;
 }
