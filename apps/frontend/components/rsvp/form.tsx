@@ -84,6 +84,7 @@ interface Props {
   name?: string;
   defaultValues?: FormValues | null;
   disabled?: boolean;
+  loading?: boolean;
   onSubmit?: (data: FormData) => void;
   onReset?: (el: HTMLFormElement) => void;
 }
@@ -92,6 +93,7 @@ export function RsvpForm({
   name,
   defaultValues,
   disabled,
+  loading,
   onSubmit,
   onReset,
 }: Props) {
@@ -249,7 +251,7 @@ export function RsvpForm({
         <Button
           type="submit"
           className="w-full bg-rose-gold-500 hover:bg-rose-gold-600 text-lg py-6"
-          disabled={disabled || form.state.isSubmitting}
+          disabled={disabled || form.state.isSubmitting || loading}
         >
           Отговорете на поканата
         </Button>
