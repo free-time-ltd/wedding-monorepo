@@ -250,6 +250,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
+  const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false);
+  const [answerPollId, setAnswerPollId] = useState<string | null>(null);
   const [editingUrl, setEditingUrl] = useState<UrlShort | null>(null);
   const [urlForm, setUrlForm] = useState<Partial<UrlShort>>({
     slug: "",
@@ -977,6 +979,26 @@ export default function AdminPage() {
     });
   }, [users, invitations]);
 
+  const answeredPoll = useMemo(() => {
+    const poll = polls.find((poll) => poll.id === answerPollId);
+    if (!poll || !Array.isArray(poll.answers)) return;
+
+    const grouped = Object.groupBy(
+      poll.answers.map((answer) => ({
+        ...answer,
+        author:
+          users.find((user) => user.id === answer.userId)?.name ??
+          answer.userId,
+      })),
+      (entry) => entry.answer.title,
+    );
+
+    return {
+      ...poll,
+      answers: grouped,
+    };
+  }, [answerPollId, polls, users]);
+
   return (
     <div className="container mx-auto p-2 md:p-6">
       <div className="mb-6">
@@ -1533,6 +1555,15 @@ export default function AdminPage() {
                               )
                             </div>
                           ))}
+                          <Button
+                            variant="link"
+                            onClick={() => {
+                              setAnswerPollId(poll.id);
+                              setIsAnswerModalOpen(true);
+                            }}
+                          >
+                            Виж гласували
+                          </Button>
                         </div>
                       </TableCell>
                       <TableCell>{poll.answers.length}</TableCell>
@@ -1767,6 +1798,32 @@ export default function AdminPage() {
           </div>
         </TabsContent>
       </Tabs>
+      <Dialog open={isAnswerModalOpen} onOpenChange={setIsAnswerModalOpen}>
+        <DialogContent className="sm:max-w-180">
+          <DialogHeader>
+            <DialogTitle className="font-serif">
+              Преглед на отговорили
+            </DialogTitle>
+          </DialogHeader>
+          {answeredPoll ? (
+            <div className="group/answers grid grid-cols-1">
+              <p className="font-bold pb-2">Въпрос: {answeredPoll.title}</p>
+              {Object.entries(answeredPoll.answers).map(([option, answers]) => (
+                <div className="group/answer-entry" key={option}>
+                  <p className="font-medium text-lg">Отговор: {option}</p>
+                  <div className="answers">
+                    <p className="text-sm">
+                      {answers?.map((answer) => answer.author).join(", ")}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <span>Не откривам анкетата</span>
+          )}
+        </DialogContent>
+      </Dialog>
       <Dialog open={familyModalOpen} onOpenChange={setFamilyModalOpen}>
         <DialogContent className="sm:max-w-120">
           <DialogHeader>
