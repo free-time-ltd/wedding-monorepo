@@ -4,10 +4,10 @@ import { verify } from "hono/jwt";
 import { env } from "./env";
 
 export async function getUserId(c: Context) {
-  const cookie = getCookie(c, env.SESSION_COOKIE_NAME!);
+  const cookie = getCookie(c, env.SESSION_COOKIE_NAME);
   if (!cookie) return null;
 
-  const data = await verify(cookie, env.JWT_SECRET!);
+  const data = await verify(cookie, env.JWT_SECRET, "HS256");
 
   if (!("sub" in data)) {
     return null;

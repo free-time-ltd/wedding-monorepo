@@ -8,7 +8,7 @@ const sessionName = env.SESSION_COOKIE_NAME ?? "sess";
 
 export async function authorizedSocket(
   socket: Socket,
-  next: (err?: ExtendedError) => void
+  next: (err?: ExtendedError) => void,
 ) {
   const parsed = cookie.parse(socket.request.headers.cookie ?? "");
   const jwtCookie = parsed[sessionName];
@@ -16,13 +16,13 @@ export async function authorizedSocket(
     return next(
       new Error(
         "No session cookie provided in the initial connection request.",
-        { cause: socket.request }
-      )
+        { cause: socket.request },
+      ),
     );
   }
 
   try {
-    const jwtData = await verify(jwtCookie, env.JWT_SECRET);
+    const jwtData = await verify(jwtCookie, env.JWT_SECRET, "HS256");
     const userModel = await findUser(jwtData.sub as string);
     if (!userModel) {
       return next(new Error("User not found"));
