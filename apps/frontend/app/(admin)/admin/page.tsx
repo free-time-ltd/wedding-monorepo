@@ -75,6 +75,7 @@ type User = {
   } | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   uploads: any[];
+  foodType: "regular" | "vegan" | null;
 };
 
 type UserForm = {
@@ -82,6 +83,7 @@ type UserForm = {
   email: string;
   phone: string;
   gender: string | "male" | "female" | "unknown";
+  foodType: User["foodType"];
   familyId: string | null;
   extras: string | number;
   tableId: string | number | null;
@@ -411,6 +413,7 @@ export default function AdminPage() {
     email: "",
     phone: "",
     gender: "unknown",
+    foodType: null,
     familyId: "" as string | "",
     extras: 0 as number,
     tableId: "" as string | "",
@@ -536,6 +539,7 @@ export default function AdminPage() {
       extras: 0,
       familyId: null,
       gender: "unknown",
+      foodType: null,
       tableId: "",
     });
     setIsUserModalOpen(true);
@@ -549,6 +553,7 @@ export default function AdminPage() {
       phone: user.phone || "",
       extras: user.extras ?? 0,
       gender: user.gender ?? "unknown",
+      foodType: user.foodType,
       familyId: user.familyId ? String(user.familyId) : null,
       tableId: user.tableId ? String(user.tableId) : "",
     });
@@ -596,6 +601,7 @@ export default function AdminPage() {
       phone: form.phone.trim() || null,
       extras: Number.isNaN(Number(form.extras)) ? 0 : Number(form.extras),
       gender: form.gender || "unknown",
+      foodType: form.foodType || null,
       familyId:
         form.familyId === "" || form.familyId === null
           ? null
@@ -937,47 +943,57 @@ export default function AdminPage() {
     }
   };
 
+  const usersWithInvites = useMemo(() => {
+    const findFamilyInvite = (familyId: number | null) =>
+      familyId
+        ? invitations.find((inv) => inv.user.familyId === familyId)
+        : undefined;
+
+    const resolveAttending = (user: (typeof users)[number]): boolean => {
+      if (user.invitation?.attending) return true;
+
+      if (user.invitation === null && user.family) {
+        const familyInvite = findFamilyInvite(user.familyId);
+        if (familyInvite) return Boolean(familyInvite.attending);
+      }
+
+      const inviteeInvite = invitations.find((inv) =>
+        inv.invited.includes(user.name),
+      );
+      return Boolean(inviteeInvite?.attending);
+    };
+
+    const resolveFoodType = (
+      user: (typeof users)[number],
+    ): User["foodType"] => {
+      if (user.foodType) return user.foodType;
+      if (user.invitation)
+        return user.invitation.menuChoice as User["foodType"];
+      return (findFamilyInvite(user.familyId)?.menuChoice ??
+        null) as User["foodType"];
+    };
+
+    return users.map((user) => ({
+      ...user,
+      attending: resolveAttending(user),
+      foodType: resolveFoodType(user),
+    }));
+  }, [users, invitations]);
+
   const csvData = useMemo(() => {
     return [
-      ["Име", "Пол", "Семейство", "Маса"],
-      ...users.map((user) => [
-        user.name,
-        user.gender,
-        user.family?.name ?? "-",
-        user.table?.name ?? "-",
-      ]),
+      ["Име", "Пол", "Храна", "Семейство", "Маса"],
+      ...usersWithInvites
+        .toSorted((a, b) => a.name.localeCompare(b.name, "bg"))
+        .map((user) => [
+          user.name,
+          user.gender,
+          user.foodType ?? "-",
+          user.family?.name ?? "-",
+          user.table?.name ?? "-",
+        ]),
     ];
-  }, [users]);
-
-  const usersWithInvites = useMemo(() => {
-    return users.map((user) => {
-      let attending = false;
-
-      if (user.invitation?.attending) {
-        attending = true;
-      } else if (user.invitation === null && user.family) {
-        // is there a family invitation
-        const familyInvite = invitations.find(
-          (invite) => invite.user.familyId === user.familyId,
-        );
-        if (familyInvite) {
-          attending = Boolean(familyInvite.attending);
-        }
-      }
-
-      if (!attending) {
-        // last ditch effort
-        const inviteeInvite = invitations.find((invite) =>
-          invite.invited.includes(user.name),
-        );
-        if (inviteeInvite) {
-          attending = Boolean(inviteeInvite.attending);
-        }
-      }
-
-      return { ...user, attending };
-    });
-  }, [users, invitations]);
+  }, [usersWithInvites]);
 
   const answeredPoll = useMemo(() => {
     const poll = polls.find((poll) => poll.id === answerPollId);
@@ -1076,8 +1092,7 @@ export default function AdminPage() {
                     <TableHead>Пол</TableHead>
                     <TableHead>Имейл</TableHead>
                     <TableHead>Семейство</TableHead>
-                    <TableHead>Придружители</TableHead>
-                    <TableHead>Маса</TableHead>
+                    <TableHead>Меню/Храна</TableHead>
                     <TableHead>Отговор на поканата</TableHead>
                     <TableHead>Снимки</TableHead>
                     <TableHead>Действия</TableHead>
@@ -1115,9 +1130,22 @@ export default function AdminPage() {
                         <TableCell>{user.gender || "unknown"}</TableCell>
                         <TableCell>{user.email || "-"}</TableCell>
                         <TableCell>{user.family?.name || "-"}</TableCell>
-                        <TableCell>{user.extras}</TableCell>
                         <TableCell>
-                          {user.table?.label || user.table?.name || "-"}
+                          {user.foodType === null ? (
+                            "-"
+                          ) : (
+                            <Badge
+                              variant={
+                                user.foodType === "regular"
+                                  ? "default"
+                                  : "destructive"
+                              }
+                            >
+                              {user.foodType === "vegan"
+                                ? "vegetarian"
+                                : user.foodType}
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell>
                           {user.invitation?.attending === null ? (
@@ -2161,16 +2189,27 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="extras">Придружители</Label>
-              <Input
-                id="extras"
-                type="number"
-                min={0}
-                value={form.extras}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, extras: Number(e.target.value) }))
+              <Label htmlFor="extras">Меню/Храна</Label>
+              <Select
+                value={form.foodType ?? ""}
+                onValueChange={(newVal) =>
+                  setForm((f) => ({
+                    ...f,
+                    foodType: (newVal === "unknown"
+                      ? null
+                      : newVal) as User["foodType"],
+                  }))
                 }
-              />
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Изберете тип храна" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="regular">Нормална</SelectItem>
+                  <SelectItem value="vegan">Вегетарианса</SelectItem>
+                  <SelectItem value="unknown">Не знам</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="gender">Пол</Label>

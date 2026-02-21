@@ -12,7 +12,7 @@ export const familyTable = sqliteTable("families", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date()
+    () => new Date(),
   ),
 });
 
@@ -27,8 +27,9 @@ export const usersTable = sqliteTable(
     email: text("email"),
     phone: text("phone"),
     gender: text("gender", { enum: ["male", "female", "unknown"] }).default(
-      "unknown"
+      "unknown",
     ),
+    foodType: text("food_type", { enum: ["regular", "vegan"] }),
     tableId: integer("table_id").references(() => tablesTable.id, {
       onDelete: "set null",
     }),
@@ -36,7 +37,7 @@ export const usersTable = sqliteTable(
       onDelete: "set null",
     }),
   },
-  (table) => [unique("unique_name_idx").on(table.name)]
+  (table) => [unique("unique_name_idx").on(table.name)],
 );
 
 export const tablesTable = sqliteTable("tables", {
@@ -71,13 +72,13 @@ export const userRooms = sqliteTable(
     joinedAt: integer("created_at", { mode: "timestamp_ms" }),
     lastReadMessageId: integer("last_read_message_id").references(
       () => messagesTable.id,
-      { onDelete: "set null" }
+      { onDelete: "set null" },
     ),
   },
   (table) => [
     unique("unique_user_room").on(table.userId, table.roomId),
     index("last_msg_idx").on(table.lastReadMessageId),
-  ]
+  ],
 );
 
 export const messagesTable = sqliteTable(
@@ -93,7 +94,7 @@ export const messagesTable = sqliteTable(
     content: text("content").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   },
-  (table) => [index("roomIndex").on(table.roomId)]
+  (table) => [index("roomIndex").on(table.roomId)],
 );
 
 export const menuTypes = ["vegan", "regular", "fish"] as const;
@@ -123,7 +124,7 @@ export const invitationUsers = sqliteTable(
       () => invitationTable.id,
       {
         onDelete: "cascade",
-      }
+      },
     ),
     userId: text("user_id").references(() => usersTable.id, {
       onDelete: "cascade",
@@ -132,13 +133,13 @@ export const invitationUsers = sqliteTable(
       onDelete: "cascade",
     }),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-      () => new Date()
+      () => new Date(),
     ),
   },
   (table) => [
     index("invite_idx").on(table.invitationId),
     unique("user_uniq_key").on(table.userId, table.invitedUserId),
-  ]
+  ],
 );
 
 export const officialPhotosTable = sqliteTable("official_photos", {
@@ -187,7 +188,7 @@ export const guestUploadsTable = sqliteTable(
   (table) => [
     index("lookupIndex").on(table.s3Key),
     index("browseIndex").on(table.status),
-  ]
+  ],
 );
 
 export const cacheTable = sqliteTable(
@@ -200,7 +201,7 @@ export const cacheTable = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }),
     expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
   },
-  (table) => [index("expireIndex").on(table.expiresAt)]
+  (table) => [index("expireIndex").on(table.expiresAt)],
 );
 
 export const newsletterTable = sqliteTable("newsletter", {
@@ -212,10 +213,10 @@ export const newsletterTable = sqliteTable("newsletter", {
     onDelete: "cascade",
   }),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date()
+    () => new Date(),
   ),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date()
+    () => new Date(),
   ),
 });
 
@@ -226,10 +227,10 @@ export const pollsTable = sqliteTable("polls", {
   title: text("title"),
   subtitle: text("subtitle"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date()
+    () => new Date(),
   ),
   validUntil: integer("validUntil", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date("2026-07-28")
+    () => new Date("2026-07-28"),
   ),
 });
 
@@ -242,7 +243,7 @@ export const pollOptionsTable = sqliteTable("poll_options", {
     .notNull(),
   title: text("title"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date()
+    () => new Date(),
   ),
 });
 
@@ -266,7 +267,7 @@ export const pollAnswersTable = sqliteTable(
   (table) => [
     index("answer_poll_index").on(table.pollId, table.answer),
     unique("userpoll_index").on(table.userId, table.pollId),
-  ]
+  ],
 );
 
 export const nearbyHotels = sqliteTable("hotels", {
@@ -275,7 +276,7 @@ export const nearbyHotels = sqliteTable("hotels", {
   distance: text("distance"),
   websiteUrl: text("website_url"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date()
+    () => new Date(),
   ),
 });
 
@@ -292,10 +293,10 @@ export const guestbookTable = sqliteTable(
     isApproved: integer("is_approved", { mode: "boolean" }).default(false),
     likesCount: integer("likes").default(0),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-      () => new Date()
+      () => new Date(),
     ),
   },
-  (table) => [index("search_idx").on(table.isPrivate, table.isApproved)]
+  (table) => [index("search_idx").on(table.isPrivate, table.isApproved)],
 );
 
 export const guestbookLikesTable = sqliteTable(
@@ -311,10 +312,10 @@ export const guestbookLikesTable = sqliteTable(
       .references(() => usersTable.id, { onDelete: "cascade" })
       .notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-      () => new Date()
+      () => new Date(),
     ),
   },
-  (table) => [unique("vote").on(table.guestbookId, table.userId)]
+  (table) => [unique("vote").on(table.guestbookId, table.userId)],
 );
 
 export const urlShortenerTable = sqliteTable("url_shortener", {
@@ -326,10 +327,10 @@ export const urlShortenerTable = sqliteTable("url_shortener", {
   url: text("url"),
   views: integer("views").default(0),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date()
+    () => new Date(),
   ),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$defaultFn(
-    () => new Date()
+    () => new Date(),
   ),
 });
 
@@ -340,7 +341,7 @@ export const urlShortenerRelations = relations(
       fields: [urlShortenerTable.userId],
       references: [usersTable.id],
     }),
-  })
+  }),
 );
 
 export const guestbookRelations = relations(
@@ -351,7 +352,7 @@ export const guestbookRelations = relations(
       references: [usersTable.id],
     }),
     likes: many(guestbookLikesTable),
-  })
+  }),
 );
 
 export const guestbookLikeRelations = relations(
@@ -365,7 +366,7 @@ export const guestbookLikeRelations = relations(
       fields: [guestbookLikesTable.guestbookId],
       references: [guestbookTable.id],
     }),
-  })
+  }),
 );
 
 export const userRoomsRelations = relations(userRooms, ({ one }) => ({
@@ -418,7 +419,7 @@ export const invitationRelations = relations(
       references: [usersTable.id],
     }),
     invited: many(invitationUsers),
-  })
+  }),
 );
 
 export const invitationUsersRelations = relations(
@@ -428,7 +429,7 @@ export const invitationUsersRelations = relations(
       fields: [invitationUsers.invitationId], // or whatever your FK field is called
       references: [invitationTable.id],
     }),
-  })
+  }),
 );
 
 export const guestUploadRelations = relations(guestUploadsTable, ({ one }) => ({
