@@ -2206,7 +2206,7 @@ export default function AdminPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="regular">Нормална</SelectItem>
-                  <SelectItem value="vegan">Вегетарианса</SelectItem>
+                  <SelectItem value="vegan">Вегетарианска</SelectItem>
                   <SelectItem value="unknown">Не знам</SelectItem>
                 </SelectContent>
               </Select>
