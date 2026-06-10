@@ -185,3 +185,7 @@
     @apply h-px w-16 bg-primary/30;
   }
 }
+
+@view-transition {
+  navigation: auto;
+}
