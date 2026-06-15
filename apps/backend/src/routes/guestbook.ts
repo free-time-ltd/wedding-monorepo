@@ -41,7 +41,7 @@ guestbookRouter.get("/", async (c) => {
     approvedMessages.map((message) => ({
       ...message,
       likes: message.likes.map((like) => like.userId),
-    }))
+    })),
   );
 });
 
@@ -56,7 +56,7 @@ guestbookRouter.post("/", requireAuth, async (c: SimpleAuthContext) => {
   if (!parsed.success) {
     return c.json(
       { success: false, error: z.treeifyError(parsed.error) },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -67,6 +67,7 @@ guestbookRouter.post("/", requireAuth, async (c: SimpleAuthContext) => {
     title,
     message,
     isPrivate,
+    isApproved: true,
   });
 
   return successResponse(c, "ok");
@@ -106,8 +107,8 @@ guestbookRouter.post("/:id/like", requireAuth, async (c: SimpleAuthContext) => {
         .where(
           and(
             eq(guestbookLikesTable.guestbookId, Number(id)),
-            eq(guestbookLikesTable.userId, userId)
-          )
+            eq(guestbookLikesTable.userId, userId),
+          ),
         );
 
       await tx
