@@ -194,7 +194,8 @@ export const transformProcessedImage = (
     message: image.message,
     createdAt: image.createdAt,
     likesCount: image.likes.length,
-    likedByMe: !!currentUserId && image.likes.some((l) => l.userId === currentUserId),
+    likedByMe:
+      !!currentUserId && image.likes.some((l) => l.userId === currentUserId),
     user: {
       ...image.user,
       table: {
