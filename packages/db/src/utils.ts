@@ -1,6 +1,8 @@
 import { db } from "./client";
 import UrlFactory from "@repo/utils/urlFactory";
 import mimeToExt from "@repo/utils/mimeToExt";
+import { count, eq, notInArray } from "drizzle-orm";
+import { guestUploadsTable, usersTable } from "./schema";
 
 export const findUser = async (userId: string) => {
   const user = await db.query.usersTable.findFirst({
@@ -137,6 +139,9 @@ export const findProcessedImages = ({
         columns: { id: true, name: true, extras: true },
         with: { table: true },
       },
+      likes: {
+        columns: { userId: true },
+      },
     },
     where: (table, { and, eq, lt, notInArray }) =>
       and(
@@ -170,7 +175,10 @@ export type ProcessedImageBaseType = NonNullable<
   Awaited<ReturnType<typeof findProcessedImages>>[number]
 >;
 
-export const transformProcessedImage = (image: ProcessedImageBaseType) => {
+export const transformProcessedImage = (
+  image: ProcessedImageBaseType,
+  currentUserId?: string,
+) => {
   return {
     id: image.id,
     key: image.s3Key,
@@ -185,6 +193,9 @@ export const transformProcessedImage = (image: ProcessedImageBaseType) => {
     },
     message: image.message,
     createdAt: image.createdAt,
+    likesCount: image.likes.length,
+    likedByMe:
+      !!currentUserId && image.likes.some((l) => l.userId === currentUserId),
     user: {
       ...image.user,
       table: {
@@ -196,10 +207,10 @@ export const transformProcessedImage = (image: ProcessedImageBaseType) => {
 };
 
 export const transformProcessedImageWithFullUrl =
-  (domain: string, secure = true) =>
+  (domain: string, currentUserId?: string, secure = true) =>
   (image: ProcessedImageBaseType) => {
     const urlFactory = new UrlFactory(domain, secure);
-    const transformed = transformProcessedImage(image);
+    const transformed = transformProcessedImage(image, currentUserId);
 
     return {
       ...transformed,
@@ -213,3 +224,26 @@ export const transformProcessedImageWithFullUrl =
   };
 
 export type ProcessedImageApiType = ReturnType<typeof transformProcessedImage>;
+
+const visibleUploadsFilter = notInArray(guestUploadsTable.status, [
+  "pending",
+  "rejected",
+]);
+
+// Distinct guests who have at least one visible (processed/approved) upload.
+export const findImageUploaders = () =>
+  db
+    .selectDistinct({ id: usersTable.id, name: usersTable.name })
+    .from(guestUploadsTable)
+    .innerJoin(usersTable, eq(guestUploadsTable.userId, usersTable.id))
+    .where(visibleUploadsFilter)
+    .orderBy(usersTable.name);
+
+export const countProcessedImages = async () => {
+  const [row] = await db
+    .select({ value: count() })
+    .from(guestUploadsTable)
+    .where(visibleUploadsFilter);
+
+  return row?.value ?? 0;
+};
