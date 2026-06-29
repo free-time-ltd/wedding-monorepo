@@ -47,8 +47,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     socketRef.current?.emit("get-unreads", function (unreads) {
       setUnreadMessages(
         Object.fromEntries(
-          unreads.map((record) => [record.roomId, record.unreadCount])
-        )
+          unreads.map((record) => [record.roomId, record.unreadCount]),
+        ),
       );
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +82,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       socketRef.current.connect();
       lastConnectProps.current = props;
     },
-    [onConnect]
+    [onConnect],
   );
 
   const disconnect = useCallback((removeListeners?: boolean) => {

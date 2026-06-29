@@ -25,7 +25,7 @@ interface Props {
   onRoomCreate?: (
     name: string,
     invitedUserIds: string[],
-    isPrivate: boolean
+    isPrivate: boolean,
   ) => void;
   hidden?: boolean;
 }
@@ -45,7 +45,7 @@ export function ChatSidebar({
   const handleCreateRoom = (
     name: string,
     invitedUserIds: string[],
-    isPrivate: boolean
+    isPrivate: boolean,
   ) => {
     onRoomCreate?.(name, invitedUserIds, isPrivate);
     setShowCreateRoom(false);

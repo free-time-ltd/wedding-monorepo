@@ -37,7 +37,7 @@ export function GuestInfo({ guests }: Props) {
 
       return acc;
     },
-    {} as Record<string, Guest[]>
+    {} as Record<string, Guest[]>,
   );
 
   return (

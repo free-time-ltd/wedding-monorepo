@@ -11,11 +11,13 @@ A wedding website monorepo built with Turborepo, featuring a Next.js frontend, H
 This is a Turborepo monorepo with:
 
 **Apps:**
+
 - `apps/frontend` - Next.js 16 app with App Router (deployed to Vercel)
 - `apps/backend` - Hono API server with Socket.io websockets (runs on VPS)
 - `apps/image-processor` - AWS Lambda function for processing uploaded images
 
 **Packages:**
+
 - `packages/db` - DrizzleORM schema and database utilities (SQLite)
 - `packages/socket` - Socket.io type definitions and shared socket logic
 - `packages/ui` - ShadCN UI components (Canary version) and shared React components
@@ -55,6 +57,7 @@ npx turbo run dev --filter=backend
 ```
 
 Default ports:
+
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3001
 - WebSocket: ws://localhost:3001/ws
@@ -140,6 +143,7 @@ npx syncpack@alpha fix --dependency-types prod
 - **Animations**: Motion library (formerly Framer Motion)
 
 Key frontend routes:
+
 - `/` - Public landing page
 - `/rsvp` - RSVP form
 - `/(root)/chat` - Real-time chat rooms
@@ -159,6 +163,7 @@ Key frontend routes:
 - **Middleware**: `requireAuth` for guest routes, `requireAdminAuth` for `/api/admin/*`
 
 API routes:
+
 - `/api/auth` - Guest authentication
 - `/api/rsvps` - RSVP management
 - `/api/rooms` - Chat rooms
@@ -175,6 +180,7 @@ API routes:
 ### Database Schema (SQLite + DrizzleORM)
 
 Core tables:
+
 - `users` - Guest information with name, email, phone, gender, table assignment
 - `families` - Family groupings for guests
 - `tables` - Seating arrangements
@@ -194,6 +200,7 @@ Database file location: `apps/backend/database/dbase.sqlite`
 ### WebSocket Events (Socket.io)
 
 **Client to Server:**
+
 - `create-room` - Create new chat room
 - `join-room` - Join existing room
 - `get-messages` - Fetch room messages with pagination
@@ -204,6 +211,7 @@ Database file location: `apps/backend/database/dbase.sqlite`
 - `ping` - Connection health check
 
 **Server to Client:**
+
 - `new-room` - Room created notification
 - `chat-message` - New message received
 - `joined-room` - Successfully joined room
@@ -260,6 +268,7 @@ Do NOT copy components from the stable ShadCN docs - the Canary version has diff
 ## Environment Variables
 
 ### Frontend (`apps/frontend/.env.local`)
+
 - `NEXT_PUBLIC_API_BASE_URL` - Backend API URL
 - `NEXT_PUBLIC_WS_SERVER_URL` - WebSocket server URL
 - `NEXT_PUBLIC_WS_PATH` - WebSocket path (/ws)
@@ -268,6 +277,7 @@ Do NOT copy components from the stable ShadCN docs - the Canary version has diff
 - `REVALIDATE_KEY` - Secret for Next.js on-demand revalidation
 
 ### Backend (`apps/backend/.env`)
+
 - `BACKEND_PORT` - Server port (default 3001)
 - `FRONTEND_URL` - Frontend URL for CORS
 - `JWT_SECRET` - JWT signing secret

@@ -24,7 +24,7 @@ imageRouter.post("/upload", requireAuth, async (c: SimpleAuthContext) => {
         status: false,
         error: z.treeifyError(result.error),
       },
-      400
+      400,
     );
   }
 
@@ -51,7 +51,7 @@ imageRouter.post("/upload", requireAuth, async (c: SimpleAuthContext) => {
   if (!guestUpload) {
     return c.json(
       { success: false, error: "Something went wrong with upload creation." },
-      { status: 501 }
+      { status: 501 },
     );
   }
 
@@ -88,7 +88,7 @@ imageRouter.post("/process", async (c) => {
         status: false,
         error: `Not found by S3 Key. The key used: "${originalKey}"`,
       },
-      { status: 404 }
+      { status: 404 },
     );
   }
 

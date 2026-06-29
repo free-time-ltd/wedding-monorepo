@@ -6,7 +6,7 @@ export async function streamToBuffer(stream: Readable): Promise<Buffer> {
 
   return new Promise((resolve, reject) => {
     stream.on("data", (chunk) =>
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)),
     );
     stream.on("end", () => resolve(Buffer.concat(chunks)));
     stream.on("error", (err) => reject(err));
@@ -23,7 +23,7 @@ export function shouldSkipProcessing(key: string): boolean {
 
 export function generateProcessedKey(
   sizeName: string,
-  originalKey: string
+  originalKey: string,
 ): string {
   return `${CONFIG.processedPrefix}${sizeName}/${originalKey}.webp`;
 }

@@ -26,7 +26,7 @@ export function useKonamiKode(onActivate?: () => void) {
       }
 
       const matches = konamiCode.every(
-        (key, i) => key === keyStrokes.current[i]
+        (key, i) => key === keyStrokes.current[i],
       );
 
       if (matches) {

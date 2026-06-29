@@ -11,7 +11,7 @@ interface Props {
 
 export function MessageList({ currentUserId, initialMessages }: Props) {
   const [messages, setMessages] = useState<GuestbookEntry[]>(
-    () => initialMessages
+    () => initialMessages,
   );
 
   const fetchMessages = () => {
@@ -22,12 +22,12 @@ export function MessageList({ currentUserId, initialMessages }: Props) {
     const res = await fetch(
       new URL(
         `/api/guestbook/${id}/like`,
-        process.env.NEXT_PUBLIC_API_BASE_URL
+        process.env.NEXT_PUBLIC_API_BASE_URL,
       ),
       {
         credentials: "include",
         method: "post",
-      }
+      },
     );
 
     const json = await res.json();

@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 const fetchRsvp = async (rsvpId: string) => {
   const url = new URL(
     `/api/rsvps/${rsvpId}`,
-    process.env.NEXT_PUBLIC_API_BASE_URL
+    process.env.NEXT_PUBLIC_API_BASE_URL,
   );
 
   const res = await fetch(url, { cache: "no-store" });

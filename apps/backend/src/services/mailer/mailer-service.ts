@@ -7,7 +7,7 @@ export class MailerService {
   constructor(
     resendKey: string,
     private pretend: boolean = false,
-    private logger: (msg: string, data?: unknown) => void = console.log
+    private logger: (msg: string, data?: unknown) => void = console.log,
   ) {
     this.mailer = new Resend(resendKey);
   }

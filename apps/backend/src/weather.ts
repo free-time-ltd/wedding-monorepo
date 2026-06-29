@@ -2,7 +2,7 @@ export async function fetchOpenMeteoWeather(
   start: string,
   end: string,
   coordinates: [number, number],
-  historical: boolean
+  historical: boolean,
 ) {
   const [lat, lon] = [...coordinates];
   const baseUrl = historical
@@ -23,7 +23,7 @@ export async function fetchOpenMeteoWeather(
       "precipitation_sum",
       "relative_humidity_2m_mean",
       "weathercode",
-    ].join(",")
+    ].join(","),
   );
 
   const res = await fetch(url.toString());

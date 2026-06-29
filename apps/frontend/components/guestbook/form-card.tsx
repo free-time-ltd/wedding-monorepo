@@ -33,7 +33,7 @@ export function GuestbookSubmitForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ title, message, private: isPrivate }),
-      }
+      },
     );
 
     const json = await res.json();

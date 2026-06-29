@@ -12,7 +12,7 @@ weatherRouter.get("/", async (c) => {
   const date = now.toISOString().split("T")[0];
   const weddingDate = new Date("2026-06-27");
   const daysUntilWedding = Math.floor(
-    (weddingDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    (weddingDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
   );
   const baseDate = daysUntilWedding > 14 ? new Date("2025-06-27") : weddingDate;
   const startDate = new Date(baseDate);
@@ -28,11 +28,11 @@ weatherRouter.get("/", async (c) => {
         startDate.toISOString().split("T")[0],
         baseDate.toISOString().split("T")[0],
         [...eventData.location.gps],
-        isHistorical
+        isHistorical,
       );
 
       return report;
-    }
+    },
   );
 
   return c.json({

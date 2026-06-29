@@ -51,7 +51,7 @@ export function Countdown({ date: weddingDate }: Props) {
           setIsVisible(true);
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
     const element = document.getElementById("countdown");

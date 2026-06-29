@@ -41,7 +41,7 @@ export function WeddingGallerySignup() {
     try {
       const url = new URL(
         "/api/gallery/newsletter/subscribe",
-        process.env.NEXT_PUBLIC_API_BASE_URL
+        process.env.NEXT_PUBLIC_API_BASE_URL,
       );
       const res = await fetch(url, {
         credentials: "include",

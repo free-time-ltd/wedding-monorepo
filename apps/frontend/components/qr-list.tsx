@@ -16,7 +16,7 @@ export function QrList({ guests }: Props) {
     "/rsvp",
     process.env.NODE_ENV === "production"
       ? "https://svatba2026.com"
-      : "https://preview.svatba2026.com"
+      : "https://preview.svatba2026.com",
   );
 
   const handleCopy = async (str: string) => {

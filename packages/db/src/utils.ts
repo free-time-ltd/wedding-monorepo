@@ -109,7 +109,7 @@ export const transformRoom = ({
           ...msg,
           createdAt: room.createdAt.getTime(),
         },
-      ])
+      ]),
     ),
     lastMessage: room.messages.at(0) ?? null,
   };
@@ -142,7 +142,7 @@ export const findProcessedImages = ({
       and(
         notInArray(table.status, ["pending", "rejected"]),
         uploader ? eq(table.userId, uploader) : undefined,
-        cursor ? lt(table.id, cursor) : undefined
+        cursor ? lt(table.id, cursor) : undefined,
       ),
     orderBy: (table, { desc, asc }) => {
       const dirFn = sort === "asc" ? asc : desc;
@@ -207,7 +207,7 @@ export const transformProcessedImageWithFullUrl =
         Object.entries(transformed.images).map(([key, path]) => [
           key,
           urlFactory.create(path),
-        ])
+        ]),
       ),
     };
   };

@@ -14,7 +14,7 @@ function isAdmin(decoded: unknown): boolean {
 export async function proxy(req: NextRequest) {
   const protectedRoutes = ["/admin", "/dashboard"];
   const isProtected = protectedRoutes.some((route) =>
-    req.nextUrl.pathname.startsWith(route)
+    req.nextUrl.pathname.startsWith(route),
   );
   if (!isProtected) return NextResponse.next();
 

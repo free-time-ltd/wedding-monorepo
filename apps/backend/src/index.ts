@@ -37,7 +37,7 @@ app.use(
   cors({
     origin: allowedCorsOrigins,
     credentials: true,
-  })
+  }),
 );
 
 app.use("/api/admin/*", requireAdminAuth);
@@ -75,7 +75,7 @@ const server = serve(
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-  }
+  },
 );
 
 const io = new Server(server, {

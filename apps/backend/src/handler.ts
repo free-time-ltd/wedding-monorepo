@@ -7,7 +7,7 @@ const handler: ErrorHandler = (err, c) => {
       success: false,
       error: err.message || "Internal server error",
     },
-    500
+    500,
   );
 };
 

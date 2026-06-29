@@ -8,7 +8,7 @@ const fetchUrl = async (slug: string) => {
       {
         credentials: "include",
         cache: "no-cache",
-      }
+      },
     );
 
     if (!res.ok) {
@@ -38,7 +38,7 @@ export default function ShortenerUrlPage({ params }: PageProps<"/s/[slug]">) {
     urlModel.url,
     !urlModel.url.startsWith("http")
       ? process.env.NEXT_PUBLIC_FRONTEND_URL
-      : undefined
+      : undefined,
   );
 
   return redirect(url.toString(), RedirectType.replace);

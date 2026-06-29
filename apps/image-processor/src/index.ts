@@ -37,7 +37,7 @@ async function imageToBuffer(output: GetObjectCommandOutput) {
 
 async function processImageSize(
   imageBuffer: Buffer,
-  config: { width: number; quality: number }
+  config: { width: number; quality: number },
 ): Promise<{ buffer: Buffer; width: number; height: number }> {
   const pipeline = sharp(imageBuffer)
     .resize(config.width, null, { withoutEnlargement: true })
@@ -58,7 +58,7 @@ async function processImageSize(
 async function uploadProcessedImage(
   bucket: string,
   key: string,
-  buffer: Buffer
+  buffer: Buffer,
 ): Promise<void> {
   await s3Client.send(
     new PutObjectCommand({
@@ -67,14 +67,14 @@ async function uploadProcessedImage(
       Body: buffer,
       ContentType: "image/webp",
       CacheControl: "public, max-age=31536000, immutable",
-    })
+    }),
   );
 }
 
 async function processAllSizes(
   imageBuffer: Buffer,
   bucket: string,
-  originalKey: string
+  originalKey: string,
 ): Promise<ProcessedImageMap> {
   const processedImages = {} as ProcessedImageMap;
 
@@ -82,7 +82,7 @@ async function processAllSizes(
     Object.entries(SIZES).map(async ([sizeName, config]) => {
       const { buffer, width, height } = await processImageSize(
         imageBuffer,
-        config
+        config,
       );
 
       const processedKey = generateProcessedKey(sizeName, originalKey);
@@ -94,7 +94,7 @@ async function processAllSizes(
         width,
         height,
       };
-    })
+    }),
   );
 
   return processedImages;
@@ -117,7 +117,7 @@ async function sendWebhook(result: ProcessingResult): Promise<void> {
 
   if (!response.ok) {
     throw new Error(
-      `Webhook failed with status ${response.status}: ${await response.text()}`
+      `Webhook failed with status ${response.status}: ${await response.text()}`,
     );
   }
 }

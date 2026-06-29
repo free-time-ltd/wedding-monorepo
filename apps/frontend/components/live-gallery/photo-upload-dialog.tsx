@@ -44,7 +44,7 @@ export function PhotoUploadDialog({
     if (!files) return;
 
     const newFiles = Array.from(files).filter((file) =>
-      file.type.startsWith("image/")
+      file.type.startsWith("image/"),
     );
 
     setSelectedFile(newFiles.at(0) ?? null);

@@ -17,7 +17,7 @@ interface Props {
 const ChatControls = forwardRef<HTMLInputElement, Props>(
   (
     { onChange, onSubmit, disabled }: Props,
-    ref: Ref<HTMLInputElement> | undefined
+    ref: Ref<HTMLInputElement> | undefined,
   ) => {
     const [messageInput, setMessageInput] = useState("");
     const submitDisabled = messageInput.trim().length < 1;
@@ -69,7 +69,7 @@ const ChatControls = forwardRef<HTMLInputElement, Props>(
         </Tooltip>
       </div>
     );
-  }
+  },
 );
 
 ChatControls.displayName = "ChatControls";

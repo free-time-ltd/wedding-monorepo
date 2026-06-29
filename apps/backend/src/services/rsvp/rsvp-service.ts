@@ -10,7 +10,7 @@ export class RsvpService {
   constructor(
     private rsvp: Invitation | null = null,
     private currentUser: User,
-    private rsvpRepository: RsvpRepository
+    private rsvpRepository: RsvpRepository,
   ) {}
 
   async init() {

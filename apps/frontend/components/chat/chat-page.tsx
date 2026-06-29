@@ -17,7 +17,7 @@ export interface ChatProps {
 
 const fetchRoomById = async (
   chatroomId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<Chatroom | null> => {
   const res = await fetch(`/api/rooms/${chatroomId}`, {
     credentials: "include",
@@ -88,7 +88,7 @@ export function ChatPage({ user, guests, initialChatroom }: ChatProps) {
         }
 
         roomData.guests.forEach((guest) =>
-          addGuestToChatroom(roomData.id, guest)
+          addGuestToChatroom(roomData.id, guest),
         );
 
         sendGetMessages(roomId, chatrooms[roomId]?.lastMessage?.id);
@@ -97,7 +97,7 @@ export function ChatPage({ user, guests, initialChatroom }: ChatProps) {
         console.error(e);
       }
     },
-    [addGuestToChatroom, chatrooms, sendGetMessages, refetchUnreads]
+    [addGuestToChatroom, chatrooms, sendGetMessages, refetchUnreads],
   );
 
   const handleRoomSelect = useCallback(
@@ -117,7 +117,7 @@ export function ChatPage({ user, guests, initialChatroom }: ChatProps) {
 
       router.replace(`/chat/${roomId}`);
     },
-    [chatrooms, selectedRoomId, loadRoomData, router]
+    [chatrooms, selectedRoomId, loadRoomData, router],
   );
 
   const handleMessageSend = (message: string) => {

@@ -154,7 +154,7 @@ export async function seedImages() {
       createdAt: new Date(),
       approvedAt: new Date(),
       status: "processed",
-    })
+    }),
   );
 
   await db.insert(guestUploadsTable).values(images);

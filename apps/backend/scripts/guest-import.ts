@@ -19,12 +19,12 @@ async function guestImport() {
     .values(
       rows.map((name) => ({
         name,
-      }))
+      })),
     )
     .onConflictDoNothing();
 
   console.log(
-    `Total of ${pluralizeWithCount(rows.length, "guest", "guests")} have been processed.`
+    `Total of ${pluralizeWithCount(rows.length, "guest", "guests")} have been processed.`,
   );
 }
 

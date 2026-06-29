@@ -133,12 +133,12 @@ const ChatArea = forwardRef<ChatAreaHandle, Props>(
         )}
       </div>
     );
-  }
+  },
 );
 
 ChatArea.displayName = "ChatArea";
 
 export default memo(
   ChatArea,
-  (prev, next) => prev.messages.size === next.messages.size
+  (prev, next) => prev.messages.size === next.messages.size,
 );

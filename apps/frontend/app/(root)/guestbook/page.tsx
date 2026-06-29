@@ -55,7 +55,7 @@ export default async function GuestbookPage() {
             {pluralizeWithCount(
               approvedMessages.length,
               "съобщение",
-              "съобщения"
+              "съобщения",
             )}
           </span>
         </div>

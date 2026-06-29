@@ -63,7 +63,7 @@ export function ChatUI({
   const handleCreateRoom = (
     name: string,
     invitedUserIds: string[],
-    isPrivate: boolean
+    isPrivate: boolean,
   ) => {
     onRoomCreate?.({ name, invitedUserIds, isPrivate });
     setShowCreateRoom(false);

@@ -71,7 +71,7 @@ export function GuestGallery({ images }: Props) {
         setIsLoadingMore(false);
       }
     },
-    [galleryFilters]
+    [galleryFilters],
   );
 
   const loadImages = useCallback(async () => {
@@ -95,7 +95,7 @@ export function GuestGallery({ images }: Props) {
           loadImages();
         }
       },
-      { threshold: 0.1, rootMargin: "100px" }
+      { threshold: 0.1, rootMargin: "100px" },
     );
 
     if (loaderEl) {

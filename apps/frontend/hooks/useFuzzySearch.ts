@@ -5,7 +5,7 @@ export function useFuzzySearch<T>(dictionary: T[], options?: IFuseOptions<T>) {
   const fuse = useMemo(
     () =>
       new Fuse(dictionary, { includeScore: true, threshold: 0.4, ...options }),
-    [dictionary, options]
+    [dictionary, options],
   );
 
   const search = (query: string) => {

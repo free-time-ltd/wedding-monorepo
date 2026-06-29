@@ -31,7 +31,7 @@ export function defineSocketServer(io: Server) {
     socket.on("create-room", async ({ roomName, invitedUserIds = [] }) => {
       const roomId = generateId();
       const insertRows: Array<typeof userRooms.$inferInsert> = Array.from(
-        new Set([socket.data.user.id, ...invitedUserIds])
+        new Set([socket.data.user.id, ...invitedUserIds]),
       ).map((userId) => ({
         roomId,
         userId,
@@ -143,7 +143,7 @@ export function defineSocketServer(io: Server) {
         cms.markRoomAsRead(
           socket.data.user.id,
           roomId,
-          messages.at(-1)?.id ?? lastMessageId
+          messages.at(-1)?.id ?? lastMessageId,
         );
       } catch (error) {
         console.error("Error fetching messages:", error);
@@ -158,7 +158,7 @@ export function defineSocketServer(io: Server) {
       if (!callback) return;
 
       const unreads = await getUserRoomsWithUnreadThrottled(
-        socket.data.user.id
+        socket.data.user.id,
       );
 
       callback(unreads);

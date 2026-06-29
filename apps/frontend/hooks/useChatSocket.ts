@@ -19,7 +19,7 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
         lastMessageId,
       });
     },
-    [socket]
+    [socket],
   );
 
   const createRoom = useCallback(
@@ -32,7 +32,7 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
     }) => {
       socket?.emit("create-room", { roomName, invitedUserIds });
     },
-    [socket]
+    [socket],
   );
 
   const sendChatMessage = useCallback(
@@ -42,15 +42,15 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
         roomId,
       });
     },
-    [socket]
+    [socket],
   );
 
   const refetchUnreads = useCallback(() => {
     socket?.emit("get-unreads", function (unreads) {
       setUnreadMessages(
         Object.fromEntries(
-          unreads.map((record) => [record.roomId, record.unreadCount])
-        )
+          unreads.map((record) => [record.roomId, record.unreadCount]),
+        ),
       );
     });
   }, [setUnreadMessages, socket]);
@@ -68,13 +68,13 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
           ...message,
           userId: message.userId!,
           createdAt: new Date(message.createdAt).getTime(),
-        })
+        }),
       );
 
       if (hasMore) {
         sendGetMessages(
           roomId,
-          getChatroom(roomId)?.lastMessage?.id ?? undefined
+          getChatroom(roomId)?.lastMessage?.id ?? undefined,
         );
       }
     };
@@ -85,7 +85,7 @@ export function useChatSocket(socket: TypedClientSocket | undefined | null) {
     };
 
     const handleNewChatMessage: ServerToClientEvents["chat-message"] = (
-      message
+      message,
     ) => {
       addMessage(message.roomId, {
         ...message,

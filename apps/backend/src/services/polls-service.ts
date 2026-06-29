@@ -157,7 +157,7 @@ export class PollService {
       userId: string;
       pollId: string;
       answer: string;
-    }>
+    }>,
   ) {
     return Promise.all(answers.map((answer) => this.upsertPollAnswer(answer)));
   }
@@ -168,7 +168,7 @@ export class PollService {
 
   transformPoll(
     { id, title, subtitle, createdAt, validUntil, ...poll }: PollWithDetails,
-    userId?: string | null
+    userId?: string | null,
   ) {
     return {
       id,
@@ -180,7 +180,7 @@ export class PollService {
         ...option,
         votes: poll.answers.reduce(
           (aggr, answer) => (answer.answer.id === option.id ? ++aggr : aggr),
-          0
+          0,
         ),
       })),
       active: !!validUntil && validUntil > new Date(),

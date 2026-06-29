@@ -43,7 +43,7 @@ roomsRouter.get("/:id", async (c) => {
     if (!roomUsers.includes(userId)) {
       return c.json(
         { status: false, error: "You don't have access to this room." },
-        { status: 403 }
+        { status: 403 },
       );
     }
   }
@@ -64,7 +64,7 @@ roomsRouter.get("/:id", async (c) => {
             label: user.table?.label ?? user.table?.name,
           },
           joinedAt: new Date(),
-        })
+        }),
       );
 
   const transformedRoom = {

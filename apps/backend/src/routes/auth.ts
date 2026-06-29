@@ -28,7 +28,7 @@ authRouter.post("/user/set", async (c) => {
     if (!user) {
       return c.json(
         { success: false, error: "No user provided" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -37,7 +37,7 @@ authRouter.post("/user/set", async (c) => {
     if (!userModel) {
       return c.json(
         { success: false, error: "User not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -72,7 +72,7 @@ authRouter.post("/user/set", async (c) => {
     if (typeof e === "object" && e !== null && "message" in e) {
       return c.json(
         { success: false, error: String(e.message) },
-        { status: 500 }
+        { status: 500 },
       );
     }
 

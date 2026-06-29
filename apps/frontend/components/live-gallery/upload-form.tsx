@@ -44,7 +44,7 @@ export function UploadForm() {
       // Generate presigned upload URL
       const url = new URL(
         "/api/images/upload",
-        process.env.NEXT_PUBLIC_API_BASE_URL
+        process.env.NEXT_PUBLIC_API_BASE_URL,
       );
 
       const res = await fetch(url, {
@@ -79,7 +79,7 @@ export function UploadForm() {
       }
 
       toast.success(
-        "Казването на картинката беше успешно. До няколко минути ще бъде обработена и ще бъде видима в сайта!"
+        "Казването на картинката беше успешно. До няколко минути ще бъде обработена и ще бъде видима в сайта!",
       );
 
       setProcessing(true);

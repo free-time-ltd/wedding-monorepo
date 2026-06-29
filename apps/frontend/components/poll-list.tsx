@@ -50,7 +50,7 @@ export function PollList({ polls: initialPolls }: Props) {
     try {
       const url = new URL(
         `/api/polls/${pollId}`,
-        process.env.NEXT_PUBLIC_API_BASE_URL
+        process.env.NEXT_PUBLIC_API_BASE_URL,
       );
 
       const res = await fetch(url, {
@@ -85,7 +85,7 @@ export function PollList({ polls: initialPolls }: Props) {
 
   const getLeadingOption = (poll: Poll) => {
     return poll.options.reduce((prev, current) =>
-      prev.votes > current.votes ? prev : current
+      prev.votes > current.votes ? prev : current,
     );
   };
 
@@ -120,7 +120,7 @@ export function PollList({ polls: initialPolls }: Props) {
                 {poll.options.map((option) => {
                   const percentage = getPercentage(
                     option.votes,
-                    poll.totalVotes
+                    poll.totalVotes,
                   );
                   const isLeading =
                     option.id === leadingOption.id && poll.totalVotes > 0;

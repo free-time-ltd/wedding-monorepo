@@ -225,8 +225,8 @@ adminRouter.post("invitations/:id/guests", async (c) => {
         (guest: { name: string; gender: "male" | "female" | "unknown" }) => ({
           name: guest.name.trim(),
           gender: guest.gender,
-        })
-      )
+        }),
+      ),
     )
     .onConflictDoUpdate({
       target: [usersTable.name],
@@ -242,7 +242,7 @@ adminRouter.post("invitations/:id/guests", async (c) => {
       userId,
       invitedUserId: user.id,
       createdAt: new Date(),
-    }))
+    })),
   );
 
   return c.json({
@@ -356,7 +356,7 @@ adminRouter.post("/polls", async (c) => {
     options.map((option) => ({
       pollId: poll.id,
       title: option.title,
-    }))
+    })),
   );
 
   const newPoll = await pollService.findPollDetailed(poll.id);

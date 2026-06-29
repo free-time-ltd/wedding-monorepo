@@ -32,7 +32,7 @@ export const MessageNotificationProvider = ({ children }: Props) => {
     (roomId: string | null) => {
       router.push(`/chat/${roomId}`);
     },
-    [router]
+    [router],
   );
 
   useEffect(() => {

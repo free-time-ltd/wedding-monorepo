@@ -1,7 +1,7 @@
 export default class UrlFactory {
   constructor(
     private readonly domain: string,
-    private readonly isSecure: boolean = true
+    private readonly isSecure: boolean = true,
   ) {}
 
   private get baseUrl() {

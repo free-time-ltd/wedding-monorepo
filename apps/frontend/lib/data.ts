@@ -94,11 +94,11 @@ export const fetchUserUploads = async ({
       uploader,
       cursor,
       limit: limit.toString(),
-    }).filter(([, v]) => !!v) as [string, string][]
+    }).filter(([, v]) => !!v) as [string, string][],
   );
   const url = new URL(
     `/api/gallery/guests?${searchParams.toString()}`,
-    process.env.NEXT_PUBLIC_API_BASE_URL
+    process.env.NEXT_PUBLIC_API_BASE_URL,
   );
 
   try {

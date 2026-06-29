@@ -50,9 +50,9 @@ export default class Cache {
           eq(cacheTable.cacheKey, key),
           or(
             isNull(cacheTable.expiresAt),
-            sql`${cacheTable.expiresAt} > ${now}`
-          )
-        )
+            sql`${cacheTable.expiresAt} > ${now}`,
+          ),
+        ),
       )
       .limit(1);
 
@@ -64,7 +64,7 @@ export default class Cache {
   async remember<T>(
     key: string,
     ttlMs: number,
-    cb: () => T | Promise<T> | null
+    cb: () => T | Promise<T> | null,
   ): Promise<T | null> {
     const cached = await this.get<T>(key);
     if (cached !== null) return cached;
@@ -90,8 +90,8 @@ export default class Cache {
         .where(
           and(
             not(isNull(cacheTable.expiresAt)),
-            lt(cacheTable.expiresAt, new Date())
-          )
+            lt(cacheTable.expiresAt, new Date()),
+          ),
         );
     }
   }

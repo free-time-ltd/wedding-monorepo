@@ -23,7 +23,7 @@ interface CreateRoomDialogProps {
   onCreateRoom: (
     name: string,
     participantIds: string[],
-    isPrivate: boolean
+    isPrivate: boolean,
   ) => void;
   currentGuestId: string;
 }
@@ -46,7 +46,7 @@ export function CreateRoomDialog({
     onCreateRoom(
       roomName,
       isPrivate ? selectedParticipants : guests.map((g) => g.id),
-      isPrivate
+      isPrivate,
     );
     setRoomName("");
     setIsPrivate(false);

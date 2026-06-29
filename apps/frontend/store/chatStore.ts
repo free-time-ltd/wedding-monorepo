@@ -90,7 +90,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
       if (message.createdAt < (updatedMessages.at(-1)?.createdAt ?? 0)) {
         const index = updatedMessages.findIndex(
-          (m) => m.createdAt > message.createdAt
+          (m) => m.createdAt > message.createdAt,
         );
         updatedMessages.splice(index, 0, message);
       } else {
@@ -106,7 +106,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           [chatroomId]: {
             ...chatroom,
             messages: new Map<number, Message>(
-              updatedMessages.map((msg) => [msg.id, msg])
+              updatedMessages.map((msg) => [msg.id, msg]),
             ),
             lastMessage: message,
           },
@@ -161,5 +161,5 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
 export const useTotalUnread = () =>
   useChatStore((state) =>
-    Object.values(state.unreadMessages).reduce((sum, count) => sum + count, 0)
+    Object.values(state.unreadMessages).reduce((sum, count) => sum + count, 0),
   );
