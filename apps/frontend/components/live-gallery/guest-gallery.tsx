@@ -45,9 +45,6 @@ export function GuestGallery({ images }: Props) {
   // Hydrate the store
   useEffect(() => {
     setPhotos(images);
-    if (nextCursor.current) {
-      nextCursor.current = null;
-    }
   }, [images, setPhotos]);
 
   const loadImagesWithParams = useCallback(
