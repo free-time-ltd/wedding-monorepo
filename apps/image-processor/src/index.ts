@@ -40,6 +40,9 @@ async function processImageSize(
   config: { width: number; quality: number },
 ): Promise<{ buffer: Buffer; width: number; height: number }> {
   const pipeline = sharp(imageBuffer)
+    // Auto-orient from EXIF before resize, otherwise the orientation tag is
+    // dropped on the webp output and the image ends up rotated.
+    .rotate()
     .resize(config.width, null, { withoutEnlargement: true })
     .webp({ quality: config.quality });
 

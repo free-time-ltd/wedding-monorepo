@@ -191,6 +191,23 @@ export const guestUploadsTable = sqliteTable(
   ],
 );
 
+export const guestUploadLikesTable = sqliteTable(
+  "guest_upload_likes",
+  {
+    id: integer().primaryKey({ autoIncrement: true }),
+    uploadId: text("upload_id")
+      .references(() => guestUploadsTable.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: text("user_id")
+      .references(() => usersTable.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(
+      () => new Date(),
+    ),
+  },
+  (table) => [unique("upload_like").on(table.uploadId, table.userId)],
+);
+
 export const cacheTable = sqliteTable(
   "cache",
   {
@@ -432,12 +449,30 @@ export const invitationUsersRelations = relations(
   }),
 );
 
-export const guestUploadRelations = relations(guestUploadsTable, ({ one }) => ({
-  user: one(usersTable, {
-    fields: [guestUploadsTable.userId],
-    references: [usersTable.id],
+export const guestUploadRelations = relations(
+  guestUploadsTable,
+  ({ one, many }) => ({
+    user: one(usersTable, {
+      fields: [guestUploadsTable.userId],
+      references: [usersTable.id],
+    }),
+    likes: many(guestUploadLikesTable),
   }),
-}));
+);
+
+export const guestUploadLikeRelations = relations(
+  guestUploadLikesTable,
+  ({ one }) => ({
+    upload: one(guestUploadsTable, {
+      fields: [guestUploadLikesTable.uploadId],
+      references: [guestUploadsTable.id],
+    }),
+    user: one(usersTable, {
+      fields: [guestUploadLikesTable.userId],
+      references: [usersTable.id],
+    }),
+  }),
+);
 
 export const newsletterRelations = relations(newsletterTable, ({ one }) => ({
   user: one(usersTable, {

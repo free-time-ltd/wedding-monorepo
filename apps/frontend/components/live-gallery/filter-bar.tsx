@@ -1,6 +1,6 @@
 "use client";
 
-import { Guest } from "@/store/chatStore";
+import { Uploader } from "@/lib/data";
 import {
   Select,
   SelectContent,
@@ -13,7 +13,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface Props {
-  guests: Guest[];
+  guests: Uploader[];
 }
 
 export function FilterBar({ guests = [] }: Props) {

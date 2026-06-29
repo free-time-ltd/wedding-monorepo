@@ -1,4 +1,4 @@
-import { fetchGuests, fetchUserUploads } from "@/lib/data";
+import { fetchUploaders, fetchUserUploads } from "@/lib/data";
 import { GuestGallery } from "@/components/live-gallery/guest-gallery";
 import { redirect } from "next/navigation";
 import { fetchUser } from "@/lib/server-data";
@@ -24,7 +24,7 @@ export default async function GalleryPage({
     redirect(`/guest-select?redirectTo=${encodeURIComponent("/live-feed")}`);
   }
 
-  const guests = (await fetchGuests()) ?? [];
+  const { uploaders, totalImages } = await fetchUploaders();
 
   let orderBy, sortFld;
   switch (sort) {
@@ -45,12 +45,6 @@ export default async function GalleryPage({
     sort: sortFld,
     uploader: Array.isArray(uploader) ? uploader.at(0) : uploader,
   });
-
-  const uniqueUserIds = new Set(images.map((image) => image.user.id));
-
-  const guestUploaders = [...guests]
-    .filter((guest) => uniqueUserIds.has(guest.id))
-    .toSorted();
 
   return (
     <div className="container mx-auto space-y-6 pt-5 px-4 sm:px-0">
@@ -77,7 +71,7 @@ export default async function GalleryPage({
               <Users className="h-4 w-4 text-green-600" />
               <span className="text-sm text-muted-foreground">
                 <span className="font-semibold text-foreground">
-                  {uniqueUserIds.size}
+                  {uploaders.length}
                 </span>{" "}
                 Гости
               </span>
@@ -86,14 +80,14 @@ export default async function GalleryPage({
               <Images className="h-4 w-4 text-amber-600" />
               <span className="text-sm text-muted-foreground">
                 <span className="font-semibold text-foreground">
-                  {images.length}
+                  {totalImages}
                 </span>{" "}
                 Снимки
               </span>
             </Card>
           </div>
 
-          <FilterBar guests={guestUploaders} />
+          <FilterBar guests={uploaders} />
         </div>
         <GuestGallery key={`${sort}-${uploader}`} images={images} />
       </div>

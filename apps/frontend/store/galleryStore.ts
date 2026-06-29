@@ -10,6 +10,7 @@ export interface GalleryStore {
   setPhotos: (photos: ProcessedImageApiType[]) => void;
   setProcessing: (newVal: boolean) => void;
   toggleProcessing: () => void;
+  setLike: (imageId: string, liked: boolean, likesCount: number) => void;
 }
 
 export const useGalleryStore = create<GalleryStore>((set) => ({
@@ -37,5 +38,13 @@ export const useGalleryStore = create<GalleryStore>((set) => ({
   toggleProcessing: () =>
     set((state) => ({
       processing: !state.processing,
+    })),
+  setLike: (imageId, liked, likesCount) =>
+    set((state) => ({
+      photos: state.photos.map((photo) =>
+        photo.id === imageId
+          ? { ...photo, likedByMe: liked, likesCount }
+          : photo,
+      ),
     })),
 }));

@@ -64,7 +64,77 @@ export type ProcessedImageApiType = {
   };
   createdAt: string;
   message: string | null;
+  likesCount: number;
+  likedByMe: boolean;
   user: UserApiType;
+};
+
+export type Uploader = { id: string; name: string };
+
+interface UploadersResponse {
+  success: boolean;
+  data: {
+    uploaders: Uploader[];
+    totalImages: number;
+  };
+}
+
+export const fetchUploaders = async (): Promise<{
+  uploaders: Uploader[];
+  totalImages: number;
+}> => {
+  const url = new URL(
+    `/api/gallery/uploaders`,
+    process.env.NEXT_PUBLIC_API_BASE_URL,
+  );
+
+  try {
+    const res = await fetch(url, {
+      credentials: "include",
+      next: { tags: ["uploads"] },
+    });
+
+    if (!res.ok) {
+      throw new Error("There was a problem fetching uploaders");
+    }
+
+    const json = (await res.json()) as UploadersResponse;
+
+    return json.data;
+  } catch (e) {
+    console.error(e);
+    return { uploaders: [], totalImages: 0 };
+  }
+};
+
+export const likeUpload = async (
+  id: string,
+): Promise<{ liked: boolean; likesCount: number } | null> => {
+  const url = new URL(
+    `/api/gallery/guests/${id}/like`,
+    process.env.NEXT_PUBLIC_API_BASE_URL,
+  );
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      throw new Error("There was a problem liking the image");
+    }
+
+    const json = (await res.json()) as ApiResponse<{
+      liked: boolean;
+      likesCount: number;
+    }>;
+
+    return json.success ? json.data : null;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 };
 
 interface UserUploadsResponse {

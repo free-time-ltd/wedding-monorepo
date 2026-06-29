@@ -253,6 +253,13 @@
       "when": 1767360412736,
       "tag": "0035_abnormal_gwen_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1782723803869,
+      "tag": "0036_omniscient_garia",
+      "breakpoints": true
     }
   ]
 }
