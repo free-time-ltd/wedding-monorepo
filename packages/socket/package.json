@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@repo/db": "1.0.0",
-    "@repo/utils": "1.0.0",
+    "@repo/utils": "*",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   }

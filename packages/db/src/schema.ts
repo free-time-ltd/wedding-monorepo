@@ -142,20 +142,25 @@ export const invitationUsers = sqliteTable(
   ],
 );
 
-export const officialPhotosTable = sqliteTable("official_photos", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => generateId()),
-  key: text("s3_key").notNull(),
-  url: text("url"), // CloudFront CDN URL if any
-  title: text("title").notNull(),
-  description: text("description"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }),
-  width: integer("width"),
-  height: integer("height"),
-  sizeBytes: integer("size_bytes"),
-  mimeType: text("mime_type"),
-});
+export const officialPhotosTable = sqliteTable(
+  "official_photos",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => generateId()),
+    key: text("s3_key").notNull(),
+    url: text("url"), // CloudFront CDN URL if any
+    title: text("title").notNull(),
+    description: text("description"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }),
+    width: integer("width"),
+    height: integer("height"),
+    sizeBytes: integer("size_bytes"),
+    mimeType: text("mime_type"),
+    album: text("album"),
+  },
+  (table) => [index("official_photo_album_idx").on(table.album)],
+);
 
 export const guestUploadStatus = [
   "pending",

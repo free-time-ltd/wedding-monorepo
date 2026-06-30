@@ -5,7 +5,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsup",
     "start": "node dist/index.js",
-    "db:seed": "tsx scripts/run-seeder.ts"
+    "db:seed": "tsx scripts/run-seeder.ts",
+    "gallery:import": "tsx scripts/import-official.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.913.0",
@@ -13,7 +14,7 @@
     "@hono/node-server": "^1.19.5",
     "@repo/db": "1.0.0",
     "@repo/socket": "1.0.0",
-    "@repo/utils": "1.0.0",
+    "@repo/utils": "*",
     "cookie": "^1.0.2",
     "dotenv": "^17.2.3",
     "hono": "^4.9.9",

@@ -15,9 +15,41 @@ import { newsletterSignSchema } from "@/types";
 import z from "zod";
 import { and, count, eq } from "@repo/db";
 import { db } from "@repo/db/client";
-import { guestUploadLikesTable, newsletterTable } from "@repo/db/schema";
+import {
+  guestUploadLikesTable,
+  newsletterTable,
+  officialPhotosTable,
+} from "@repo/db/schema";
 
 const galleryRouter = new Hono();
+
+galleryRouter.get("/official", async (c) => {
+  const images = await db.query.officialPhotosTable.findMany({
+    // `key` is the (sanitized) source filename, so this preserves the
+    // photographer's name ordering. Assumes zero-padded names for natural sort.
+    orderBy: (table, { asc }) => [asc(table.album), asc(table.key)],
+  });
+
+  return successResponse(c, images);
+});
+
+galleryRouter.get("/official/albums", async (c) => {
+  const albums = await db
+    .select({
+      album: officialPhotosTable.album,
+      imageCount: count(officialPhotosTable.id),
+    })
+    .from(officialPhotosTable)
+    .groupBy(officialPhotosTable.album)
+    .then((rows) =>
+      rows.map((row) => ({
+        album: row.album ?? "Без албум",
+        imageCount: row.imageCount,
+      })),
+    );
+
+  return successResponse(c, albums);
+});
 
 galleryRouter.get("/guests", async (c) => {
   const {
