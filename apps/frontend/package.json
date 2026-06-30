@@ -12,7 +12,7 @@
   "dependencies": {
     "@repo/socket": "1.0.0",
     "@repo/ui": "0.0.0",
-    "@repo/utils": "1.0.0",
+    "@repo/utils": "*",
     "@tanstack/react-form": "^1.27.1",
     "fuse.js": "^7.1.0",
     "jose": "^6.1.0",

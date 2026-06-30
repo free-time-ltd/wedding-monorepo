@@ -22,7 +22,7 @@
   "description": "",
   "dependencies": {
     "@libsql/client": "^0.15.15",
-    "@repo/utils": "1.0.0",
+    "@repo/utils": "*",
     "drizzle-orm": "^0.44.5",
     "sqlite3": "^5.1.7"
   },
