@@ -299,3 +299,64 @@ export const fetchGuestbook = cache(async (): Promise<GuestbookEntry[]> => {
     return [];
   }
 });
+
+export interface OfficialPhoto {
+  id: string;
+  key: string;
+  url: string | null;
+  title: string;
+  description: string | null;
+  createdAt: Date | null;
+  width: number | null;
+  height: number | null;
+  sizeBytes: number | null;
+  mimeType: string | null;
+  album: string | null;
+}
+
+export interface Album {
+  album: string;
+  imageCount: number;
+}
+
+export const fetchOfficialGallery = cache(async () => {
+  const url = new URL(
+    `/api/gallery/official`,
+    process.env.NEXT_PUBLIC_API_BASE_URL,
+  );
+
+  try {
+    const res = await fetch(url, { next: { tags: ["gallery"] } });
+    const json = (await res.json()) as ApiResponse<OfficialPhoto[]>;
+
+    if (json.success) {
+      return json.data;
+    }
+
+    return [];
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+});
+
+export const fetchGalleryAlbums = cache(async () => {
+  const url = new URL(
+    `/api/gallery/official/albums`,
+    process.env.NEXT_PUBLIC_API_BASE_URL,
+  );
+
+  try {
+    const res = await fetch(url, { next: { tags: ["gallery"] } });
+    const json = (await res.json()) as ApiResponse<Album[]>;
+
+    if (json.success) {
+      return json.data;
+    }
+
+    return [];
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { SubmitEvent, useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "@repo/ui";
 import {
@@ -28,7 +28,7 @@ export function WeddingGallerySignup() {
     }
   }, []);
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (!email || !email.includes("@")) {
