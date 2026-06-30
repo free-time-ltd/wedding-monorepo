@@ -1,13 +1,11 @@
 import { parseArgs } from "node:util";
 
 import {
-  DEFAULT_FORMAT,
   DEFAULT_OUT_DIR,
   DEFAULT_QUALITY,
   DEFAULT_THUMB_SIZE,
-  VALID_FORMATS,
 } from "../config";
-import type { CliOptions, ThumbnailFormat } from "../types";
+import type { CliOptions } from "../types";
 
 export const HELP_TEXT = `
 photo-cli — prepare wedding photos for the gallery
@@ -18,13 +16,16 @@ Usage:
 Arguments:
   <input>                 Path to an image or a directory of images to import
 
+Each image is written as three webp renditions (thumbnail/medium/full) plus a
+copy of the original, laid out to mirror the S3 bucket so the output dir can be
+shipped with a single \`aws s3 sync\`.
+
 Options:
-  -o, --out <dir>         Output directory for thumbnails and the manifest
+  -o, --out <dir>         Output directory for renditions and the manifest
                           (default: "${DEFAULT_OUT_DIR}")
   -a, --album <name>      Album name applied to every photo
-  -s, --size <px>         Max thumbnail width in pixels (default: ${DEFAULT_THUMB_SIZE})
-  -q, --quality <1-100>   Thumbnail quality for lossy formats (default: ${DEFAULT_QUALITY})
-  -f, --format <fmt>      Thumbnail format: ${VALID_FORMATS.join(", ")} (default: ${DEFAULT_FORMAT})
+  -s, --size <px>         Max width of the thumbnail rendition (default: ${DEFAULT_THUMB_SIZE})
+  -q, --quality <1-100>   Webp quality for the renditions (default: ${DEFAULT_QUALITY})
   -r, --recursive         Scan sub-directories
   -y, --yes               Skip interactive prompts and accept defaults
   -h, --help              Show this help
@@ -32,7 +33,7 @@ Options:
 Examples:
   photo-cli ./photos
   photo-cli ./photos --out ./gallery --album "Ceremony" --size 600
-  photo-cli ./photos -r -f avif -q 70 -y
+  photo-cli ./photos -r -q 70 -y
 `;
 
 /** Thrown when the provided arguments are invalid. */
@@ -44,15 +45,6 @@ function parsePositiveInt(value: string, flag: string): number {
     throw new CliUsageError(`${flag} must be a positive integer (got "${value}")`);
   }
   return n;
-}
-
-function parseFormat(value: string): ThumbnailFormat {
-  if (!VALID_FORMATS.includes(value as ThumbnailFormat)) {
-    throw new CliUsageError(
-      `--format must be one of: ${VALID_FORMATS.join(", ")} (got "${value}")`,
-    );
-  }
-  return value as ThumbnailFormat;
 }
 
 /** Parse `argv` into validated {@link CliOptions}. */
@@ -67,7 +59,6 @@ export function parseCliArgs(argv: string[] = process.argv.slice(2)): CliOptions
         album: { type: "string", short: "a" },
         size: { type: "string", short: "s" },
         quality: { type: "string", short: "q" },
-        format: { type: "string", short: "f" },
         recursive: { type: "boolean", short: "r", default: false },
         yes: { type: "boolean", short: "y", default: false },
         help: { type: "boolean", short: "h", default: false },
@@ -99,7 +90,6 @@ export function parseCliArgs(argv: string[] = process.argv.slice(2)): CliOptions
     album: values.album,
     size: values.size ? parsePositiveInt(values.size, "--size") : undefined,
     quality,
-    format: values.format ? parseFormat(values.format) : undefined,
     recursive: values.recursive ?? false,
     yes: values.yes ?? false,
     help: values.help ?? false,

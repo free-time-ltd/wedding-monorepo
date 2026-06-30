@@ -1,12 +1,12 @@
 import path from "node:path";
 
 import {
-  DEFAULT_FORMAT,
   DEFAULT_OUT_DIR,
   DEFAULT_QUALITY,
   DEFAULT_THUMB_SIZE,
   MANIFEST_FILENAME,
-  THUMBNAILS_SUBDIR,
+  ORIGINALS_SUBDIR,
+  PROCESSED_SUBDIR,
 } from "../config";
 import type { CliOptions, ResolvedConfig } from "../types";
 import type { Prompter } from "./prompts";
@@ -40,12 +40,12 @@ export async function resolveConfig(
   return {
     inputDir: path.resolve(input),
     outDir,
-    thumbsDir: path.join(outDir, THUMBNAILS_SUBDIR),
+    originalsDir: path.join(outDir, ORIGINALS_SUBDIR),
+    processedDir: path.join(outDir, PROCESSED_SUBDIR),
     manifestPath: path.join(outDir, MANIFEST_FILENAME),
     album,
     size: opts.size ?? DEFAULT_THUMB_SIZE,
     quality: opts.quality ?? DEFAULT_QUALITY,
-    format: opts.format ?? DEFAULT_FORMAT,
     recursive: opts.recursive,
   };
 }

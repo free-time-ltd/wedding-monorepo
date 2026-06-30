@@ -1,5 +1,6 @@
 import { writeFile } from "node:fs/promises";
 
+import { FULL_SIZE, MEDIUM_SIZE } from "../config";
 import type { Manifest, PhotoEntry, ResolvedConfig } from "../types";
 
 /** Assemble the manifest document from processed photo entries. */
@@ -11,10 +12,12 @@ export function buildManifest(
     generatedAt: new Date().toISOString(),
     sourceDir: config.inputDir,
     album: config.album,
-    thumbnail: {
-      format: config.format,
-      maxWidth: config.size,
+    renditions: {
+      format: "webp",
       quality: config.quality,
+      thumbnail: config.size,
+      medium: MEDIUM_SIZE,
+      full: FULL_SIZE,
     },
     count: photos.length,
     photos,

@@ -25,7 +25,9 @@ const galleryRouter = new Hono();
 
 galleryRouter.get("/official", async (c) => {
   const images = await db.query.officialPhotosTable.findMany({
-    orderBy: (table, { asc }) => [asc(table.album), asc(table.id)],
+    // `key` is the (sanitized) source filename, so this preserves the
+    // photographer's name ordering. Assumes zero-padded names for natural sort.
+    orderBy: (table, { asc }) => [asc(table.album), asc(table.key)],
   });
 
   return successResponse(c, images);

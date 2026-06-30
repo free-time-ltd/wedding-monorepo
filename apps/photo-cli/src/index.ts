@@ -4,7 +4,7 @@ import { CliUsageError, HELP_TEXT, parseCliArgs } from "./cli/args";
 import { isInteractive, Prompter } from "./cli/prompts";
 import { resolveConfig } from "./cli/resolve";
 import { buildManifest, writeManifest } from "./core/manifest";
-import { processImage } from "./core/processor";
+import { keyFromFilename, processImage } from "./core/processor";
 import { scanImages } from "./core/scanner";
 import { ensureDir } from "./lib/fs";
 import { color, logger } from "./lib/logger";
@@ -42,16 +42,30 @@ async function run(): Promise<void> {
     prompter?.close();
   }
 
-  await ensureDir(config.thumbsDir);
+  await Promise.all([
+    ensureDir(config.originalsDir),
+    ensureDir(path.join(config.processedDir, "thumbnail")),
+    ensureDir(path.join(config.processedDir, "medium")),
+    ensureDir(path.join(config.processedDir, "full")),
+  ]);
 
   const photos: PhotoEntry[] = [];
   const failures: { file: string; reason: string }[] = [];
+
+  // Keys derive from filenames; suffix duplicates so nothing is overwritten.
+  const keyCounts = new Map<string, number>();
+  const uniqueKey = (filename: string): string => {
+    const base = keyFromFilename(filename);
+    const n = keyCounts.get(base) ?? 0;
+    keyCounts.set(base, n + 1);
+    return n === 0 ? base : `${base}-${n + 1}`;
+  };
 
   for (const [i, source] of sources.entries()) {
     const name = path.basename(source);
     try {
       logger.step(i + 1, sources.length, name);
-      photos.push(await processImage(source, config));
+      photos.push(await processImage(source, config, uniqueKey(name)));
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
       logger.error(`  failed: ${reason}`);
@@ -64,7 +78,8 @@ async function run(): Promise<void> {
 
   logger.heading("Done");
   logger.success(`Processed ${photos.length}/${sources.length} image(s)`);
-  logger.dim(`  thumbnails  ${config.thumbsDir}`);
+  logger.dim(`  originals   ${config.originalsDir}`);
+  logger.dim(`  processed   ${config.processedDir}`);
   logger.dim(`  manifest    ${config.manifestPath}`);
   if (failures.length > 0) {
     logger.warn(`${failures.length} image(s) failed to process`);
@@ -77,7 +92,7 @@ function printSummary(config: ResolvedConfig, count: number): void {
   logger.info(`Output     ${config.outDir}`);
   logger.info(`Album      ${config.album ?? color.dim("(none)")}`);
   logger.info(
-    `Thumbnails ${count} image(s) → ${config.format} @ ${config.size}px / q${config.quality}`,
+    `Renditions ${count} image(s) → webp @ ${config.size}/1280/2048px / q${config.quality} + original`,
   );
 }
 

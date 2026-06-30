@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 // LOCAL PREVIEW ONLY — set to false (or remove the mock import + this block)
 // before shipping to prod, so the page reads real photos from the API.
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 export default async function GalleryPage() {
   const [fetchedImages, fetchedAlbums] = await Promise.all([

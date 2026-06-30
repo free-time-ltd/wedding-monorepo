@@ -17,10 +17,8 @@ export interface CliOptions {
   album?: string;
   /** Max width (px) for generated thumbnails. */
   size?: number;
-  /** Output quality (1-100) for lossy thumbnail formats. */
+  /** Output quality (1-100) for the webp renditions. */
   quality?: number;
-  /** Thumbnail output format. */
-  format?: ThumbnailFormat;
   /** Recurse into sub-directories when scanning. */
   recursive: boolean;
   /** Skip interactive prompts and accept defaults. */
@@ -33,36 +31,37 @@ export interface CliOptions {
 export interface ResolvedConfig {
   inputDir: string;
   outDir: string;
-  thumbsDir: string;
+  /** `{out}/official/originals` — downloadable originals, renamed to `{key}.{ext}`. */
+  originalsDir: string;
+  /** `{out}/processed/official` — holds the `thumbnail`/`medium`/`full` rendition dirs. */
+  processedDir: string;
   manifestPath: string;
   album: string | null;
+  /** Width (px) of the smallest (thumbnail) rendition. */
   size: number;
   quality: number;
-  format: ThumbnailFormat;
   recursive: boolean;
 }
 
-/** A single processed photo, mirroring `official_photos`. */
+/**
+ * A single processed photo, mirroring the columns of the `official_photos`
+ * table so the manifest can be imported directly. `key` is a bare,
+ * extensionless, path-safe identifier; the frontend builds every URL from it
+ * (`processed/official/<size>/<key>.webp`, `official/originals/<key>.<ext>`).
+ */
 export interface PhotoEntry {
   id: string;
-  /** Intended S3 key for the original image. */
   key: string;
   title: string;
   description: string | null;
   album: string | null;
+  /** Oriented dimensions of the original image. */
   width: number | null;
   height: number | null;
+  /** Byte size of the original file. */
   sizeBytes: number | null;
   mimeType: string | null;
   originalFilename: string;
-  thumbnail: {
-    /** Path of the thumbnail relative to the output directory. */
-    key: string;
-    width: number | null;
-    height: number | null;
-    sizeBytes: number | null;
-    format: ThumbnailFormat;
-  };
   createdAt: string;
 }
 
@@ -71,10 +70,13 @@ export interface Manifest {
   generatedAt: string;
   sourceDir: string;
   album: string | null;
-  thumbnail: {
-    format: ThumbnailFormat;
-    maxWidth: number;
+  renditions: {
+    format: "webp";
     quality: number;
+    /** Max width (px) per rendition segment. */
+    thumbnail: number;
+    medium: number;
+    full: number;
   };
   count: number;
   photos: PhotoEntry[];

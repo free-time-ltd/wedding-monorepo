@@ -3,17 +3,29 @@ import type { ThumbnailFormat } from "./types";
 /** Output directory used when `--out` is not provided. */
 export const DEFAULT_OUT_DIR = "output";
 
-/** Default max width (px) for generated thumbnails. */
+/** Default max width (px) for the smallest (thumbnail) rendition. */
 export const DEFAULT_THUMB_SIZE = 400;
 
-/** Default quality for lossy thumbnail formats. */
+/** Default quality for the webp renditions. */
 export const DEFAULT_QUALITY = 80;
 
 /** Default thumbnail output format. */
 export const DEFAULT_FORMAT: ThumbnailFormat = "webp";
 
-/** Sub-directory (inside the output dir) where thumbnails are written. */
-export const THUMBNAILS_SUBDIR = "thumbnails";
+/**
+ * Processed rendition widths (px). The keys are the S3/CDN size segments the
+ * frontend expects under `processed/official/<segment>/<key>.webp`. The
+ * `thumbnail` width is overridable via `--size`; medium/full are fixed.
+ */
+export const MEDIUM_SIZE = 1280;
+export const FULL_SIZE = 2048;
+
+/**
+ * Output sub-paths mirroring the S3/CloudFront bucket layout, so the whole
+ * output dir can be shipped with a single `aws s3 sync output/ s3://bucket/`.
+ */
+export const PROCESSED_SUBDIR = "processed/official"; // + /{thumbnail,medium,full}/{key}.webp
+export const ORIGINALS_SUBDIR = "official/originals"; // + /{key}.{ext}
 
 /** Manifest file name written to the output directory. */
 export const MANIFEST_FILENAME = "manifest.json";

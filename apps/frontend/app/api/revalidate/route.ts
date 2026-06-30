@@ -8,6 +8,7 @@ const tagList = [
   "hotels",
   "guestbook",
   "current-user",
+  "gallery",
 ] as const;
 
 type RevalidateTag = (typeof tagList)[number];
