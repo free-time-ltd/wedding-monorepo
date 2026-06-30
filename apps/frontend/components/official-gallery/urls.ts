@@ -14,8 +14,8 @@ export interface OfficialPhotoUrls {
 }
 
 // The official import writes these keys (see import script / plan):
-//   processed/official/{thumbnail,medium,full}/{key}.webp
-//   official/originals/{key}.{ext}
+//   photographer/processed/{thumbnail,medium,full}/{key}.webp
+//   photographer/official/{key}.{ext}
 export function buildOfficialUrls(photo: OfficialPhoto): OfficialPhotoUrls {
   // Escape hatch for local mock data: if the key is already an absolute URL
   // (e.g. a placeholder image), use it as-is for every variant.
@@ -30,10 +30,10 @@ export function buildOfficialUrls(photo: OfficialPhoto): OfficialPhotoUrls {
 
   const ext = mimeToExt(photo.mimeType ?? "image/jpeg");
   return {
-    thumb: `${CDN}/processed/official/thumbnail/${photo.key}.webp`,
-    lq: `${CDN}/processed/official/medium/${photo.key}.webp`,
-    hd: `${CDN}/processed/official/full/${photo.key}.webp`,
-    download: `${CDN}/official/originals/${photo.key}.${ext}`,
+    thumb: `${CDN}/photographer/processed/thumbnail/${photo.key}.webp`,
+    lq: `${CDN}/photographer/processed/medium/${photo.key}.webp`,
+    hd: `${CDN}/photographer/processed/full/${photo.key}.webp`,
+    download: `${CDN}/photographer/official/${photo.key}.${ext}`,
   };
 }
 

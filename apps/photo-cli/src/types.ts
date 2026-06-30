@@ -31,9 +31,9 @@ export interface CliOptions {
 export interface ResolvedConfig {
   inputDir: string;
   outDir: string;
-  /** `{out}/official/originals` — downloadable originals, renamed to `{key}.{ext}`. */
+  /** `{out}/photographer/official` — downloadable originals, renamed to `{key}.{ext}`. */
   originalsDir: string;
-  /** `{out}/processed/official` — holds the `thumbnail`/`medium`/`full` rendition dirs. */
+  /** `{out}/photographer/processed` — holds the `thumbnail`/`medium`/`full` rendition dirs. */
   processedDir: string;
   manifestPath: string;
   album: string | null;
@@ -47,7 +47,7 @@ export interface ResolvedConfig {
  * A single processed photo, mirroring the columns of the `official_photos`
  * table so the manifest can be imported directly. `key` is a bare,
  * extensionless, path-safe identifier; the frontend builds every URL from it
- * (`processed/official/<size>/<key>.webp`, `official/originals/<key>.<ext>`).
+ * (`photographer/processed/<size>/<key>.webp`, `photographer/official/<key>.<ext>`).
  */
 export interface PhotoEntry {
   id: string;
