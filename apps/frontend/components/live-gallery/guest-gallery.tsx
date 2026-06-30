@@ -13,6 +13,8 @@ interface Props {
   images: ProcessedImageApiType[];
 }
 
+const PAGE_SIZE = 20;
+
 export function GuestGallery({ images }: Props) {
   const loaderRef = useRef<HTMLDivElement>(null);
   const { isConnected, connect, socket } = useSocket();
@@ -22,17 +24,19 @@ export function GuestGallery({ images }: Props) {
   const isProcessing = useGalleryStore((state) => state.processing);
   const setProcessing = useGalleryStore((state) => state.setProcessing);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const nextCursor = useRef(images.at(-1)?.id ?? null);
+  const nextOffset = useRef<number | null>(
+    images.length >= PAGE_SIZE ? images.length : null,
+  );
   const galleryFilters = useGalleryFilters();
 
   useSocketEvent(socket, "live-feed", async () => {
     setProcessing(false);
 
-    const { images: newImages, nextCursor: newCursor } =
-      await loadImagesWithParams({ cursor: null });
+    const { images: newImages, nextOffset: newOffset } =
+      await loadImagesWithParams({ offset: 0 });
 
     setPhotos(newImages);
-    nextCursor.current = newCursor;
+    nextOffset.current = newOffset;
   });
 
   useEffect(() => {
@@ -49,21 +53,21 @@ export function GuestGallery({ images }: Props) {
 
   const loadImagesWithParams = useCallback(
     async ({
-      cursor,
-      limit = 20,
+      offset,
+      limit = PAGE_SIZE,
     }: {
-      cursor: string | null;
+      offset: number;
       limit?: number;
     }) => {
       setIsLoadingMore(true);
       try {
-        const { images: newImages = [], nextCursor: newCursor } =
-          await fetchUserUploads({ ...galleryFilters, cursor, limit });
+        const { images: newImages = [], nextOffset: newOffset } =
+          await fetchUserUploads({ ...galleryFilters, offset, limit });
 
-        return { images: newImages, nextCursor: newCursor };
+        return { images: newImages, nextOffset: newOffset };
       } catch (e) {
         console.error("Error loading more images:", e);
-        return { images: [], nextCursor: null };
+        return { images: [], nextOffset: null };
       } finally {
         setIsLoadingMore(false);
       }
@@ -72,13 +76,13 @@ export function GuestGallery({ images }: Props) {
   );
 
   const loadImages = useCallback(async () => {
-    const cursor = nextCursor.current;
-    if (isLoadingMore || !cursor) return;
+    const offset = nextOffset.current;
+    if (isLoadingMore || offset === null) return;
 
-    const { images: newImages, nextCursor: newCursor } =
-      await loadImagesWithParams({ cursor, limit: 20 });
+    const { images: newImages, nextOffset: newOffset } =
+      await loadImagesWithParams({ offset, limit: PAGE_SIZE });
 
-    nextCursor.current = newCursor;
+    nextOffset.current = newOffset;
     newImages.forEach((image) => addPhoto(image));
   }, [isLoadingMore, loadImagesWithParams, addPhoto]);
 
@@ -88,7 +92,7 @@ export function GuestGallery({ images }: Props) {
     const observer = new IntersectionObserver(
       (entries) => {
         const target = entries[0];
-        if (target?.isIntersecting && !!nextCursor.current) {
+        if (target?.isIntersecting && nextOffset.current !== null) {
           loadImages();
         }
       },
@@ -114,7 +118,7 @@ export function GuestGallery({ images }: Props) {
           <ImageCard image={img} key={img.id} />
         ))}
       </div>
-      {!!nextCursor.current && (
+      {nextOffset.current !== null && (
         <div ref={loaderRef} className="w-full py-8 flex justify-center">
           {isLoadingMore && (
             <>
@@ -126,7 +130,7 @@ export function GuestGallery({ images }: Props) {
           )}
         </div>
       )}
-      {!nextCursor.current && (
+      {nextOffset.current === null && (
         <p className="text-center text-gray-500 py-8">
           Няма повече снимки. Винаги можеш да добавиш от своите!
         </p>

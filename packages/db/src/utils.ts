@@ -123,14 +123,14 @@ interface ImageFinderProps {
   sort?: string;
   orderBy?: string;
   uploader?: string;
-  cursor?: string;
+  offset?: number;
   limit?: number;
 }
 export const findProcessedImages = ({
   sort,
   orderBy = "createdAt",
   uploader,
-  cursor,
+  offset = 0,
   limit = 20,
 }: ImageFinderProps = {}) => {
   return db.query.guestUploadsTable.findMany({
@@ -143,11 +143,10 @@ export const findProcessedImages = ({
         columns: { userId: true },
       },
     },
-    where: (table, { and, eq, lt, notInArray }) =>
+    where: (table, { and, eq, notInArray }) =>
       and(
         notInArray(table.status, ["pending", "rejected"]),
         uploader ? eq(table.userId, uploader) : undefined,
-        cursor ? lt(table.id, cursor) : undefined,
       ),
     orderBy: (table, { desc, asc }) => {
       const dirFn = sort === "asc" ? asc : desc;
@@ -165,9 +164,12 @@ export const findProcessedImages = ({
           ? columnMap[orderBy as keyof typeof columnMap]
           : table.createdAt;
 
-      return dirFn(sortField);
+      // id is a stable tiebreaker so offset paging stays deterministic when
+      // the primary sort field has ties (e.g. equal createdAt / null message).
+      return [dirFn(sortField), dirFn(table.id)];
     },
     limit,
+    offset,
   });
 };
 

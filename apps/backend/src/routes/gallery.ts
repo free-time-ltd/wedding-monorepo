@@ -21,31 +21,34 @@ const galleryRouter = new Hono();
 
 galleryRouter.get("/guests", async (c) => {
   const {
-    cursor,
+    offset = "0",
     sort = "desc",
     orderBy,
     uploader,
-    limit = 20,
+    limit = "20",
   } = c.req.query();
 
   const userId = await getUserId(c);
 
+  const lim = Number(limit);
+  const off = Number(offset);
+
   const images = await findProcessedImages({
-    cursor,
+    offset: off,
     orderBy,
     sort,
     uploader,
-    limit: Number(limit),
+    limit: lim,
   });
 
-  const nextCursor =
-    images.length === limit ? images[images.length - 1].id : null;
+  // A full page means there may be more; anything short is the last page.
+  const nextOffset = images.length === lim ? off + images.length : null;
 
   return successResponse(c, {
     images: images.map(
       transformProcessedImageWithFullUrl(env.CDN_DOMAIN, userId ?? undefined),
     ),
-    nextCursor,
+    nextOffset,
   });
 });
 

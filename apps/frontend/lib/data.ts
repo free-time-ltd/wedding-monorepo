@@ -141,11 +141,11 @@ interface UserUploadsResponse {
   success: boolean;
   data: {
     images: ProcessedImageApiType[];
-    nextCursor: string | null;
+    nextOffset: number | null;
   };
 }
 export const fetchUserUploads = async ({
-  cursor,
+  offset,
   sort,
   orderBy,
   uploader,
@@ -154,7 +154,7 @@ export const fetchUserUploads = async ({
   sort?: string;
   orderBy?: string;
   uploader?: string;
-  cursor?: string | null;
+  offset?: number | null;
   limit?: number;
 } = {}) => {
   const searchParams = new URLSearchParams(
@@ -162,7 +162,7 @@ export const fetchUserUploads = async ({
       sort,
       orderBy,
       uploader,
-      cursor,
+      offset: offset ? offset.toString() : undefined,
       limit: limit.toString(),
     }).filter(([, v]) => !!v) as [string, string][],
   );
@@ -186,7 +186,7 @@ export const fetchUserUploads = async ({
     return json.data;
   } catch (e) {
     console.error(e);
-    return { images: [], nextCursor: null };
+    return { images: [], nextOffset: null };
   }
 };
 
