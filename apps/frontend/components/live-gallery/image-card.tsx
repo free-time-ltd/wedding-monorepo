@@ -130,7 +130,7 @@ export default function ImageCard({ image }: Props) {
               <Button
                 size="icon"
                 variant="ghost"
-                className="absolute top-0 right-0 text-muted cursor-pointer"
+                className="absolute top-0 right-0 z-10 text-muted cursor-pointer"
                 onClick={() => setIsOpen(false)}
               >
                 <X className="h-6 w-6" strokeWidth={5} />
