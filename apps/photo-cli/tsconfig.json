@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
         "target": "es2022",
-        "module": "nodenext",
-        "moduleResolution": "nodenext",
+        "module": "commonjs",
+        "moduleResolution": "node",
         "esModuleInterop": true,
         "strict": true,
         "lib": [
@@ -14,6 +14,7 @@
         ],
         "outDir": "./dist",
         "rootDir": "./src",
+        "baseUrl": ".",
         "paths": {
             "@/*": [
                 "./src/*"
