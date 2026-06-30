@@ -17,12 +17,16 @@ export function AlbumTabs({ albums, total, active, onChange }: Props) {
 
   const tabs: { value: string | null; label: string; count: number }[] = [
     { value: null, label: "Всички", count: total },
-    ...albums.map((a) => ({ value: a.album, label: a.album, count: a.imageCount })),
+    ...albums.map((a) => ({
+      value: a.album,
+      label: a.album,
+      count: a.imageCount,
+    })),
   ];
 
   return (
     <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
-      <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden snap-x">
         {tabs.map((tab) => {
           const isActive = active === tab.value;
           return (
