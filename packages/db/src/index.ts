@@ -12,6 +12,8 @@ export {
   not,
   isNull,
   isNotNull,
+  inArray,
+  asc,
   desc,
   count,
   type InferSelectModel,

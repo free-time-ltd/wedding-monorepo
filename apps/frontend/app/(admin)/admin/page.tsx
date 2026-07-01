@@ -46,6 +46,7 @@ import { CircleX, ExternalLink, UserPlus2, X } from "@repo/ui/icons";
 import { generateId } from "@repo/utils/generateId";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { FamilySelector } from "@/components/family-selector";
+import { OfficialPhotosManager } from "@/components/admin/official-photos-manager";
 import { CSVLink } from "react-csv";
 
 type User = {
@@ -1034,6 +1035,7 @@ export default function AdminPage() {
             Покани ({invitations.length})
           </TabsTrigger>
           <TabsTrigger value="uploads">Снимки ({uploads.length})</TabsTrigger>
+          <TabsTrigger value="official-photos">Официални снимки</TabsTrigger>
           <TabsTrigger value="newsletter">
             Бюлетин ({newsletter.length})
           </TabsTrigger>
@@ -1766,6 +1768,9 @@ export default function AdminPage() {
               </Table>
             )}
           </div>
+        </TabsContent>
+        <TabsContent value="official-photos">
+          <OfficialPhotosManager />
         </TabsContent>
         <TabsContent value="families">
           <div className="mt-4 border rounded-lg">

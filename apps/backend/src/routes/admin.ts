@@ -13,8 +13,9 @@ import {
   guestbookTable,
   urlShortenerTable,
   familyTable,
+  officialPhotosTable,
 } from "@repo/db/schema";
-import { eq, desc, count, sql } from "@repo/db";
+import { eq, desc, count, sql, inArray } from "@repo/db";
 import { errorResponse, successResponse } from "@/reponses";
 import { PollService } from "@/services/polls-service";
 
@@ -285,6 +286,59 @@ adminRouter.delete("/uploads/:id", async (c) => {
   await db.delete(guestUploadsTable).where(eq(guestUploadsTable.id, id));
 
   return c.json({ success: true });
+});
+
+// Official photos
+adminRouter.get("/official-photos", async (c) => {
+  const images = await db.query.officialPhotosTable.findMany({
+    orderBy: (table, { asc }) => [asc(table.title), asc(table.key)],
+  });
+
+  return successResponse(c, images);
+});
+
+// Assign (or clear) an album for one or many photos at once. `album` may be
+// null/empty to unset the album; `ids` is always an array so single-photo
+// edits and bulk edits share the same path. Registered before `/:id` so the
+// literal "album" segment isn't captured as an id.
+adminRouter.patch("/official-photos/album", async (c) => {
+  const body = await c.req.json();
+  const ids: unknown = body?.ids;
+  const rawAlbum: unknown = body?.album;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return errorResponse(c, "No photos provided", 400);
+  }
+
+  const album =
+    typeof rawAlbum === "string" && rawAlbum.trim().length > 0
+      ? rawAlbum.trim()
+      : null;
+
+  const updated = await db
+    .update(officialPhotosTable)
+    .set({ album })
+    .where(inArray(officialPhotosTable.id, ids as string[]))
+    .returning();
+
+  return successResponse(c, updated);
+});
+
+adminRouter.patch("/official-photos/:id", async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json();
+
+  const [updated] = await db
+    .update(officialPhotosTable)
+    .set(body)
+    .where(eq(officialPhotosTable.id, id))
+    .returning();
+
+  if (!updated) {
+    return errorResponse(c, "Photo not found", 404);
+  }
+
+  return successResponse(c, updated);
 });
 
 // Newsletter
